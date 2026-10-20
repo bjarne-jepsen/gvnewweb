@@ -1,0 +1,15 @@
+---
+import Base from '../layouts/Base.astro';
+import Entries from '../components/Entries.astro';
+import { records } from '../../lib/site/content';
+---
+<Base title="Forside">
+  <p class="prototype">Lokal prototype med kildebaseret prøveindhold</p>
+  <h1>Information til livet i Grøndalsvænge</h1>
+  <p class="intro">Find dokumenter, praktiske vejledninger og nyt fra foreningen samlet ét sted.</p>
+  <div class="columns">
+    <section aria-labelledby="praktisk"><h2 id="praktisk">Praktisk at vide</h2><Entries entries={records.filter(r => r.type === 'guide')} /><a href="/dokumenter/">Se dokumentoversigten</a></section>
+    <section aria-labelledby="nyt"><h2 id="nyt">Nyt fra foreningen</h2><Entries entries={records.filter(r => r.type === 'notice')} /></section>
+  </div>
+  <section aria-labelledby="kalender"><h2 id="kalender">Det sker i fællesskabet</h2><Entries entries={records.filter(r => r.type === 'event')} /></section>
+</Base>

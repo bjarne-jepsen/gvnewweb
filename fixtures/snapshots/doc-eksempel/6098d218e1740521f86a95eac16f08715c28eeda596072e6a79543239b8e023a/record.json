@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "doc-eksempel",
+  "title": "Eksempeldokument",
+  "summary": "Illustrativt indhold til den lokale prototype.",
+  "slug": "doc-eksempel",
+  "category": "Foreningen",
+  "visibility": "public",
+  "updatedAt": "2026-10-20T08:00:00.000Z",
+  "source": {
+    "provider": "mock",
+    "sourceId": "internal-doc-eksempel"
+  },
+  "contentHash": "sha256:6098d218e1740521f86a95eac16f08715c28eeda596072e6a79543239b8e023a",
+  "type": "document",
+  "documentKind": "vejledning",
+  "file": {
+    "assetPath": "source/doc-eksempel.pdf",
+    "assetHash": "sha256:dad9baec6a15a99e57125f44c19a847641632cb4d1868a66d487cf1e80fea782",
+    "sizeBytes": 608,
+    "mimeType": "application/pdf",
+    "originalFilename": "doc-eksempel.pdf"
+  }
+}

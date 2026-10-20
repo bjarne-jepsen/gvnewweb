@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "guide-ventelister",
+  "title": "Ventelister i Grøndalsvænge",
+  "summary": "Læs om Ekspektancelisten, Internlisten og tilmelding gennem Waitly.",
+  "slug": "ventelister",
+  "category": "Foreningen",
+  "visibility": "public",
+  "updatedAt": "2026-10-20T10:15:00.000Z",
+  "source": {
+    "provider": "mock",
+    "sourceId": "https://groendalsvaenge.dk/andelshaveren/ekspektance-og-internliste/",
+    "sourceRevision": "curated-2026-10-20"
+  },
+  "contentHash": "sha256:fad76d71d464bd58480af17e52e3eaa5d7c210aa990a69e5e484f8db72f183e4",
+  "type": "guide",
+  "bodyMarkdown": "## To forskellige ventelister\n\nHjemmesiden beskriver en Ekspektanceliste for personer med tilknytning til foreningen og en Internliste for nuværende andelshavere, som ønsker en anden bolig. Der er ikke en almindelig ekstern liste for personer uden tilknytning.\n\n## Ekspektancelisten\n\nListen omfatter blandt andre bestemte familiemedlemmer til nuværende eller tidligere beboere samt tidligere andelshavere. Siden angiver en aldersgrænse på 18 år.\n\n## Internlisten\n\nFor nuværende andelshavere angiver siden mindst tre års ejerskab som betingelse for opskrivning. Internlisten har fortrinsret frem for Ekspektancelisten.\n\n## Tilmelding og placering\n\nListerne administreres i Waitly, hvor du kan følge din placering via din profil. Bestyrelsen kontrollerer tilmeldingerne. Se den fulde beskrivelse af kriterierne og de konkrete tilmeldingslinks på originalsiden.\n\n## Kilde og prøveindhold\n\nDette er en forkortet, bearbejdet prøveversion til den lokale prototype, klargjort 20. oktober 2026.\n\n[Se originalsiden på groendalsvaenge.dk](https://groendalsvaenge.dk/andelshaveren/ekspektance-og-internliste/)",
+  "relatedDocumentIds": []
+}

@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "guide-dokumenter",
+  "title": "Find foreningens dokumenter",
+  "summary": "Illustrativt indhold til den lokale prototype.",
+  "slug": "guide-dokumenter",
+  "category": "Foreningen",
+  "visibility": "public",
+  "updatedAt": "2026-10-20T08:00:00.000Z",
+  "source": {
+    "provider": "mock",
+    "sourceId": "internal-guide-dokumenter"
+  },
+  "contentHash": "sha256:a0f5ebf328a53b8b5f6b8fe66e412d64e9d51757391822eda065adba752f1d97",
+  "type": "guide",
+  "bodyMarkdown": "## Find det, du skal bruge\n\nHer samles dokumenter og vejledninger fra foreningen. Indholdet på denne side er et eksempel.\n\n- Åbn dokumentoversigten.\n- Vælg dokumentet, du vil læse.\n- Hent en PDF, som du kan gemme.\n\n## Om prototypen\n\nDokumentet nedenfor er en prøvefil og indeholder ingen gældende regler.",
+  "relatedDocumentIds": [
+    "doc-eksempel"
+  ]
+}

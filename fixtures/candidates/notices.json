@@ -1,0 +1,38 @@
+[
+  {
+    "schemaVersion": 1,
+    "id": "notice-velkommen",
+    "title": "Velkommen til prototypen",
+    "summary": "Illustrativt indhold til den lokale prototype.",
+    "slug": "notice-velkommen",
+    "category": "Foreningen",
+    "visibility": "public",
+    "updatedAt": "2026-10-20T08:00:00.000Z",
+    "source": {
+      "provider": "mock",
+      "sourceId": "internal-notice-velkommen"
+    },
+    "contentHash": "sha256:82c2b333996574a1d56f3ce3b8ae6b30c6033ec0a9e24e02d77d30c7203e3038",
+    "type": "notice",
+    "bodyMarkdown": "Her afprøver vi en ny måde at samle foreningens offentlige information på. Alle tekster og dokumenter er mockdata.",
+    "priority": "normal"
+  },
+  {
+    "schemaVersion": 1,
+    "id": "notice-kladde",
+    "title": "UNAPPROVED_CANARY",
+    "summary": "Illustrativt indhold til den lokale prototype.",
+    "slug": "notice-kladde",
+    "category": "Foreningen",
+    "visibility": "public",
+    "updatedAt": "2026-10-20T08:00:00.000Z",
+    "source": {
+      "provider": "mock",
+      "sourceId": "internal-notice-kladde"
+    },
+    "contentHash": "sha256:456bf670a1b9438a872cbe9f87885a0a31c51fe8174595bcbe0a2a116da567e2",
+    "type": "notice",
+    "bodyMarkdown": "UNAPPROVED_BODY_CANARY",
+    "priority": "normal"
+  }
+]

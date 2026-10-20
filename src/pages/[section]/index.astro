@@ -1,0 +1,13 @@
+---
+import Base from '../../layouts/Base.astro';
+import Entries from '../../components/Entries.astro';
+import { records, sections, labels } from '../../../lib/site/content';
+export function getStaticPaths() { return Object.entries(sections).map(([type, section]) => ({ params: { section }, props: { type } })); }
+const type = Astro.props.type as keyof typeof sections;
+---
+<Base title={labels[type]}>
+  <a class="back" href="/">Til forsiden</a>
+  <h1>{labels[type]}</h1>
+  <p class="intro">{({ document:'Hent dokumenter fra foreningen som PDF.', guide:'Find praktisk information og hjælp til hverdagen.', notice:'Læs de seneste offentlige opslag.', event:'Se kommende arrangementer og aktiviteter.' })[type]}</p>
+  <Entries heading="h2" entries={records.filter(r => r.type === type)} />
+</Base>

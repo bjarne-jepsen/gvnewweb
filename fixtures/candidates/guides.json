@@ -1,0 +1,136 @@
+[
+  {
+    "schemaVersion": 1,
+    "id": "guide-dokumenter",
+    "title": "Find foreningens dokumenter",
+    "summary": "Illustrativt indhold til den lokale prototype.",
+    "slug": "guide-dokumenter",
+    "category": "Foreningen",
+    "visibility": "public",
+    "updatedAt": "2026-10-20T08:00:00.000Z",
+    "source": {
+      "provider": "mock",
+      "sourceId": "internal-guide-dokumenter"
+    },
+    "contentHash": "sha256:a0f5ebf328a53b8b5f6b8fe66e412d64e9d51757391822eda065adba752f1d97",
+    "type": "guide",
+    "bodyMarkdown": "## Find det, du skal bruge\n\nHer samles dokumenter og vejledninger fra foreningen. Indholdet på denne side er et eksempel.\n\n- Åbn dokumentoversigten.\n- Vælg dokumentet, du vil læse.\n- Hent en PDF, som du kan gemme.\n\n## Om prototypen\n\nDokumentet nedenfor er en prøvefil og indeholder ingen gældende regler.",
+    "relatedDocumentIds": [
+      "doc-eksempel"
+    ]
+  },
+  {
+    "schemaVersion": 1,
+    "id": "guide-boligsalg",
+    "title": "Hvordan sælger jeg mit hus?",
+    "summary": "Start salgsforløbet med Vurderingsudvalget og få overblik over dine næste skridt.",
+    "slug": "hvordan-saelger-jeg-mit-hus",
+    "category": "Foreningen",
+    "visibility": "public",
+    "updatedAt": "2026-10-20T10:15:00.000Z",
+    "source": {
+      "provider": "mock",
+      "sourceId": "https://groendalsvaenge.dk/andelshaveren/hvordan-saelger-jeg-mit-hus/",
+      "sourceRevision": "curated-2026-10-20"
+    },
+    "contentHash": "sha256:9b2c4744b38ef2bbc413b979715f94ec0d887a301bbf1d1af64082f536eb03ff",
+    "type": "guide",
+    "bodyMarkdown": "## Begynd hos Vurderingsudvalget\n\nForeningens hjemmeside beskriver Vurderingsudvalget som det første kontaktpunkt, når du vil sælge din andelsbolig. Udvalget kan hjælpe med at afklare forløbet og dine opgaver som sælger.\n\n## Få overblik før salget\n\n- Tag kontakt til udvalget, inden du går videre med salget.\n- Aftal et indledende møde.\n- Brug mødet til at gennemgå processen og forventningerne til dig.\n\nKontaktoplysninger og henvisningen til administratorens salgsvejledning findes på originalsiden.\n\n## Kilde og prøveindhold\n\nDette er en forkortet, bearbejdet prøveversion til den lokale prototype, klargjort 20. oktober 2026.\n\n[Se originalsiden på groendalsvaenge.dk](https://groendalsvaenge.dk/andelshaveren/hvordan-saelger-jeg-mit-hus/)",
+    "relatedDocumentIds": []
+  },
+  {
+    "schemaVersion": 1,
+    "id": "guide-ventelister",
+    "title": "Ventelister i Grøndalsvænge",
+    "summary": "Læs om Ekspektancelisten, Internlisten og tilmelding gennem Waitly.",
+    "slug": "ventelister",
+    "category": "Foreningen",
+    "visibility": "public",
+    "updatedAt": "2026-10-20T10:15:00.000Z",
+    "source": {
+      "provider": "mock",
+      "sourceId": "https://groendalsvaenge.dk/andelshaveren/ekspektance-og-internliste/",
+      "sourceRevision": "curated-2026-10-20"
+    },
+    "contentHash": "sha256:fad76d71d464bd58480af17e52e3eaa5d7c210aa990a69e5e484f8db72f183e4",
+    "type": "guide",
+    "bodyMarkdown": "## To forskellige ventelister\n\nHjemmesiden beskriver en Ekspektanceliste for personer med tilknytning til foreningen og en Internliste for nuværende andelshavere, som ønsker en anden bolig. Der er ikke en almindelig ekstern liste for personer uden tilknytning.\n\n## Ekspektancelisten\n\nListen omfatter blandt andre bestemte familiemedlemmer til nuværende eller tidligere beboere samt tidligere andelshavere. Siden angiver en aldersgrænse på 18 år.\n\n## Internlisten\n\nFor nuværende andelshavere angiver siden mindst tre års ejerskab som betingelse for opskrivning. Internlisten har fortrinsret frem for Ekspektancelisten.\n\n## Tilmelding og placering\n\nListerne administreres i Waitly, hvor du kan følge din placering via din profil. Bestyrelsen kontrollerer tilmeldingerne. Se den fulde beskrivelse af kriterierne og de konkrete tilmeldingslinks på originalsiden.\n\n## Kilde og prøveindhold\n\nDette er en forkortet, bearbejdet prøveversion til den lokale prototype, klargjort 20. oktober 2026.\n\n[Se originalsiden på groendalsvaenge.dk](https://groendalsvaenge.dk/andelshaveren/ekspektance-og-internliste/)",
+    "relatedDocumentIds": []
+  },
+  {
+    "schemaVersion": 1,
+    "id": "guide-byggeprojekter",
+    "title": "Planlægger du at bygge?",
+    "summary": "Forbered dit byggeprojekt med rådgivning, lokalplan og hjælp til håndværkeraftalen.",
+    "slug": "byggeprojekter",
+    "category": "Bolig og vedligehold",
+    "visibility": "public",
+    "updatedAt": "2026-10-20T10:15:00.000Z",
+    "source": {
+      "provider": "mock",
+      "sourceId": "https://groendalsvaenge.dk/andelshaveren/byggeprojekter/",
+      "sourceRevision": "curated-2026-10-20"
+    },
+    "contentHash": "sha256:20f4363d3a6ed20c425472586341808446eb119de9ae10a9b755c0293136a773",
+    "type": "guide",
+    "bodyMarkdown": "## Få rådgivning tidligt\n\nForeningens byggeside anbefaler professionel byggerådgivning, før du søger byggetilladelse. Det hjælper dig med at få overblik over kravene til projektet.\n\n## Udvendige arbejder\n\nVed eksempelvis vinduer og tag fremhæver siden, at håndværkeren skal kende lokalplanens krav. Siden henviser også til forslag til aftalen med håndværkeren.\n\n- Gennemgå projektet med en byggerådgiver.\n- Gør kravene til arbejdet tydelige i håndværkeraftalen.\n- Brug Byggeudvalget som kontaktpunkt for spørgsmål.\n\n## Materialer og inspiration\n\nOriginalsiden samler links til lokalplan, kontraktvejledning, tidligere byggetilladelser og anbefalede håndværkere. Vejledningen erstatter ikke dit eget ansvar for arbejdet.\n\n## Kilde og prøveindhold\n\nDette er en forkortet, bearbejdet prøveversion til den lokale prototype, klargjort 20. oktober 2026.\n\n[Se originalsiden på groendalsvaenge.dk](https://groendalsvaenge.dk/andelshaveren/byggeprojekter/)",
+    "relatedDocumentIds": []
+  },
+  {
+    "schemaVersion": 1,
+    "id": "guide-forsikringsskader",
+    "title": "Anmeldelse af forsikringsskader",
+    "summary": "Find den beskrevne vej til skadeanmeldelse og se, hvor kontaktoplysningerne står.",
+    "slug": "forsikringsskader",
+    "category": "Bolig og vedligehold",
+    "visibility": "public",
+    "updatedAt": "2026-10-20T10:15:00.000Z",
+    "source": {
+      "provider": "mock",
+      "sourceId": "https://groendalsvaenge.dk/andelshaveren/anmeldelse-af-forsikringsskader/",
+      "sourceRevision": "curated-2026-10-20"
+    },
+    "contentHash": "sha256:2c21e6d864ec0a5980ea4deade8dbeaebbce1302205dc5f3ee55164e5d80c4fe",
+    "type": "guide",
+    "bodyMarkdown": "## Hvem modtager anmeldelsen?\n\nForeningens hjemmeside beskriver en forsikringsaftale hos Gjensidige med Howden som mægler. Glasskader er også omfattet af den beskrevne ordning.\n\n## I og uden for telefontiden\n\n- I almindelig telefontid henviser siden til Howden.\n- Uden for telefontiden henviser siden til Gjensidige og beder om efterfølgende kontakt til Howden.\n\nSe de konkrete telefonnumre og åbningstider på originalsiden, inden du kontakter selskaberne.\n\n## Find forsikringsmaterialet\n\nOriginalsiden indeholder også en henvisning til policen og oplysninger om den beskrevne dækning. Policen er ikke importeret til denne prototype.\n\n## Kilde og prøveindhold\n\nDette er en forkortet, bearbejdet prøveversion til den lokale prototype, klargjort 20. oktober 2026.\n\n[Se originalsiden på groendalsvaenge.dk](https://groendalsvaenge.dk/andelshaveren/anmeldelse-af-forsikringsskader/)",
+    "relatedDocumentIds": []
+  },
+  {
+    "schemaVersion": 1,
+    "id": "guide-renovation",
+    "title": "Renovation og affald",
+    "summary": "Find vej til tømmekalenderen og hjælp, hvis affaldet ikke bliver hentet.",
+    "slug": "renovation",
+    "category": "Bolig og vedligehold",
+    "visibility": "public",
+    "updatedAt": "2026-10-20T10:15:00.000Z",
+    "source": {
+      "provider": "mock",
+      "sourceId": "https://groendalsvaenge.dk/andelshaveren/renovation/",
+      "sourceRevision": "curated-2026-10-20"
+    },
+    "contentHash": "sha256:b7c869ebd417966c9927e8892f5466ad0cef77789e8f54cbb4ed9b9b60303217",
+    "type": "guide",
+    "bodyMarkdown": "## Affaldsafhentning\n\nKøbenhavns Kommune håndterer ifølge foreningens hjemmeside afhentning af dagrenovation og storskrald i området.\n\n## Hvis afhentningen mangler\n\nSpørgsmål og manglende afhentning skal rettes til kommunen. Originalsidens links fører til kommunens kontaktoplysninger.\n\n## Se datoerne for din adresse\n\nVia kommunens hjemmeside kan du slå adressen op og finde planlagte afhentninger af blandt andet storskrald, haveaffald og hårde hvidevarer. Prototypen henter ikke en personlig tømmekalender.\n\n## Beholdere og opkrævning\n\nSiden fremhæver, at andelshaveren selv skal bestille ændringer af beholderstørrelsen, følge op på levering og kontrollere, at afgiften svarer til beholderen.\n\n## Kilde og prøveindhold\n\nDette er en forkortet, bearbejdet prøveversion til den lokale prototype, klargjort 20. oktober 2026.\n\n[Se originalsiden på groendalsvaenge.dk](https://groendalsvaenge.dk/andelshaveren/renovation/)",
+    "relatedDocumentIds": []
+  },
+  {
+    "schemaVersion": 1,
+    "id": "guide-lokaleleje",
+    "title": "Leje af lokaler i foreningsbygningen",
+    "summary": "Få overblik over de to lokaler, faciliteterne og den beskrevne bookingproces.",
+    "slug": "leje-af-lokaler",
+    "category": "Fællesskab",
+    "visibility": "public",
+    "updatedAt": "2026-10-20T10:15:00.000Z",
+    "source": {
+      "provider": "mock",
+      "sourceId": "https://groendalsvaenge.dk/groendalsvaenge-socialt/leje-af-lokaler-i-groendalsvaenge-fritidsforening/",
+      "sourceRevision": "curated-2026-10-20"
+    },
+    "contentHash": "sha256:ef6d8485f8c7c8c5d966fe6b3a67b945c12d82cbe9d6dafe7569f376fce0b99f",
+    "type": "guide",
+    "bodyMarkdown": "## Plads til dit arrangement\n\nHjemmesiden beskriver to lokaler i foreningsbygningens stueetage, som beboere kan leje hver for sig eller samlet. Det ene er angivet til 40 personer og det andet til 50.\n\n## Faciliteter\n\n- Køkken med service.\n- Borde og stole.\n- Adgang til toiletter.\n\nLokalerne beskrives som egnede til blandt andet familiefester. Udlejning sker især i weekenderne, men øvrige ugedage kan også være en mulighed.\n\n## Sådan foregår booking\n\nOriginalsiden beskriver booking ved personligt fremmøde i Fritidsforeningens kontortid, mandag kl. 19–20. Her aftales praktiske forhold og betaling.\n\nSe originalsiden for bookingoplysninger. Prototypen har ingen bookingfunktion og viser ikke aktuel ledighed.\n\n## Kilde og prøveindhold\n\nDette er en forkortet, bearbejdet prøveversion til den lokale prototype, klargjort 20. oktober 2026.\n\n[Se originalsiden på groendalsvaenge.dk](https://groendalsvaenge.dk/groendalsvaenge-socialt/leje-af-lokaler-i-groendalsvaenge-fritidsforening/)",
+    "relatedDocumentIds": []
+  }
+]

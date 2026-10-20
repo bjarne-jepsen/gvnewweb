@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "guide-boligsalg",
+  "title": "Hvordan sælger jeg mit hus?",
+  "summary": "Start salgsforløbet med Vurderingsudvalget og få overblik over dine næste skridt.",
+  "slug": "hvordan-saelger-jeg-mit-hus",
+  "category": "Foreningen",
+  "visibility": "public",
+  "updatedAt": "2026-10-20T10:15:00.000Z",
+  "source": {
+    "provider": "mock",
+    "sourceId": "https://groendalsvaenge.dk/andelshaveren/hvordan-saelger-jeg-mit-hus/",
+    "sourceRevision": "curated-2026-10-20"
+  },
+  "contentHash": "sha256:9b2c4744b38ef2bbc413b979715f94ec0d887a301bbf1d1af64082f536eb03ff",
+  "type": "guide",
+  "bodyMarkdown": "## Begynd hos Vurderingsudvalget\n\nForeningens hjemmeside beskriver Vurderingsudvalget som det første kontaktpunkt, når du vil sælge din andelsbolig. Udvalget kan hjælpe med at afklare forløbet og dine opgaver som sælger.\n\n## Få overblik før salget\n\n- Tag kontakt til udvalget, inden du går videre med salget.\n- Aftal et indledende møde.\n- Brug mødet til at gennemgå processen og forventningerne til dig.\n\nKontaktoplysninger og henvisningen til administratorens salgsvejledning findes på originalsiden.\n\n## Kilde og prøveindhold\n\nDette er en forkortet, bearbejdet prøveversion til den lokale prototype, klargjort 20. oktober 2026.\n\n[Se originalsiden på groendalsvaenge.dk](https://groendalsvaenge.dk/andelshaveren/hvordan-saelger-jeg-mit-hus/)",
+  "relatedDocumentIds": []
+}

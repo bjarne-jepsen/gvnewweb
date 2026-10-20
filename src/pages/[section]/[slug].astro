@@ -1,0 +1,19 @@
+---
+import Base from '../../layouts/Base.astro';
+import { records, sections, labels, download, date, time, url } from '../../../lib/site/content';
+import { renderMarkdown } from '../../../lib/site/markdown';
+export function getStaticPaths() { return records.map(record => ({ params: { section: sections[record.type], slug: record.slug }, props: { record } })); }
+const { record } = Astro.props;
+---
+<Base title={record.title}>
+  <a class="back" href={`/${sections[record.type]}/`}>Til {labels[record.type].toLocaleLowerCase('da-DK')}</a>
+  <article>
+    <h1>{record.title}</h1>
+    <p class="intro">{record.summary}</p>
+    {record.type === 'document' && <><p>Eksempelfil til prototypen. Dokumentet indeholder ingen gældende regler.</p><p><a class="download" href={download(record)} download={record.file.originalFilename}>Hent PDF · {Math.ceil(record.file.sizeBytes / 1024)} KB</a></p></>}
+    {(record.type === 'guide' || record.type === 'notice') && <div class="prose" set:html={renderMarkdown(record.bodyMarkdown)} />}
+    {record.type === 'guide' && record.relatedDocumentIds.length > 0 && <section aria-labelledby="bilag"><h2 id="bilag">Tilhørende dokumenter</h2><ul>{record.relatedDocumentIds.map(id => { const doc = records.find(r => r.id === id)!; return <li><a href={url(doc)}>{doc.title}</a></li>; })}</ul></section>}
+    {record.type === 'event' && <><p><time datetime={record.startsAt}>{date(record.startsAt)} kl. {time(record.startsAt)}</time> – <time datetime={record.endsAt}>{date(record.endsAt)} kl. {time(record.endsAt)}</time></p>{record.locationText && <p>{record.locationText}</p>}{record.registrationUrl && <p><a href={record.registrationUrl}>Læs mere og tilmeld dig</a></p>}</>}
+    <p class="meta">Opdateret {date(record.updatedAt)}</p>
+  </article>
+</Base>

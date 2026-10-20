@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "guide-byggeprojekter",
+  "title": "Planlægger du at bygge?",
+  "summary": "Forbered dit byggeprojekt med rådgivning, lokalplan og hjælp til håndværkeraftalen.",
+  "slug": "byggeprojekter",
+  "category": "Bolig og vedligehold",
+  "visibility": "public",
+  "updatedAt": "2026-10-20T10:15:00.000Z",
+  "source": {
+    "provider": "mock",
+    "sourceId": "https://groendalsvaenge.dk/andelshaveren/byggeprojekter/",
+    "sourceRevision": "curated-2026-10-20"
+  },
+  "contentHash": "sha256:20f4363d3a6ed20c425472586341808446eb119de9ae10a9b755c0293136a773",
+  "type": "guide",
+  "bodyMarkdown": "## Få rådgivning tidligt\n\nForeningens byggeside anbefaler professionel byggerådgivning, før du søger byggetilladelse. Det hjælper dig med at få overblik over kravene til projektet.\n\n## Udvendige arbejder\n\nVed eksempelvis vinduer og tag fremhæver siden, at håndværkeren skal kende lokalplanens krav. Siden henviser også til forslag til aftalen med håndværkeren.\n\n- Gennemgå projektet med en byggerådgiver.\n- Gør kravene til arbejdet tydelige i håndværkeraftalen.\n- Brug Byggeudvalget som kontaktpunkt for spørgsmål.\n\n## Materialer og inspiration\n\nOriginalsiden samler links til lokalplan, kontraktvejledning, tidligere byggetilladelser og anbefalede håndværkere. Vejledningen erstatter ikke dit eget ansvar for arbejdet.\n\n## Kilde og prøveindhold\n\nDette er en forkortet, bearbejdet prøveversion til den lokale prototype, klargjort 20. oktober 2026.\n\n[Se originalsiden på groendalsvaenge.dk](https://groendalsvaenge.dk/andelshaveren/byggeprojekter/)",
+  "relatedDocumentIds": []
+}
