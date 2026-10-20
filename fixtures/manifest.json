@@ -38,5 +38,13 @@
   {
     "contentId": "guide-lokaleleje",
     "approvedHash": "sha256:ef6d8485f8c7c8c5d966fe6b3a67b945c12d82cbe9d6dafe7569f376fce0b99f"
+  },
+  {
+    "contentId": "doc-google-pilot",
+    "approvedHash": "sha256:8d8a4fc075029e375a7b589c4e5080b143e32a7c34253a38e729faa152e48a90"
+  },
+  {
+    "contentId": "guide-google-pilot",
+    "approvedHash": "sha256:7e4d525d00eb0a0d803150a5060ddb5ccb58f4f02166eef1062605ddf82f23e2"
   }
 ]

@@ -77,6 +77,6 @@ Kildelinks og afgrænsninger er samlet i [kildeoversigten](docs/mock-content-sou
 
 Google-piloten er dokumenteret i [docs/google-pilot.md](docs/google-pilot.md). Den understøtter én Google Docs-vejledning med tekst, tabeller og billeder samt én PDF i Drive. Guidekontrakt v2 er struktureret; eksisterende v1-snapshots og deres hashes bevares. Google-hentning og preparation godkender ikke indhold.
 
-De valgte rigtige testkilder er kun klargjort lokalt til review og er ikke føjet til den offentlige release. Adgangstokens, rå API-svar og prepared pilotmapper ligger uden for Git under `.local/`.
+De to gennemsete Google-snapshots er godkendt til den lokale pilot og indgår i lokal build. Godkendelsen omfatter ikke ekstern offentliggørelse; se [den registrerede godkendelse](docs/local-pilot-approval.md). Adgangstokens, rå API-svar og prepared pilotmapper ligger uden for Git under `.local/`.
 
 `.github/workflows/checks.yml` kører låst installation, tests, typekontrol og statisk build ved push og pull requests. Workflowet kræver ingen Google-adgang og udfører ikke deployment. Den faktiske hosted kørsel er endnu ikke verificeret.

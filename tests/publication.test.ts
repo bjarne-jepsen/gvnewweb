@@ -10,7 +10,7 @@ import { prepare, selectPublic, snapshotDirectory, resolveManifest } from '../li
 const records = await new MockContentAdapter().listCandidates();
 const manifest = JSON.parse(await readFile('fixtures/manifest.json', 'utf8'));
 const approvals = JSON.parse(await readFile('fixtures/approvals.json', 'utf8'));
-const at = '2026-10-20T12:00:00Z';
+const at = new Date(Math.max(Date.parse('2026-10-20T12:00:00Z'), ...approvals.map((a: {approvedAt: string}) => Date.parse(a.approvedAt)))).toISOString();
 const roots: string[] = [];
 afterEach(async () => { await Promise.all(roots.splice(0).map(p => rm(p, { recursive: true, force: true }))); });
 async function temp() { const root = await mkdtemp(join(tmpdir(), 'gv-pub-')); roots.push(root); return root; }
@@ -18,7 +18,7 @@ const publish = (contentId: string, approvedHash: string, decision = 'publish') 
 
 test('kun godkendte offentlige snapshots, uden interne felter', async () => {
   const result = await selectPublic(manifest, approvals, 'fixtures/snapshots', at);
-  expect(result.records.length).toBe(10); expect(result.assets.size).toBe(1);
+  expect(result.records.length).toBe(12); expect(result.assets.size).toBe(3);
   expect(JSON.stringify(result.records)).not.toMatch(/sourceId|assetPath|CANARY|mock-editor/);
 });
 test('ændret candidate bevarer offentlig tekst og download; ny godkendelse opdaterer begge', async () => {
@@ -70,10 +70,11 @@ test('manglende snapshot, godkendelse, dubletter og tvetydige beslutninger stopp
 });
 test('notice-perioder bruger ét buildAt og eksklusivt expiresAt', async () => {
   const root = await temp(); const notice = records.find(r => r.type === 'notice')!;
-  const n = sealRecord({ ...notice, publishFrom: at, expiresAt: '2026-10-21T12:00:00Z' });
+  const expiresAt = new Date(Date.parse(at) + 86400000).toISOString();
+  const n = sealRecord({ ...notice, publishFrom: at, expiresAt });
   const entry = await prepare(n, 'fixtures/assets', root);
-  const approved = [{ ...publish(n.id, n.contentHash), approvedAt: '2026-10-20T10:00:00Z' }];
-  expect((await selectPublic([entry], approved, root, '2026-10-20T11:00:00Z')).records).toHaveLength(0);
+  const approved = [{ ...publish(n.id, n.contentHash), approvedAt: new Date(Date.parse(at) - 7200000).toISOString() }];
+  expect((await selectPublic([entry], approved, root, new Date(Date.parse(at) - 3600000).toISOString())).records).toHaveLength(0);
   expect((await selectPublic([entry], approved, root, at)).records).toHaveLength(1);
   expect((await selectPublic([entry], approved, root, n.type === 'notice' ? n.expiresAt! : at)).records).toHaveLength(0);
 });

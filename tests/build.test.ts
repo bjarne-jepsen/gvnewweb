@@ -11,7 +11,9 @@ afterAll(() => rm(root, { recursive: true, force: true }));
 const json = async (path: string) => JSON.parse(await readFile(join(root, path), 'utf8'));
 const save = (path: string, data: unknown) => writeFile(join(root, path), JSON.stringify(data));
 async function build() {
-  const proc = Bun.spawn([process.execPath, 'run', 'scripts/build.ts'], { cwd: root, env: { ...process.env, BUILD_AT: '2026-10-20T14:00:00Z' }, stdout: 'pipe', stderr: 'pipe' });
+  const baselineApprovals = JSON.parse(await readFile('fixtures/approvals.json', 'utf8')) as {approvedAt: string}[];
+  const buildAt = new Date(Math.max(Date.parse('2026-10-20T14:00:00Z'), ...baselineApprovals.map(a => Date.parse(a.approvedAt))) + 1000).toISOString();
+  const proc = Bun.spawn([process.execPath, 'run', 'scripts/build.ts'], { cwd: root, env: { ...process.env, BUILD_AT: buildAt }, stdout: 'pipe', stderr: 'pipe' });
   const [stdout, stderr, exit] = await Promise.all([new Response(proc.stdout).text(), new Response(proc.stderr).text(), proc.exited]);
   return { exit, log: stdout + stderr };
 }

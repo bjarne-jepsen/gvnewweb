@@ -37,7 +37,7 @@ try {
     try { await rename('.build/staging', 'dist'); }
     catch (error) { if (previous) await rename('.build/previous', 'dist'); throw error; }
     await rm('.build/previous', { recursive: true, force: true });
-    console.log(`Outputkontrol bestået: ${selected.records.length} offentlige snapshots, ${selected.assets.size} PDF. buildAt=${buildAt}`);
+    console.log(`Outputkontrol bestået: ${selected.records.length} offentlige snapshots, ${selected.assets.size} filer (PDF/billeder). buildAt=${buildAt}`);
   }
 } finally {
   await lock.close(); await rm('.build/lock', { force: true });

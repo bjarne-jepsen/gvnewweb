@@ -10,7 +10,6 @@ jobs:
     timeout-minutes: 10
     env:
       ASTRO_TELEMETRY_DISABLED: '1'
-      BUILD_AT: '2026-10-20T14:00:00Z'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

@@ -54,9 +54,9 @@ Capture-kommandoen kontrollerer revisions-/bytebeviserne mod de lokale kildefile
 
 ## Resultat med de valgte kilder
 
-To prepared snapshots ligger lokalt under `.local/google-pilot`, uden for Git og offentligt output. Den normaliserede vejledning indeholder otte tabeller og ét billede. Teksten fra afsnit og tabelceller er sammenlignet med kildens tekst efter ensartet normalisering af whitespace og er bevaret. Billedet manglede alternativ tekst, som derfor blev tilføjet i pilotindekset efter visuel gennemgang. Originalerne er ikke redigeret.
+De oprindelige prepared-kopier ligger lokalt under `.local/google-pilot`, uden for Git. Efter brugerens lokale godkendelse er netop disse versioner også fastholdt som snapshotkopier i projektets lokale Git-repository. Den normaliserede vejledning indeholder otte tabeller og ét billede. Teksten fra afsnit og tabelceller er sammenlignet med kildens tekst efter ensartet normalisering af whitespace og er bevaret. Billedet manglede alternativ tekst, som derfor blev tilføjet i pilotindekset efter visuel gennemgang. Originalerne er ikke redigeret.
 
-PDF'en er en separat testfil; sammenkoblingen i pilotdatasættet betyder ikke, at den oprindeligt var bilag til Docs-teksten. Ingen ny publiceringsgodkendelse er oprettet for nogen af de to rigtige kilder.
+PDF'en er en separat testfil; sammenkoblingen i pilotdatasættet betyder ikke, at den oprindeligt var bilag til Docs-teksten. De to gennemsete versioner er efterfølgende godkendt af brugeren til den lokale pilot. Se `docs/local-pilot-approval.md` for præcise hashes, godkendelsestidspunkt og den lokale afgrænsning.
 
 ## Manuel godkendelse i Git
 
@@ -77,4 +77,4 @@ Der er fortsat ingen produktion eller automatisk publicering fra Google.
 
 ## Verifikation
 
-43 tests består. Astro/TypeScript: 0 fejl, 0 advarsler og 0 hints. Låst installation og statisk build består. De eksisterende 15 offentlige mock-sider og deres datasæt er fortsat de eneste publicerede input; pilotens rigtige kilder findes kun i lokale prepared snapshots. Forhåndsvisningen af billede og tabeller er gennemset i browseren.
+43 tests består. Astro/TypeScript: 0 fejl, 0 advarsler og 0 hints. Låst installation og statisk build består. Efter brugerens lokale godkendelse indgår begge eksakte Google-snapshots i den lokale build sammen med mockindholdet. Der er fortsat ingen ekstern publicering. Forhåndsvisningen af billede og tabeller er gennemset i browseren.

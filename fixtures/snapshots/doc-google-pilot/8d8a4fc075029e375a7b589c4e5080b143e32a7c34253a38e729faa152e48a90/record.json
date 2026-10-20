@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "doc-google-pilot",
+  "title": "Pilotfil: Vedtægter § 3 — designprøve",
+  "summary": "Separat PDF-testfil fra Drive. Bruges til at afprøve versionsbundet download.",
+  "slug": "google-pilot",
+  "category": "Bolig og vedligehold",
+  "visibility": "public",
+  "updatedAt": "2026-10-10T14:31:26.629Z",
+  "source": {
+    "provider": "google",
+    "sourceId": "1R_SB8AaK0m8gtmFzsTQOUPUtC-ZzCU0d",
+    "sourceRevision": "captured:sha256:745cf2020fff8cda25edff54aa2fe46e149459ecc4295aac806b75939c3aa3e9"
+  },
+  "contentHash": "sha256:8d8a4fc075029e375a7b589c4e5080b143e32a7c34253a38e729faa152e48a90",
+  "type": "document",
+  "documentKind": "vedtægter",
+  "file": {
+    "assetPath": "source/745cf2020fff8cda25edff54aa2fe46e149459ecc4295aac806b75939c3aa3e9.pdf",
+    "assetHash": "sha256:745cf2020fff8cda25edff54aa2fe46e149459ecc4295aac806b75939c3aa3e9",
+    "sizeBytes": 24373,
+    "mimeType": "application/pdf",
+    "originalFilename": "Vedtaegter-paragraf-3-nyt-design.pdf"
+  }
+}

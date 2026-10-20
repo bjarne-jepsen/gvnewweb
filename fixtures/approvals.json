@@ -68,5 +68,19 @@
     "approvedAt": "2026-10-20T10:30:00Z",
     "approvedBy": "mock-editor-realistic-fixtures",
     "decision": "publish"
+  },
+  {
+    "contentId": "doc-google-pilot",
+    "approvedHash": "sha256:8d8a4fc075029e375a7b589c4e5080b143e32a7c34253a38e729faa152e48a90",
+    "approvedAt": "2026-10-20T15:25:28Z",
+    "approvedBy": "bjarne.jepsen",
+    "decision": "publish"
+  },
+  {
+    "contentId": "guide-google-pilot",
+    "approvedHash": "sha256:7e4d525d00eb0a0d803150a5060ddb5ccb58f4f02166eef1062605ddf82f23e2",
+    "approvedAt": "2026-10-20T15:25:28Z",
+    "approvedBy": "bjarne.jepsen",
+    "decision": "publish"
   }
 ]
