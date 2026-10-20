@@ -141,13 +141,13 @@
     "slug": "google-pilot",
     "category": "Foreningen",
     "visibility": "public",
-    "updatedAt": "2026-10-04T16:02:30.099Z",
+    "updatedAt": "2026-10-20T15:31:11.362Z",
     "source": {
       "provider": "google",
       "sourceId": "1T1POrjbjJmrFKBfKJZdlI7-Lf-2Czz2Wid8tReKfIn0",
-      "sourceRevision": "AHj4eMT-zTFhrnhOS26oy3aunXs95t2TSAD-wTOg7YOzg-Y3Nt7w4z-wG9VQKVl8sN8HtF7RbbLEcwr9mxzOl9ZRLiqZka9TBYZI-E2xFvo"
+      "sourceRevision": "AHj4eMSt8QmS72KKHwhSVvUyBPjaRLfclQ4tT0mTBmHu8TjUcANqUW8XbVy8OGJY9CTx8H4h4DWuI6EzHrHzmVucw7ogb574iDXPaVnaw9A"
     },
-    "contentHash": "sha256:7e4d525d00eb0a0d803150a5060ddb5ccb58f4f02166eef1062605ddf82f23e2",
+    "contentHash": "sha256:4ab5312f9b873c52aee7e11c2eb7280dd277d1b5842dbf229142bdf1609602be",
     "type": "guide",
     "bodyBlocks": [
       {
@@ -155,7 +155,7 @@
         "level": 2,
         "content": [
           {
-            "text": "Fælleslokalerne: Hvem skal betale?"
+            "text": "XXXFælleslokalerne: Hvem skal betale?"
           }
         ]
       },

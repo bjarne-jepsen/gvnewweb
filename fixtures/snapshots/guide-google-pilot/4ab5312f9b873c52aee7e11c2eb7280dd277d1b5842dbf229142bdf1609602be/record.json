@@ -1,0 +1,799 @@
+{
+  "schemaVersion": 2,
+  "id": "guide-google-pilot",
+  "title": "fælleslokaler-hvem-skal-betale",
+  "summary": "Pilotkilde til test af tekst, tabeller og billeder fra Google Docs. PDF-filen er en separat testfil.",
+  "slug": "google-pilot",
+  "category": "Foreningen",
+  "visibility": "public",
+  "updatedAt": "2026-10-20T15:31:11.362Z",
+  "source": {
+    "provider": "google",
+    "sourceId": "1T1POrjbjJmrFKBfKJZdlI7-Lf-2Czz2Wid8tReKfIn0",
+    "sourceRevision": "AHj4eMSt8QmS72KKHwhSVvUyBPjaRLfclQ4tT0mTBmHu8TjUcANqUW8XbVy8OGJY9CTx8H4h4DWuI6EzHrHzmVucw7ogb574iDXPaVnaw9A"
+  },
+  "contentHash": "sha256:4ab5312f9b873c52aee7e11c2eb7280dd277d1b5842dbf229142bdf1609602be",
+  "type": "guide",
+  "bodyBlocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "content": [
+        {
+          "text": "XXXFælleslokalerne: Hvem skal betale?"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "content": [
+        {
+          "text": "1. Større dele af udgifterne er der, også når lokalerne står tomme"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "text": "Forslaget regner med en driftsudgift på 75.000 kr. om året. Næsten tre fjerdedele af beløbet ændrer sig ikke, hvis lokalerne bruges mere eller mindre."
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "file": {
+        "assetPath": "source/601380f9c785a293e99b930e5f8d90d72067c6a01b8cbee3e9c5d26811283aa2.png",
+        "assetHash": "sha256:601380f9c785a293e99b930e5f8d90d72067c6a01b8cbee3e9c5d26811283aa2",
+        "sizeBytes": 97125,
+        "mimeType": "image/png",
+        "originalFilename": "601380f9c785a293e99b930e5f8d90d72067c6a01b8cbee3e9c5d26811283aa2.png"
+      },
+      "alt": "Diagram over udgifter: varme 35.000 kr., renovation 10.000 kr., rengøring 10.000 kr., el 10.000 kr. og vand 10.000 kr. Diagrammet angiver 55.000 kr. som faste udgifter og 20.000 kr. som udgifter, der delvist kan følge brugen. Køkkenudgiften er ukendt og ikke medregnet. Skravering markerer beløb eller fordelinger, som ikke er målt."
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "text": "Varme: ",
+          "bold": true
+        },
+        {
+          "text": "Forslaget regner med 35.000 kr. Driftsbudgettet viser 30.000 kr. Med budgettets tal er udgifterne 70.000 kr. og ikke 75.000 kr."
+        },
+        {
+          "text": "",
+          "bold": true
+        }
+      ]
+    },
+    {
+      "type": "separator"
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "text": "Rengøring:",
+          "bold": true
+        },
+        {
+          "text": " "
+        },
+        {
+          "text": "S"
+        },
+        {
+          "text": "ker efter en fast plan, ikke efter bookinger. Forslaget nævner januar, maj og september, men det er uklart for mig, hvad det dækker. Ifølge forslaget gør brugerne desuden selv rent efter sig."
+        },
+        {
+          "text": ""
+        }
+      ]
+    },
+    {
+      "type": "separator"
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "text": "Vand",
+          "bold": true
+        },
+        {
+          "text": ": H"
+        },
+        {
+          "text": "ar ingen måler. Alligevel står fælleslokalerne til 10.000 af bygningens 15.000 kr."
+        }
+      ]
+    },
+    {
+      "type": "separator"
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "text": "Renovation",
+          "bold": true
+        },
+        {
+          "text": ": "
+        },
+        {
+          "text": "F"
+        },
+        {
+          "text": "ælleslokalerne står til 10.000 af bygningens 11.000 kr. De øvrige lejere står til 0 kr."
+        }
+      ]
+    },
+    {
+      "type": "separator"
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "text": "El",
+          "bold": true
+        },
+        {
+          "text": ": F"
+        },
+        {
+          "text": "aktureres samlet for to lokaler. "
+        }
+      ]
+    },
+    {
+      "type": "separator"
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "text": "Køkken",
+          "bold": true
+        },
+        {
+          "text": ": Rensning af emhætte, industrikomfur og opvaskemaskine står med \"?\" i forslaget og er ikke regnet med i de 75.000 kr. Driftsbudgettet har 50.000 kr. til nødvendig kontrol og vedligehold af industrikøkkenet. Det undersøges nu."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "content": [
+        {
+          "text": "2. "
+        },
+        {
+          "text": "Klubberne bruger lokalerne mindst, men skal betale mest pr. time"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "text": "Bookede timer i forslagets budget for 2027:"
+        },
+        {
+          "text": ""
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "rows": [
+        [
+          [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "Weekender og døgn"
+                },
+                {
+                  "text": ""
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "Private fester"
+                },
+                {
+                  "text": ""
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "ca. 840 timer",
+                  "bold": true
+                },
+                {
+                  "text": ""
+                }
+              ]
+            }
+          ]
+        ]
+      ]
+    },
+    {
+      "type": "table",
+      "rows": [
+        [
+          [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "Klubber"
+                },
+                {
+                  "text": ""
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "Kor, yoga, madklubber m.fl."
+                },
+                {
+                  "text": ""
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "ca. 200 timer",
+                  "bold": true
+                },
+                {
+                  "text": ""
+                }
+              ]
+            }
+          ],
+          []
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "text": "Pris pr. time:"
+        },
+        {
+          "text": ""
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "rows": [
+        [
+          [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "Weekend"
+                },
+                {
+                  "text": ""
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "3.000 kr. for 48 timer"
+                },
+                {
+                  "text": ""
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "62,50 kr.",
+                  "bold": true
+                },
+                {
+                  "text": ""
+                }
+              ]
+            }
+          ],
+          []
+        ]
+      ]
+    },
+    {
+      "type": "table",
+      "rows": [
+        [
+          [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "Døgn"
+                },
+                {
+                  "text": ""
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "2.000 kr. for 24 timer"
+                },
+                {
+                  "text": ""
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "83 kr.",
+                  "bold": true
+                },
+                {
+                  "text": ""
+                }
+              ]
+            }
+          ],
+          []
+        ]
+      ]
+    },
+    {
+      "type": "table",
+      "rows": [
+        [
+          [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "Klubber i dag"
+                },
+                {
+                  "text": ""
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "Social timepris"
+                },
+                {
+                  "text": ""
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "50 kr.",
+                  "bold": true
+                },
+                {
+                  "text": ""
+                }
+              ]
+            }
+          ],
+          []
+        ]
+      ]
+    },
+    {
+      "type": "table",
+      "rows": [
+        [
+          [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "Klubber efter forslaget"
+                },
+                {
+                  "text": ""
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "Hverdage"
+                },
+                {
+                  "text": ""
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "100 kr.",
+                  "bold": true
+                },
+                {
+                  "text": ""
+                }
+              ]
+            }
+          ],
+          []
+        ]
+      ]
+    },
+    {
+      "type": "table",
+      "rows": [
+        [
+          [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "Klubber i weekenden?"
+                },
+                {
+                  "text": ""
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "Hvis weekendprisen gælder dem"
+                },
+                {
+                  "text": ""
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "150 kr.",
+                  "bold": true
+                },
+                {
+                  "text": ""
+                }
+              ]
+            }
+          ]
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "text": "\n"
+        },
+        {
+          "text": "Yoga og kor bruger næsten ingen el og vand. Madklubberne bruger mere og betaler 150-200 kr. pr. gang. Køkkenet er den udgift, der tydeligst følger brugen, og den gælder både klubber og fester."
+        },
+        {
+          "text": "\n"
+        },
+        {
+          "text": ""
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "content": [
+        {
+          "text": "\n\n"
+        },
+        {
+          "text": "3. "
+        },
+        {
+          "text": "Tre veje til omtrent det samme beløb",
+          "bold": true
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "text": "Forslaget skal hente ca. 7.000-7.500 kr. ekstra. Det kan gøres på flere måder, og der er ingen regnskabslogik der argumenterer for at klubberne skal håndtere udgiften"
+        },
+        {
+          "text": ". Det er alene en politisk beslutning i bestyrelsen.\n"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "rows": [
+        [
+          [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": " Forslaget ",
+                  "bold": true
+                },
+                {
+                  "text": ""
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "Klubberne betaler",
+                  "bold": true
+                },
+                {
+                  "text": ""
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "Timeprisen fordobles"
+                },
+                {
+                  "text": ""
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "+7.250 kr.",
+                  "bold": true
+                },
+                {
+                  "text": ""
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "50 → 100 kr. i timen"
+                },
+                {
+                  "text": ""
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "\n",
+                  "bold": true
+                },
+                {
+                  "text": "Festerne betaler",
+                  "bold": true
+                },
+                {
+                  "text": ""
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "Nævnt i forslaget som alternativ"
+                },
+                {
+                  "text": ""
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "+7.500 kr.",
+                  "bold": true
+                },
+                {
+                  "text": ""
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "3.000 → 3.500 kr. pr. weekend"
+                },
+                {
+                  "text": ""
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "\n",
+                  "bold": true
+                },
+                {
+                  "text": "Foreningen betaler",
+                  "bold": true
+                },
+                {
+                  "text": ""
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "Lokalerne som fællesgode"
+                },
+                {
+                  "text": ""
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "ca. 7.000 kr.",
+                  "bold": true
+                },
+                {
+                  "text": ""
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "Som en fællesudgift i budgettet"
+                },
+                {
+                  "text": ""
+                }
+              ]
+            }
+          ]
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "content": [
+        {
+          "text": "Det jeg mangler forståelse for:"
+        }
+      ]
+    },
+    {
+      "type": "list",
+      "items": [
+        [
+          {
+            "text": "De faktiske indtægter for 2026. Forslagets 2026-kolonne passer ikke med det antal weekender og døgn, teksten nævner."
+          }
+        ],
+        [
+          {
+            "text": "Hvordan beløbene til vand og renovation er fordelt mellem fælleslokalerne og resten af bygningen."
+          }
+        ],
+        [
+          {
+            "text": "Hvor meget varme og el stiger, når lokalerne er booket. Det kan Ista-aflæsninger måned for måned vise."
+          }
+        ],
+        [
+          {
+            "text": "Hvor mange klubber der stopper ved 100 kr. i timen. Fra 2025 til 2026 stoppede tre."
+          }
+        ],
+        [
+          {
+            "text": "Hvad \"januar, maj og september\" betyder i rengøringsposten, og hvordan de 10.000 kr. hænger sammen med, at brugerne selv gør rent."
+          }
+        ],
+        [
+          {
+            "text": "Hvad kontrol, rensning og vedligehold af køkkenet koster, og om det er lovpligtigt. Driftsbudgettet har 50.000 kr. til det, og det kan være mere end hele det beløb, sagen handler om."
+          }
+        ],
+        [
+          {
+            "text": "Om varmen i fælleslokalerne koster 30.000 kr., som driftsbudgettet viser, eller 35.000 kr., som forslaget regner med."
+          }
+        ],
+        [
+          {
+            "text": "Om weekendtimeprisen på 150 kr. også gælder klubberne."
+          }
+        ],
+        [
+          {
+            "text": "Hvorfor billard, badminton og vinklub er fjernet fra tabellen, mens summerne for 2025 og 2026 er uændrede."
+          }
+        ]
+      ]
+    }
+  ],
+  "relatedDocumentIds": [
+    "doc-google-pilot"
+  ]
+}

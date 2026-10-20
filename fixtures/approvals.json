@@ -82,5 +82,12 @@
     "approvedAt": "2026-10-20T15:25:28Z",
     "approvedBy": "bjarne.jepsen",
     "decision": "publish"
+  },
+  {
+    "contentId": "guide-google-pilot",
+    "approvedHash": "sha256:4ab5312f9b873c52aee7e11c2eb7280dd277d1b5842dbf229142bdf1609602be",
+    "approvedAt": "2026-10-20T15:44:25Z",
+    "approvedBy": "bjarne.jepsen",
+    "decision": "publish"
   }
 ]
