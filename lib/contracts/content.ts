@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
+import { bodyBlockSchema } from './blocks';
 
 export const digest = (bytes: string | Uint8Array) => `sha256:${createHash('sha256').update(bytes).digest('hex')}`;
 export const hashSchema = z.string().regex(/^sha256:[a-f0-9]{64}$/);
@@ -20,11 +21,12 @@ const common = {
 const recordUnion = z.discriminatedUnion('type', [
   z.strictObject({ ...common, type: z.literal('document'), documentKind: z.enum(['vejledning', 'referat', 'regnskab', 'vedtægter']), effectiveDate: z.iso.date().optional(),
     file: z.strictObject({ assetPath: z.string().regex(/^[a-zA-Z0-9_-]+\/[a-zA-Z0-9_.-]+$/).refine(s => !s.includes('..')), assetHash: hashSchema, sizeBytes: z.number().int().nonnegative(), mimeType: z.literal('application/pdf'), originalFilename: z.string().regex(/^[a-zA-Z0-9_-]+\.pdf$/) }) }),
-  z.strictObject({ ...common, type: z.literal('guide'), bodyMarkdown: markdown, relatedDocumentIds: z.array(identifier), ownerLabel: text.optional() }),
+  z.strictObject({ ...common, type: z.literal('guide'), schemaVersion: z.union([z.literal(1), z.literal(2)]), bodyMarkdown: markdown.optional(), bodyBlocks: z.array(bodyBlockSchema).min(1).max(1000).optional(), relatedDocumentIds: z.array(identifier), ownerLabel: text.optional() }),
   z.strictObject({ ...common, type: z.literal('notice'), bodyMarkdown: markdown, publishFrom: dateTime.optional(), expiresAt: dateTime.optional(), priority: z.enum(['normal', 'important']) }),
   z.strictObject({ ...common, type: z.literal('event'), startsAt: dateTime, endsAt: dateTime, timeZone: z.literal('Europe/Copenhagen'), locationText: text.optional(), registrationUrl: safeUrl.optional() }),
 ]);
 export const contentSchema = recordUnion.superRefine((r, ctx) => {
+  if (r.type === 'guide' && (r.schemaVersion === 1 ? r.bodyMarkdown === undefined || r.bodyBlocks !== undefined : r.bodyBlocks === undefined || r.bodyMarkdown !== undefined)) ctx.addIssue({ code: 'custom', message: 'Guide v1 kræver kun bodyMarkdown; guide v2 kræver kun bodyBlocks' });
   if (r.type === 'event' && r.endsAt <= r.startsAt) ctx.addIssue({ code: 'custom', path: ['endsAt'], message: 'Skal ligge efter startsAt' });
   if (r.type === 'notice' && r.publishFrom && r.expiresAt && r.expiresAt <= r.publishFrom) ctx.addIssue({ code: 'custom', path: ['expiresAt'], message: 'Skal ligge efter publishFrom' });
 });
@@ -35,6 +37,11 @@ export function publicationPayload(record: ContentRecord) {
     const { assetPath: _path, ...file } = payload.file;
     return { ...payload, file };
   }
+  if (payload.type === 'guide' && payload.bodyBlocks) return { ...payload, bodyBlocks: payload.bodyBlocks.map(b => {
+    if (b.type !== 'image') return b;
+    const { assetPath: _path, ...file } = b.file;
+    return { ...b, file };
+  }) };
   return payload;
 }
 export function canonical(value: unknown): string {

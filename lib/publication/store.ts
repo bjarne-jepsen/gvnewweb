@@ -1,7 +1,8 @@
 import { mkdir, readFile, writeFile, realpath } from 'node:fs/promises';
 import { join, relative, resolve } from 'node:path';
 import { z } from 'zod';
-import { digest, hashSchema, normalizeRecord, publicationPayload, validateSet, type ContentRecord } from '../contracts/content';
+import { recordAssets, verifyFile } from './assets';
+import { hashSchema, normalizeRecord, publicationPayload, validateSet, type ContentRecord } from '../contracts/content';
 
 const idSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 const timestamp = z.iso.datetime({ offset: true });
@@ -24,21 +25,25 @@ export async function safeRead(root: string, path: string) {
 }
 export function verifyAsset(record: ContentRecord, bytes: Uint8Array) {
   if (record.type !== 'document') throw new Error('Forventede document');
-  if (bytes.length !== record.file.sizeBytes || digest(bytes) !== record.file.assetHash) throw new Error(`${record.id}: dokumentets bytes matcher ikke assetHash/sizeBytes`);
-  if (!Buffer.from(bytes).subarray(0, 5).equals(Buffer.from('%PDF-'))) throw new Error(`${record.id}: forventede PDF`);
+  try { verifyFile(record.file, bytes); } catch (error) { throw new Error(`${record.id}: ${String(error)}`); }
 }
 export async function prepare(input: ContentRecord, assetRoot: string, snapshotRoot: string) {
   const record = normalizeRecord(input);
   const directory = snapshotDirectory(snapshotRoot, record.id, record.contentHash);
-  const bytes = record.type === 'document' ? await safeRead(assetRoot, record.file.assetPath) : undefined;
-  if (bytes) verifyAsset(record, bytes);
+  const files = [];
+  for (const asset of recordAssets(record)) {
+    const bytes = await safeRead(assetRoot, asset.file.assetPath);
+    verifyFile(asset.file, bytes); files.push({ ...asset, bytes });
+  }
   await mkdir(directory, { recursive: true });
-  // Exclusive creation: an existing version is validated, never overwritten.
-  if (bytes) {
-    try { await writeFile(join(directory, 'document.pdf'), bytes, { flag: 'wx' }); }
+  // Exclusive creation: an existing version and all its assets are verified, never overwritten.
+  for (const asset of files) {
+    const target = join(directory, asset.snapshotPath);
+    await mkdir(resolve(target, '..'), { recursive: true });
+    try { await writeFile(target, asset.bytes, { flag: 'wx' }); }
     catch (error) {
       if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error;
-      verifyAsset(record, await safeRead(directory, 'document.pdf'));
+      verifyFile(asset.file, await safeRead(directory, asset.snapshotPath));
     }
   }
   try { await writeFile(join(directory, 'record.json'), JSON.stringify(record, null, 2) + '\n', { flag: 'wx' }); }
@@ -79,9 +84,9 @@ export async function selectPublic(manifestInput: unknown, approvals: unknown, s
     const record = normalizeRecord(JSON.parse((await safeRead(directory, 'record.json')).toString()));
     if (record.id !== entry.contentId || record.contentHash !== entry.approvedHash) throw new Error(`${entry.contentId}: forkert snapshot`);
     if (record.visibility !== 'public') throw new Error(`${record.id}: godkendt snapshot er ikke public`);
-    if (record.type === 'document') {
-      const bytes = await safeRead(directory, 'document.pdf'); verifyAsset(record, bytes);
-      assets.set(assetUrl(record), bytes);
+    for (const asset of recordAssets(record)) {
+      const bytes = await safeRead(directory, asset.snapshotPath); verifyFile(asset.file, bytes);
+      assets.set(asset.publicUrl, bytes);
     }
     if (record.type === 'notice' && ((record.publishFrom && Date.parse(record.publishFrom) > Date.parse(buildAt)) || (record.expiresAt && Date.parse(record.expiresAt) <= Date.parse(buildAt)))) continue;
     records.push(record);

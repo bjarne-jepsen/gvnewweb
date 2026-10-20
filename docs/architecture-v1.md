@@ -1,6 +1,6 @@
 # Grøndalsvænge 2.0 — datakontrakter og publicering (v1)
 
-**Status:** Designoplæg til POC — ikke implementeret  
+**Status:** Oprindeligt v1-design; mock-POC implementeret. Den efterfølgende godkendte Google-pilot og guidekontrakt v2 er beskrevet i `docs/google-pilot.md`.
 **Formål:** En statisk Astro-hjemmeside, hvor bestyrelsen vedligeholder indhold i Google Workspace, mens en kontrolleret publiceringsproces eksporterer godkendt indhold. POC'en bruger mockdata med nøjagtig samme normaliserede datastruktur som de kommende Google-adaptere.
 
 ## 1. Beslutninger

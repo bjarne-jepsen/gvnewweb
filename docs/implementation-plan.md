@@ -4,7 +4,7 @@
 
 Bevis, at en statisk frontend kan publicere **versionsbundet, godkendt** indhold fra normaliserede mockdata. En senere Google Workspace-adapter skal kunne levere nøjagtig den samme kontrakt uden ændringer i frontend.
 
-**Status:** Planforslag, ikke implementeret. Codex skal først gennemføre discovery, udfordre planen og afvente eksplicit godkendelse før applikationskode.
+**Status:** Den oprindelige POC-plan er godkendt og implementeret. Dokumentet bevarer det oprindelige faseforløb. Den efterfølgende Google-pilot med manuel snapshotgodkendelse og understøttelse af tabeller/billeder er særskilt godkendt og dokumenteret i `docs/google-pilot.md`.
 
 ## Første Codex-opgave: discovery (ingen applikationskode)
 

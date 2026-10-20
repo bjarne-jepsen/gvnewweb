@@ -46,6 +46,21 @@ test('hele buildforløbet: kladde → samme release → ny godkendelse → ny re
   result = await build(); expect(result.log).toContain('Outputkontrol bestået'); expect(result.exit).toBe(0);
   expect(await release()).not.toEqual(before);
   expect(await readFile(join(root, 'dist/vejledninger/guide-dokumenter/index.html'), 'utf8')).toContain('Ny godkendelseskrævende titel');
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aiv8AAAAASUVORK5CYII=', 'base64');
+  await writeFile(join(root, 'fixtures/assets/source/test.png'), png);
+  const rich = sealRecord({ ...guides[0], id:'guide-rich', slug:'rich', schemaVersion:2, bodyMarkdown:undefined,
+    bodyBlocks:[{type:'table',rows:[[[{type:'paragraph',content:[{text:'Tabelindhold'}]}]]]}, {type:'image',alt:'Testbillede',file:{assetPath:'source/test.png',assetHash:digest(png),sizeBytes:png.length,mimeType:'image/png',originalFilename:'test.png'}}] });
+  const richEntry = await prepare(rich, join(root,'fixtures/assets'), join(root,'fixtures/snapshots'));
+  guides.push(rich); manifest.push(richEntry); approvals.push({...richEntry,decision:'publish',approvedAt:'2026-10-20T13:00:00Z',approvedBy:'integration-test'});
+  await save('fixtures/candidates/guides.json', guides); await save('fixtures/manifest.json',manifest); await save('fixtures/approvals.json',approvals);
+  result = await build(); expect(result.log).toContain('Outputkontrol bestået'); expect(result.exit).toBe(0);
+  const richHtml = await readFile(join(root,'dist/vejledninger/rich/index.html'),'utf8');
+  expect(richHtml).toContain('<table>'); expect(richHtml).toContain('alt="Testbillede"');
+  const media = join(root,`dist/media/${digest(png).slice(7)}.png`);
+  expect(await readFile(media)).toEqual(png);
+  approvals.push({...richEntry,decision:'withdraw',approvedAt:'2026-10-20T13:30:00Z',approvedBy:'integration-test'});
+  await save('fixtures/approvals.json',approvals);
+  result = await build(); expect(result.exit).toBe(0); expect(await Bun.file(media).exists()).toBe(false);
   const after = await release();
   guides[0].visibility = 'unknown'; await save('fixtures/candidates/guides.json', guides);
   result = await build(); expect(result.exit).not.toBe(0); expect(result.log).toContain('visibility');

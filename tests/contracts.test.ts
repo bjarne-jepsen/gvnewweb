@@ -1,11 +1,13 @@
 import { describe, expect, test } from 'bun:test';
+import { expectAdapterContract } from './helpers/adapter-contract';
 import { MockContentAdapter } from '../lib/adapters/mock';
 import { canonical, contentHash, normalizeRecord, sealRecord, validateSet } from '../lib/contracts/content';
 
 const records = await new MockContentAdapter().listCandidates();
 const guide = records.find(r => r.type === 'guide')!;
 describe('fælles adapterkontrakt', () => {
-  test('alle fire typer og tre synlighedsklasser', () => {
+  test('alle fire typer og tre synlighedsklasser', async () => {
+    await expectAdapterContract(new MockContentAdapter());
     expect(new Set(records.map(r => r.type)).size).toBe(4);
     expect(new Set(records.map(r => r.visibility)).size).toBe(3);
     records.forEach(r => expect(normalizeRecord(r)).toEqual(r));

@@ -1,0 +1,20 @@
+{
+  "documentId": "test-doc-id",
+  "title": "Pilotvejledning",
+  "suggestionsViewMode": "SUGGESTIONS_INLINE",
+  "documentStyle": {"background": {"color": {"color": {"rgbColor": {"red": 1}}}}},
+  "tabs": [{
+    "tabProperties": {"tabId": "t.0", "title": "Fane 1"},
+    "documentTab": {
+      "body": {"content": [
+        {"sectionBreak": {}},
+        {"paragraph": {"paragraphStyle": {"namedStyleType": "HEADING_2"}, "elements": [{"textRun": {"content": "Før du går i gang\n"}}]}},
+        {"paragraph": {"elements": [{"textRun": {"content": "Læs vejledningen og det tilhørende PDF-bilag.\n"}}]}},
+        {"paragraph": {"bullet": {"listId": "kix.1", "nestingLevel": 0}, "elements": [{"textRun": {"content": "Første punkt\n"}}]}},
+        {"paragraph": {"bullet": {"listId": "kix.1"}, "elements": [{"textRun": {"content": "Andet punkt\n"}}]}},
+        {"paragraph": {"elements": [{"textRun": {"content": "Læs mere", "textStyle": {"link": {"url": "https://example.test/vejledning"}}}}, {"textRun": {"content": "\n"}}]}}
+      ]},
+      "lists": {"kix.1": {"listProperties": {"nestingLevels": [{"glyphSymbol": "●", "glyphFormat": "%0"}]}}}
+    }
+  }]
+}

@@ -1,5 +1,5 @@
 import { mkdir, readFile, writeFile, rm, rename } from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
 import { MockContentAdapter } from '../lib/adapters/mock';
 import { selectPublic } from '../lib/publication/store';
 import { verifyOutput } from './verify-output';
@@ -20,7 +20,10 @@ try {
   await rm('.build/staging', { recursive: true, force: true });
   await mkdir('.build/assets/downloads', { recursive: true });
   await writeFile('.build/content.json', JSON.stringify(selected.records));
-  for (const [url, bytes] of selected.assets) await writeFile(join('.build/assets', url.slice(1)), bytes);
+  for (const [url, bytes] of selected.assets) {
+    const target = join('.build/assets', url.slice(1));
+    await mkdir(dirname(target), { recursive: true }); await writeFile(target, bytes);
+  }
   const command = dev ? ['node', 'node_modules/astro/bin/astro.mjs', 'dev', '--host', '127.0.0.1'] : ['node', 'node_modules/astro/bin/astro.mjs', 'build'];
   const processResult = Bun.spawn(command, { stdout: 'inherit', stderr: 'inherit', env: { ...process.env, ASTRO_TELEMETRY_DISABLED: '1' } });
   const exit = await processResult.exited;

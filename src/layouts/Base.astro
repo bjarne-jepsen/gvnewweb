@@ -58,6 +58,16 @@ const navigation = [['/', 'Forside'], ['/dokumenter/', 'Dokumenter'], ['/vejledn
   .columns { display:grid; grid-template-columns: 1.35fr 1fr; gap:4rem; }
   .prose { max-width:68ch; }
   .prose h2 { margin-top:2.5rem; }
+  .prose figure { margin:2rem 0; }
+  .prose img { display:block; max-width:100%; height:auto; }
+  .prose .rich-text { white-space:pre-line; }
+  .prose hr { border:0; border-top:1px solid var(--line); margin:2rem 0; }
+  .table-scroll { overflow-x:auto; margin:2rem 0; }
+  .table-scroll table { border-collapse:collapse; width:100%; font-size:1rem; }
+  .table-scroll caption { text-align:left; color:var(--muted); font: .85rem/1.7 system-ui,sans-serif; margin-bottom:.5rem; }
+  .table-scroll td { border:1px solid var(--line); padding:.75rem; vertical-align:top; min-width:7rem; }
+  .table-scroll p { margin:0 0 .5rem; }
+  .table-scroll p:last-child { margin-bottom:0; }
   .prose li { padding-left:.25rem; margin-bottom:.5rem; }
   .download { display:inline-block; padding:.75rem 1.25rem; background:var(--accent); color:var(--paper); font:1rem/1.5 system-ui, sans-serif; text-decoration:none; }
   .download:hover { background:var(--ink); text-decoration:underline; }

@@ -16,7 +16,10 @@ export async function verifyOutput(root: string, records: PublicRecord[], assets
   const allowed = new Set([...pages, 'search.json', 'sitemap.xml', ...assets.keys()].map(x => x.replace(/^\//, '')));
   const paths = await walk(root), found = new Set<string>();
   const selected = new Set(records.map(r => r.id));
-  const forbidden = candidates.filter(r => !selected.has(r.id)).flatMap(r => [r.id, r.title, ...(r.type === 'document' ? [r.file.originalFilename] : [])]);
+  const approvedText = JSON.stringify(records);
+  // Titles/filenames can legitimately be shared by a withdrawn candidate and an
+  // approved record. Exact approved payloads and the asset allowlist are authoritative.
+  const forbidden = candidates.filter(r => !selected.has(r.id)).flatMap(r => [r.id, r.title, ...(r.type === 'document' ? [r.file.originalFilename] : [])]).filter(token => !approvedText.includes(token));
   for (const path of paths) {
     const rel = relative(root, path); found.add(rel);
     if (!allowed.has(rel) && !/^_astro\/[a-zA-Z0-9_.-]+\.css$/.test(rel)) throw new Error(`Uventet outputfil: ${rel}`);

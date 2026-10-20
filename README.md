@@ -1,6 +1,6 @@
 # Grøndalsvænge 2.0 — lokal POC
 
-Statisk Astro + TypeScript-prototype med Zod-validerede mockdata. Der er ingen Google API, login, database eller produktionsdeployment. Seks vejledninger er forkortede, bearbejdede prøveversioner af offentlige sider på groendalsvaenge.dk. Den oprindelige dokumentvejledning, PDF og kalender er fortsat illustrative.
+Statisk Astro + TypeScript-prototype med Zod-validerede mockdata. Den oprindelige mock-POC har ingen Google-afhængighed. En særskilt Google-pilot kan klargøre to valgte kilder til manuel gennemgang; almindelig build bruger fortsat lokale, godkendte snapshots. Der er ingen loginfunktion, database eller produktionsdeployment. Seks vejledninger er forkortede, bearbejdede prøveversioner af offentlige sider på groendalsvaenge.dk. Den oprindelige dokumentvejledning, PDF og kalender er fortsat illustrative.
 
 ## Kør lokalt
 
@@ -72,3 +72,11 @@ Kildematerialet er registreret 20. oktober 2026. `updatedAt` er tidspunktet for 
 `scripts/mock-guides.ts` vedligeholder de seks prøveversioner. `bun run scripts/use-realistic-content.ts` er en eksplicit vedligeholdelseskommando for dette lokale mockdatasæt: den tilføjer kandidater, fastholder snapshots og opretter simulerede godkendelser. Den bevarer eksisterende snapshotfiler og øvrige godkendelser. Kommandoen er kun til POC-fixtures og køres aldrig af almindelig build/dev; den er ikke en redaktionel eller produktionsmæssig godkendelsesfunktion. Den oprindelige fixture-generator inkluderer også de seks guides ved en fuld nulstilling.
 
 Kildelinks og afgrænsninger er samlet i [kildeoversigten](docs/mock-content-sources.md).
+
+## Google-pilot
+
+Google-piloten er dokumenteret i [docs/google-pilot.md](docs/google-pilot.md). Den understøtter én Google Docs-vejledning med tekst, tabeller og billeder samt én PDF i Drive. Guidekontrakt v2 er struktureret; eksisterende v1-snapshots og deres hashes bevares. Google-hentning og preparation godkender ikke indhold.
+
+De valgte rigtige testkilder er kun klargjort lokalt til review og er ikke føjet til den offentlige release. Adgangstokens, rå API-svar og prepared pilotmapper ligger uden for Git under `.local/`.
+
+`.github/workflows/checks.yml` kører låst installation, tests, typekontrol og statisk build ved push og pull requests. Workflowet kræver ingen Google-adgang og udfører ikke deployment. Den faktiske hosted kørsel er endnu ikke verificeret.

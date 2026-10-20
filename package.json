@@ -7,7 +7,9 @@
     "build": "bun run scripts/build.ts",
     "test": "bun test",
     "typecheck": "ASTRO_TELEMETRY_DISABLED=1 astro check && tsc --noEmit",
-    "content:prepare": "bun run scripts/prepare-content.ts"
+    "content:prepare": "bun run scripts/prepare-content.ts",
+    "google:prepare": "bun run scripts/google-prepare.ts",
+    "google:prepare-capture": "bun run scripts/google-prepare-capture.ts"
   },
   "dependencies": {
     "astro": "^6.0.0",

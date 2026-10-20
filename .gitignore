@@ -4,3 +4,5 @@ dist/
 .build/
 .env*
 !.env.example
+.local/
+config/*.local.json

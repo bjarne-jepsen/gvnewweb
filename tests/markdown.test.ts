@@ -8,3 +8,9 @@ test('Markdown renderes uden HTML- eller protokolinjektion', () => {
   expect(html).not.toContain('<script>');
   expect(html).not.toContain('href="javascript:');
 });
+
+test('strukturerede blokke escaper tekst, alt og attributter', async () => {
+  const { renderBlocks } = await import('../lib/site/blocks');
+  expect(renderBlocks([{type:'paragraph',content:[{text:'<script>alert(1)</script>',href:'https://example.test/?a=1&b=2',bold:true}]}])).not.toContain('<script>');
+  expect(() => renderBlocks([{type:'paragraph',content:[{text:'x',href:'javascript:alert(1)'}]}])).toThrow();
+});
