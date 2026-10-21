@@ -1,6 +1,6 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
-import { digest } from '../lib/contracts/content';
+import { digest } from '../lib/sync/content';
 import type { Site } from '../lib/site/load';
 export async function walk(root: string): Promise<string[]> {
   const results: string[] = [];

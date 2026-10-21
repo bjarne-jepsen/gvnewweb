@@ -1,5 +1,7 @@
 # Kilder til realistiske mockvejledninger
 
+> **Historisk.** Dette dokument beskriver den tidligere model med versionsgodkendelse og snapshots. Den er erstattet af mappemodellen (`docs/mappemodel-fase0.md` til `docs/mappemodel-fase2d.md`) og fjernet fra koden i fase 2d (21. oktober 2026).
+
 Udvidet 20. oktober 2026 på brugerens ønske om mere realistisk indhold fra Andelshaveren. Der bruges korte bearbejdede tekster, ikke en komplet kopi eller en automatisk import.
 
 | Lokal guide | Offentlig kilde |

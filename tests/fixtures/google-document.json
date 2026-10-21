@@ -1,7 +1,7 @@
 {
   "documentId": "test-doc-id",
   "title": "Pilotvejledning",
-  "suggestionsViewMode": "SUGGESTIONS_INLINE",
+  "suggestionsViewMode": "PREVIEW_WITHOUT_SUGGESTIONS",
   "documentStyle": {"background": {"color": {"color": {"rgbColor": {"red": 1}}}}},
   "tabs": [{
     "tabProperties": {"tabId": "t.0", "title": "Fane 1"},

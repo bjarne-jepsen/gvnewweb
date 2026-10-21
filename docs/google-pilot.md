@@ -1,5 +1,7 @@
 # Google-pilot — én vejledning og én PDF
 
+> **Historisk.** Dette dokument beskriver den tidligere model med versionsgodkendelse og snapshots. Den er erstattet af mappemodellen (`docs/mappemodel-fase0.md` til `docs/mappemodel-fase2d.md`) og fjernet fra koden i fase 2d (21. oktober 2026).
+
 Godkendt 20. oktober 2026 som næste fase efter mock-POC'en. Brugeren valgte to konkrete testfiler og manuel snapshotgodkendelse i Git. Da testdokumentet indeholdt tabeller og et billede, godkendte brugeren også udvidelsen af kontrakten til disse elementer.
 
 ## Implementeret

@@ -3,7 +3,7 @@ import { rejects } from 'node:assert/strict';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
-import { digest } from '../lib/contracts/content';
+import { digest } from '../lib/sync/content';
 import { siteConfigSchema } from '../lib/sync/config';
 import { splitFrontmatter } from '../lib/sync/markdown';
 import { hasChanges } from '../lib/sync/report';
@@ -60,7 +60,7 @@ test('forslag i et svar afviser dokumentet; sidste gyldige version beholdes', as
   ((leaked.tabs[0]!.documentTab.body.content[2] as any).paragraph.elements[0].textRun).suggestedInsertionIds = ['suggest.1'];
   w.drive.update('doc-1', { doc: leaked });
   const report = await w.run();
-  expect(report.errors).toEqual([{ section: 'foreningen', id: 'doc-1', title: 'Om foreningen', message: 'Google Docs: løs forslag før import; sidste gyldige version beholdes' }]);
+  expect(report.errors).toEqual([{ section: 'foreningen', id: 'doc-1', title: 'Om foreningen', message: 'Google Docs: svaret indeholder forslag; dokumentet publiceres ikke; sidste gyldige version beholdes' }]);
   expect(await w.tree()).toEqual(before);
 });
 
@@ -79,7 +79,7 @@ test('et dokument, der ikke kan konverteres, beholder sidste version; de andre s
   w.drive.gdoc('doc-e', 'E', 'f-vejledninger', { ...simple('doc-e'), documentId: 'other' });
   const report = await w.run();
   expect(report.errors.map(e => [e.id, e.message])).toEqual([
-    ['doc-a', 'Google Docs: piloten kræver præcis én fane uden underfaner; sidste gyldige version beholdes'],
+    ['doc-a', 'Google Docs: dokumentet skal have præcis én fane uden underfaner; sidste gyldige version beholdes'],
     ['doc-c', 'Google Docs: nummererede lister understøttes ikke; sidste gyldige version beholdes'],
     ['doc-d', 'Et billede mangler alternativ tekst (højreklik på billedet → Alternativ tekst); sidste gyldige version beholdes'],
     ['doc-e', 'Google Docs: forkert eller ugyldigt dokument; sidste gyldige version beholdes']]);

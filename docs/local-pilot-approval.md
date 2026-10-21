@@ -1,5 +1,7 @@
 # Godkendelse af lokal Google-pilot
 
+> **Historisk.** Dette dokument beskriver den tidligere model med versionsgodkendelse og snapshots. Den er erstattet af mappemodellen (`docs/mappemodel-fase0.md` til `docs/mappemodel-fase2d.md`) og fjernet fra koden i fase 2d (21. oktober 2026).
+
 Brugeren godkendte de to gennemsete snapshots med beskeden:
 
 > Jeg godkender de to viste snapshots til den lokale pilot.

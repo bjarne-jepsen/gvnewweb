@@ -1,5 +1,7 @@
 # Discovery og implementeringsplan — første POC
 
+> **Historisk.** Dette dokument beskriver den tidligere model med versionsgodkendelse og snapshots. Den er erstattet af mappemodellen (`docs/mappemodel-fase0.md` til `docs/mappemodel-fase2d.md`) og fjernet fra koden i fase 2d (21. oktober 2026).
+
 ## Formål
 
 Bevis, at en statisk frontend kan publicere **versionsbundet, godkendt** indhold fra normaliserede mockdata. En senere Google Workspace-adapter skal kunne levere nøjagtig den samme kontrakt uden ændringer i frontend.

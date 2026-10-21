@@ -1,11 +1,9 @@
 import { cp, mkdir, open, readdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { z } from 'zod';
-import { googleDocsBlocks } from '../adapters/google/blocks';
-import { digest } from '../contracts/content';
-import { imageFormat } from '../publication/assets';
+import { googleDocsBlocks } from '../google/docs';
 import type { SiteConfig } from './config';
-import { documentMetaSchema, guideMetaSchema, localImage, MAX_IMAGE_BYTES, MAX_IMAGES, MAX_PDF_BYTES, serializeMeta } from './content';
+import { digest, documentMetaSchema, guideMetaSchema, imageFormat, localImage, MAX_IMAGE_BYTES, MAX_IMAGES, MAX_PDF_BYTES, serializeMeta } from './content';
 import { DriveAccessError, FOLDER, GDOC, PDF, SHORTCUT, type DriveItem, type DriveSource } from './drive';
 import { assertRoundTrip, blocksToMarkdown, splitFrontmatter, summaryOf, validateMarkdown, withFrontmatter, type SerializableBlock } from './markdown';
 import { emptyReport, type ReportEntry, type SyncReport } from './report';

@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 import { rejects } from 'node:assert/strict';
-import { GoogleReadClient } from '../lib/adapters/google/client';
+import { GoogleReadClient } from '../lib/google/client';
 import { DriveAccessError } from '../lib/sync/drive';
 
 const item = (id: string, extra: Record<string, unknown> = {}) => ({ id, name: `${id}.pdf`, mimeType: 'application/pdf', modifiedTime: '2026-10-21T08:00:00Z', trashed: false, ...extra });
@@ -51,6 +51,35 @@ test('readDocument henter altid uden forslag og med alle faner', async () => {
   expect(seen!.searchParams.get('includeTabsContent')).toBe('true');
   await rejects(new GoogleReadClient('t', async () => new Response('', { status: 404 })).readDocument('doc'), DriveAccessError);
   await rejects(client.readDocument('../x'));
+});
+
+test('fejl viser hverken HTTP-svar, token eller rå netværksfejl', async () => {
+  const secret = 'SENSITIVE_TOKEN_CANARY';
+  for (const status of [401, 403, 404, 429, 500]) {
+    const client = new GoogleReadClient(secret, async (_url, init) => {
+      expect(init.method).toBe('GET'); expect(init.redirect).toBe('error'); expect(init.cache).toBe('no-store');
+      expect(new Headers(init.headers).get('Authorization')).toBe(`Bearer ${secret}`);
+      return new Response(`private body ${secret}`, { status });
+    });
+    await rejects(client.readDocument('doc'), error => { expect(String(error)).not.toContain(secret); expect(String(error)).not.toContain('private body'); return true; });
+  }
+  await rejects(new GoogleReadClient(secret, async () => { throw new Error(secret); }).downloadPdf('pdf'), error => /netværksfejl/.test(String(error)) && !String(error).includes(secret));
+});
+
+test('ugyldigt JSON og for store svar afvises', async () => {
+  await rejects(new GoogleReadClient('t', async () => new Response('not json')).readDocument('doc'), /JSON/);
+  await rejects(new GoogleReadClient('t', async () => new Response('x', { headers: { 'content-length': String(21 * 1024 * 1024) } })).downloadPdf('pdf'), /størrelsesgrænsen/);
+  await rejects(new GoogleReadClient('t', async () => new Response(new Uint8Array(6 * 1024 * 1024))).downloadImage('https://lh3.googleusercontent.com/x'), /for stort/);
+});
+
+test('billeder hentes uden API-token og kun fra Googles billedværter', async () => {
+  const client = new GoogleReadClient('secret', async (_url, init) => {
+    expect(new Headers(init.headers).has('Authorization')).toBe(false);
+    expect(init.redirect).toBe('error'); return new Response('image-bytes');
+  });
+  await client.downloadImage('https://docs.google.com/docs-images-rt/test');
+  await client.downloadImage('https://lh3.googleusercontent.com/abc');
+  for (const uri of ['http://docs.google.com/docs-images-rt/test', 'https://example.test/test', 'https://lh3.googleusercontent.com.evil.test/x', 'https://docs.google.com/other', 'https://user:pw@lh3.googleusercontent.com/x', 'https://localhost/x']) await rejects(client.downloadImage(uri));
 });
 
 test('getFile returnerer papirkurvsstatus og afviser forkert fil', async () => {

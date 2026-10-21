@@ -1,5 +1,7 @@
 # Grøndalsvænge 2.0 — datakontrakter og publicering (v1)
 
+> **Historisk.** Dette dokument beskriver den tidligere model med versionsgodkendelse og snapshots. Den er erstattet af mappemodellen (`docs/mappemodel-fase0.md` til `docs/mappemodel-fase2d.md`) og fjernet fra koden i fase 2d (21. oktober 2026).
+
 **Status:** Oprindeligt v1-design; mock-POC implementeret. Den efterfølgende godkendte Google-pilot og guidekontrakt v2 er beskrevet i `docs/google-pilot.md`.
 **Formål:** En statisk Astro-hjemmeside, hvor bestyrelsen vedligeholder indhold i Google Workspace, mens en kontrolleret publiceringsproces eksporterer godkendt indhold. POC'en bruger mockdata med nøjagtig samme normaliserede datastruktur som de kommende Google-adaptere.
 

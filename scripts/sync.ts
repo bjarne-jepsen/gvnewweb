@@ -1,6 +1,6 @@
 // Reads the website's Drive folders and rewrites content/. Read-only towards Google; never commits.
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { GoogleReadClient } from '../lib/adapters/google/client';
+import { GoogleReadClient } from '../lib/google/client';
 import { siteConfigSchema } from '../lib/sync/config';
 import type { DriveSource } from '../lib/sync/drive';
 import { renderReport } from '../lib/sync/report';

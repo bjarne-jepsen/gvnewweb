@@ -2,7 +2,7 @@ import { afterAll, expect, test } from 'bun:test';
 import { cp, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
-import { digest } from '../lib/contracts/content';
+import { digest } from '../lib/sync/content';
 import { siteConfigSchema } from '../lib/sync/config';
 import { serializeSlugs, setSlug, slugsSchema } from '../lib/sync/slugs';
 import { syncContent } from '../lib/sync/sync';

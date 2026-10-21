@@ -3,7 +3,7 @@ import { rejects } from 'node:assert/strict';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
-import { digest } from '../lib/contracts/content';
+import { digest } from '../lib/sync/content';
 import { siteConfigSchema } from '../lib/sync/config';
 import { GDOC } from '../lib/sync/drive';
 import { hasChanges, renderReport } from '../lib/sync/report';

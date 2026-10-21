@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { BodyBlock, Inline, TextBlock } from '../../contracts/blocks';
+import type { BodyBlock, Inline, TextBlock } from '../contracts/blocks';
 const obj = z.record(z.string(), z.unknown());
 type Obj = Record<string, unknown>;
 const object = (v: unknown): Obj => obj.parse(v);
@@ -7,7 +7,7 @@ const present = (v: unknown) => Array.isArray(v) ? v.length > 0 : v && typeof v 
 function checkSuggestions(value: unknown): void {
   if (!value || typeof value !== 'object') return;
   for (const [key, v] of Object.entries(value)) {
-    if ((key.startsWith('suggested') || key === 'suggestions') && present(v)) throw new Error('Google Docs: løs forslag før import');
+    if ((key.startsWith('suggested') || key === 'suggestions') && present(v)) throw new Error('Google Docs: svaret indeholder forslag; dokumentet publiceres ikke');
     checkSuggestions(v);
   }
 }
@@ -15,14 +15,14 @@ export type ResolveImage = (id: string, embedded: Obj) => Promise<Extract<BodyBl
 export async function googleDocsBlocks(input: unknown, expectedId: string, resolveImage: ResolveImage) {
   const doc = object(input);
   if (doc.documentId !== expectedId || typeof doc.title !== 'string') throw new Error('Google Docs: forkert eller ugyldigt dokument');
-  // The pilot reads suggestions inline and rejects them; the folder sync reads the accepted text only.
-  // In both modes any remaining suggestion field rejects the document.
-  if (doc.suggestionsViewMode !== 'SUGGESTIONS_INLINE' && doc.suggestionsViewMode !== 'PREVIEW_WITHOUT_SUGGESTIONS') throw new Error('Google Docs: ukendt visning af forslag');
+  // Only the accepted text is ever converted. A suggestion field that still appears means the
+  // response is not what was asked for, and the whole document is rejected.
+  if (doc.suggestionsViewMode !== 'PREVIEW_WITHOUT_SUGGESTIONS') throw new Error('Google Docs: dokumentet skal hentes uden forslag');
   checkSuggestions(doc);
   const tabs = z.array(obj).parse(doc.tabs);
-  if (tabs.length !== 1 || present(tabs[0]!.childTabs)) throw new Error('Google Docs: piloten kræver præcis én fane uden underfaner');
+  if (tabs.length !== 1 || present(tabs[0]!.childTabs)) throw new Error('Google Docs: dokumentet skal have præcis én fane uden underfaner');
   const tab = object(tabs[0]!.documentTab);
-  for (const key of ['headers', 'footers', 'footnotes', 'positionedObjects']) if (present(tab[key])) throw new Error(`Google Docs: ${key} understøttes ikke i piloten`);
+  for (const key of ['headers', 'footers', 'footnotes', 'positionedObjects']) if (present(tab[key])) throw new Error(`Google Docs: ${key} understøttes ikke`);
   const listMetadata = object(tab.lists ?? {}), images = object(tab.inlineObjects ?? {});
   const imageCache = new Map<string, Extract<BodyBlock, {type: 'image'}>>();
   async function convert(content: unknown, inCell = false): Promise<BodyBlock[]> {
