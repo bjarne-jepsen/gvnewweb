@@ -42,6 +42,17 @@ test('404 bliver til DriveAccessError uden token; andre fejl afbryder', async ()
   await rejects(new GoogleReadClient(secret, async () => new Response('x', { status: 500 })).getFile('abc'), error => !(error instanceof DriveAccessError) && /HTTP 500/.test(String(error)));
 });
 
+test('readDocument henter altid uden forslag og med alle faner', async () => {
+  let seen: URL | undefined;
+  const client = new GoogleReadClient('t', async (url, init) => { expect(init.method).toBe('GET'); seen = new URL(url); return Response.json({ documentId: 'doc' }); });
+  expect(await client.readDocument('doc')).toEqual({ documentId: 'doc' });
+  expect(seen!.origin + seen!.pathname).toBe('https://docs.googleapis.com/v1/documents/doc');
+  expect(seen!.searchParams.get('suggestionsViewMode')).toBe('PREVIEW_WITHOUT_SUGGESTIONS');
+  expect(seen!.searchParams.get('includeTabsContent')).toBe('true');
+  await rejects(new GoogleReadClient('t', async () => new Response('', { status: 404 })).readDocument('doc'), DriveAccessError);
+  await rejects(client.readDocument('../x'));
+});
+
 test('getFile returnerer papirkurvsstatus og afviser forkert fil', async () => {
   const client = new GoogleReadClient('t', async url => Response.json(item(new URL(url).pathname.split('/').at(-1)!, { trashed: true })));
   expect((await client.getFile('abc')).trashed).toBe(true);

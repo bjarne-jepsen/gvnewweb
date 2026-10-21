@@ -23,4 +23,8 @@ export interface DriveSource {
   listFolder(folderId: string): Promise<DriveItem[]>;
   getFile(fileId: string): Promise<DriveItem>;
   downloadPdf(fileId: string): Promise<Uint8Array>;
+  /** Docs API JSON rendered without suggestions (PREVIEW_WITHOUT_SUGGESTIONS), all tabs included. */
+  readDocument(fileId: string): Promise<unknown>;
+  /** Short-lived image URL from a Docs response; fetched without credentials. */
+  downloadImage(uri: string): Promise<Uint8Array>;
 }

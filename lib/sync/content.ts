@@ -8,5 +8,12 @@ export const documentMetaSchema = z.strictObject({
   updatedAt: z.iso.datetime(), sizeBytes: z.number().int().positive(), sha256: hashSchema,
 });
 export type DocumentMeta = z.infer<typeof documentMetaSchema>;
+/** Frontmatter of content/<section>/<driveId>.md; images live in content/<section>/<driveId>/. */
+export const guideMetaSchema = z.strictObject({
+  id: driveIdSchema, title: z.string().min(1).max(300), updatedAt: z.iso.datetime(), summary: z.string().max(400),
+});
+export type GuideMeta = z.infer<typeof guideMetaSchema>;
+export const imageNamePattern = /^[a-f0-9]{16}\.(png|jpg|webp)$/;
 export const MAX_PDF_BYTES = 20 * 1024 * 1024;
+export const MAX_IMAGES = 20, MAX_IMAGE_BYTES = 20 * 1024 * 1024;
 export const serializeMeta = (meta: DocumentMeta) => JSON.stringify(documentMetaSchema.parse(meta), null, 2) + '\n';

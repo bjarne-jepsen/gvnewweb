@@ -15,7 +15,9 @@ export type ResolveImage = (id: string, embedded: Obj) => Promise<Extract<BodyBl
 export async function googleDocsBlocks(input: unknown, expectedId: string, resolveImage: ResolveImage) {
   const doc = object(input);
   if (doc.documentId !== expectedId || typeof doc.title !== 'string') throw new Error('Google Docs: forkert eller ugyldigt dokument');
-  if (doc.suggestionsViewMode !== 'SUGGESTIONS_INLINE') throw new Error('Google Docs: forslag skal være synlige ved validering');
+  // The pilot reads suggestions inline and rejects them; the folder sync reads the accepted text only.
+  // In both modes any remaining suggestion field rejects the document.
+  if (doc.suggestionsViewMode !== 'SUGGESTIONS_INLINE' && doc.suggestionsViewMode !== 'PREVIEW_WITHOUT_SUGGESTIONS') throw new Error('Google Docs: ukendt visning af forslag');
   checkSuggestions(doc);
   const tabs = z.array(obj).parse(doc.tabs);
   if (tabs.length !== 1 || present(tabs[0]!.childTabs)) throw new Error('Google Docs: piloten kræver præcis én fane uden underfaner');
@@ -59,7 +61,8 @@ export async function googleDocsBlocks(input: unknown, expectedId: string, resol
           if (!levels[0] || (levels[0].glyphType && !['NONE','GLYPH_TYPE_UNSPECIFIED'].includes(String(levels[0].glyphType)))) throw new Error('Google Docs: nummererede lister understøttes ikke');
           const previous = blocks.at(-1);
           if (previous?.type === 'list') previous.items.push(content); else blocks.push({ type: 'list', items: [content] });
-        } else blocks.push(heading ? { type: 'heading', level: Math.max(2, Number(heading[1] ?? 2)), content } : { type: 'paragraph', content });
+        // H1 is the page title, so Docs levels shift down one step: TITLE/H1 → 2, H2 → 3 … H5/H6 → 6.
+        } else blocks.push(heading ? { type: 'heading', level: Math.min(6, heading[1] ? Number(heading[1]) + 1 : 2), content } : { type: 'paragraph', content });
         content = [];
       };
       for (const element of z.array(obj).parse(p.elements)) {

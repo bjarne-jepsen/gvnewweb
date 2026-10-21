@@ -48,7 +48,7 @@ test('kun filer direkte i en sektionsmappe publiceres; resten rapporteres eller 
   expect(report.warnings.map(x => x.message)).toEqual(expect.arrayContaining([
     'Fil direkte i roden; publiceres ikke', 'Undermappe; indholdet publiceres ikke', `Filtypen ${GDOC} accepteres ikke i dokumenter`]));
   expect(JSON.stringify(report)).not.toMatch(/REDAKTION_CANARY|SUB_CANARY|PRIVATE_CANARY/);
-  expect(report.added).toHaveLength(1); expect(report.skippedSections).toEqual(['foreningen', 'nyheder']);
+  expect(report.added).toHaveLength(1); expect(report.skippedSections).toEqual(['nyheder']);
   expect(renderReport(report)).toContain('1 nye, 0 ændrede, 0 fjernede');
 });
 
@@ -210,12 +210,12 @@ test('updatedAt følger indholdet, ikke modifiedTime; uændret kørsel er byte-i
 
 test('andre sektioner og manuelle filer i content/ bevares uændret', async () => {
   const w = await world();
-  await mkdir(join(w.contentDir, 'foreningen'), { recursive: true });
-  await writeFile(join(w.contentDir, 'foreningen/x.md'), '# Bevares\n');
+  await mkdir(join(w.contentDir, 'nyheder'), { recursive: true });
+  await writeFile(join(w.contentDir, 'nyheder/nyheder.json'), '[]\n');
   await writeFile(join(w.contentDir, '_redirects.json'), '{"/gammel/": "/ny/"}\n');
   w.drive.pdf('doc-a', 'A.pdf', 'f-dokumenter');
   await w.run();
-  expect(await readFile(join(w.contentDir, 'foreningen/x.md'), 'utf8')).toBe('# Bevares\n');
+  expect(await readFile(join(w.contentDir, 'nyheder/nyheder.json'), 'utf8')).toBe('[]\n');
   expect(await readFile(join(w.contentDir, '_redirects.json'), 'utf8')).toBe('{"/gammel/": "/ny/"}\n');
 });
 

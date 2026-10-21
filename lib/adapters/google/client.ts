@@ -111,4 +111,11 @@ export class GoogleReadClient implements GoogleReader, DriveSource {
     return item;
   }
   downloadPdf(fileId: string) { return this.access(() => this.pdf(fileId)); }
+  async readDocument(fileId: string) {
+    googleIdSchema.parse(fileId);
+    // Unaccepted suggestions must never reach the website; this mode is the accepted text only.
+    const query = new URLSearchParams({ includeTabsContent: 'true', suggestionsViewMode: 'PREVIEW_WITHOUT_SUGGESTIONS' });
+    return this.access(() => this.json(`https://docs.googleapis.com/v1/documents/${fileId}?${query}`));
+  }
+  downloadImage(uri: string) { return this.image(uri); }
 }

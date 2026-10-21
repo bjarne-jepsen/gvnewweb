@@ -6,6 +6,9 @@
       "name": "groendalsvaenge-poc",
       "dependencies": {
         "astro": "^6.0.0",
+        "mdast-util-from-markdown": "2.1.0",
+        "mdast-util-gfm-table": "2.0.0",
+        "micromark-extension-gfm-table": "2.1.2",
         "zod": "^4.0.0",
       },
       "devDependencies": {
