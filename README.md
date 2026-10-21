@@ -48,6 +48,19 @@ GOOGLE_ACCESS_TOKEN_FILE=~/.gv-google-token bun run sync
 - **Exit-koder:** 0 betyder ingen fejl. 2 betyder, at enkelte filer fejlede, men `content/` er opdateret. 1 betyder, at kørslen blev afbrudt, og intet er ændret.
 - **Masseudtagning:** Vil en kørsel fjerne mere end halvdelen af en sektion (og mindst to filer), stopper den. Kør igen med `-- --allow-mass-removal`, hvis det er meningen.
 
+**Samlet kørsel:**
+
+```sh
+GOOGLE_ACCESS_TOKEN_FILE=~/.gv-google-token bun run publish
+```
+
+Kørslen synkroniserer, skriver rapporten og committer `content/`, hvis noget har ændret sig, og bygger derefter. Commit-beskeden lister nye, ændrede og fjernede sider. Andre ændringer i arbejdsmappen bliver ikke committet, og der pushes aldrig.
+
+- **Exit-koder:** 0 betyder ingen fejl. 2 betyder, at enkelte filer fejlede, men `content/` og `dist` er opdateret. 1 betyder, at sync blev afbrudt, eller at buildet fejlede.
+- **Valg:** `--no-commit` synkroniserer og bygger uden at committe. `--allow-mass-removal` virker som ved `sync`.
+
+Den natlige og manuelle kørsel er endnu ikke sat op. Forslaget står i [docs/mappemodel-fase4.md](docs/mappemodel-fase4.md).
+
 ### `content/`
 
 ```text
