@@ -1,8 +1,10 @@
 ---
-interface Props { entries: { path: string; title: string; summary: string }[]; empty?: string; heading?: 'h2' | 'h3'; }
+import { date } from '../../lib/site/sections';
+interface Props { entries: { path: string; title: string; summary: string; date?: string }[]; empty?: string; heading?: 'h2' | 'h3'; }
 const { heading: Heading = 'h3', entries, empty = 'Der er ingen offentliggjorte elementer her endnu.' } = Astro.props;
 ---
 {entries.length ? <ul class="entries">{entries.map(entry => <li>
   <Heading><a href={entry.path}>{entry.title}</a></Heading>
+  {entry.date && <p class="meta"><time datetime={entry.date}>{date(entry.date)}</time></p>}
   {entry.summary && <p>{entry.summary}</p>}
 </li>)}</ul> : <p>{empty}</p>}

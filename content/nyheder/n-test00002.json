@@ -1,0 +1,9 @@
+{
+  "id": "n-test00002",
+  "title": "Testnyhed med udløbsdato",
+  "date": "2026-10-21",
+  "expires": "2026-10-31",
+  "summary": "Denne testnyhed vises til og med den 31. oktober 2026.",
+  "body": "Denne testnyhed vises til og med den 31. oktober 2026.\n",
+  "updatedAt": "2026-10-21T20:47:38.679Z"
+}

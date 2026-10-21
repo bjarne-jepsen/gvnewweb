@@ -7,7 +7,7 @@ import { loadSite } from '../lib/site/load';
 import { renderBody } from '../lib/site/render';
 import { siteConfigSchema } from '../lib/sync/config';
 import { syncContent } from '../lib/sync/sync';
-import { docJson, FakeDrive } from './helpers/fake-drive';
+import { docJson, FakeDrive, sheetJson } from './helpers/fake-drive';
 
 const local = (url: string) => url.startsWith('./d/');
 test('renderer escaper tekst og attributter og kender kun dialekten', () => {
@@ -48,4 +48,24 @@ test('loadSite afviser manglende slug, redirect over en side og sektion uden nav
   await writeFile(slugsPath, JSON.stringify(rest));
   await rejects(loadSite(root), /doc-a mangler/);
   await rejects(loadSite(await site({ foreningen: { type: 'guide', category: 'f', accepts: ['gdoc'] }, arkiv: { type: 'document', accepts: ['pdf'] } })), /arkiv mangler tekst/);
+});
+
+test('nyheder filtreres ved build: fra datoen, til og med udløbsdagen i dansk tid, nyeste først', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'gv-site-')); roots.push(root);
+  const config = { rootFolderId: 'root', sections: { nyheder: { type: 'notice', source: 'sheet' } } };
+  await mkdir(join(root, 'config')); await writeFile(join(root, 'config/site.json'), JSON.stringify(config));
+  const drive = new FakeDrive();
+  drive.folder('f-nyheder', 'nyheder', 'root');
+  drive.sheet('sheet', 'Nyheder', 'f-nyheder', sheetJson([['ID', 'Dato', 'Titel', 'Tekst', 'Udløber', 'Status'],
+    ['n-old', '2026-09-01', 'Gammel', 'Tekst', '', 'offentlig'], ['n-exp', '2026-10-01', 'Udløber', 'Tekst', '2026-10-31', 'offentlig'],
+    ['n-future', '2099-01-01', 'Fremtid', 'Tekst', '', 'offentlig']]));
+  await syncContent({ config: siteConfigSchema.parse(config), drive, contentDir: join(root, 'content') });
+  const visible = async (at: string) => (await loadSite(root, new Date(at))).items.map(i => i.title);
+  expect(await visible('2026-10-31T22:30:00Z')).toEqual(['Udløber', 'Gammel']); // 23:30 the 31st in Copenhagen
+  expect(await visible('2026-10-31T23:30:00Z')).toEqual(['Gammel']);           // 00:30 the 1st
+  expect(await visible('2099-01-01T00:30:00+01:00')).toEqual(['Fremtid', 'Gammel']);
+  const s = await loadSite(root, new Date('2026-10-21T12:00:00Z'));
+  expect(s.internalIds).toEqual([]); expect(s.buildDay).toBe('2026-10-21');
+  expect(s.items[0]).toMatchObject({ kind: 'notice', path: '/nyheder/2026-10-01-udloeber/', date: '2026-10-01', expires: '2026-10-31', html: '<p>Tekst</p>' });
+  await rejects(loadSite(root, new Date('ugyldig')), /BUILD_AT/);
 });

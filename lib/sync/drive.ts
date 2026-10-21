@@ -5,6 +5,7 @@ export const FOLDER = 'application/vnd.google-apps.folder';
 export const SHORTCUT = 'application/vnd.google-apps.shortcut';
 export const GDOC = 'application/vnd.google-apps.document';
 export const PDF = 'application/pdf';
+export const SHEET = 'application/vnd.google-apps.spreadsheet';
 
 export const driveItemSchema = z.object({
   id: driveIdSchema, name: z.string().min(1), mimeType: z.string().min(1),
@@ -27,4 +28,6 @@ export interface DriveSource {
   readDocument(fileId: string): Promise<unknown>;
   /** Short-lived image URL from a Docs response; fetched without credentials. */
   downloadImage(uri: string): Promise<Uint8Array>;
+  /** Sheets API grid data (values, links) of a spreadsheet; parsed by lib/google/sheets.ts. */
+  readSheet(fileId: string): Promise<unknown>;
 }

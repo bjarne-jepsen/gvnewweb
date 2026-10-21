@@ -53,6 +53,17 @@ test('readDocument henter altid uden forslag og med alle faner', async () => {
   await rejects(client.readDocument('../x'));
 });
 
+test('readSheet henter grid data fra Sheets API med GET', async () => {
+  let seen: URL | undefined;
+  const client = new GoogleReadClient('t', async (url, init) => { expect(init.method).toBe('GET'); seen = new URL(url); return Response.json({ sheets: [] }); });
+  expect(await client.readSheet('sheet_1')).toEqual({ sheets: [] });
+  expect(seen!.origin + seen!.pathname).toBe('https://sheets.googleapis.com/v4/spreadsheets/sheet_1');
+  expect(seen!.searchParams.get('includeGridData')).toBe('true');
+  expect(seen!.searchParams.get('fields')).toContain('textFormatRuns');
+  await rejects(new GoogleReadClient('t', async () => new Response('', { status: 404 })).readSheet('s'), DriveAccessError);
+  await rejects(client.readSheet('../x'));
+});
+
 test('fejl viser hverken HTTP-svar, token eller rå netværksfejl', async () => {
   const secret = 'SENSITIVE_TOKEN_CANARY';
   for (const status of [401, 403, 404, 429, 500]) {

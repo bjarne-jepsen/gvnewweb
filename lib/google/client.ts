@@ -7,7 +7,7 @@ const itemFields = 'id,name,mimeType,modifiedTime,trashed,size,sha256Checksum,sh
 const listSchema = z.object({ files: z.array(driveItemSchema), nextPageToken: z.string().min(1).optional(), incompleteSearch: z.boolean().optional() });
 export type HttpFetch = (url: string, init: RequestInit) => Promise<Response>;
 
-/** Fixed Google endpoints and GET only: read-only listing, metadata, PDFs, Docs and images. */
+/** Fixed Google endpoints and GET only: read-only listing, metadata, PDFs, Docs, Sheets and images. */
 export class GoogleReadClient implements DriveSource {
   constructor(private token: string, private transport: HttpFetch = (url, init) => fetch(url, init)) {
     if (!token || /\s/.test(token)) throw new Error('Google: ugyldigt eller manglende adgangstoken');
@@ -83,6 +83,11 @@ export class GoogleReadClient implements DriveSource {
     // Unaccepted suggestions must never reach the website; this mode is the accepted text only.
     const query = new URLSearchParams({ includeTabsContent: 'true', suggestionsViewMode: 'PREVIEW_WITHOUT_SUGGESTIONS' });
     return this.access(() => this.json(`https://docs.googleapis.com/v1/documents/${fileId}?${query}`));
+  }
+  async readSheet(fileId: string) {
+    driveIdSchema.parse(fileId);
+    const query = new URLSearchParams({ includeGridData: 'true', fields: 'sheets(properties(title),data(rowData(values(formattedValue,effectiveValue,hyperlink,textFormatRuns))))' });
+    return this.access(() => this.json(`https://sheets.googleapis.com/v4/spreadsheets/${fileId}?${query}`));
   }
   async downloadImage(uri: string) {
     const url = new URL(uri);

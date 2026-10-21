@@ -7,7 +7,7 @@ import { siteConfigSchema } from '../lib/sync/config';
 import { serializeSlugs, setSlug, slugsSchema } from '../lib/sync/slugs';
 import { syncContent } from '../lib/sync/sync';
 import { walk } from '../scripts/verify-output';
-import { docJson, FakeDrive, pdfBytes, png } from './helpers/fake-drive';
+import { docJson, FakeDrive, pdfBytes, png, sheetJson } from './helpers/fake-drive';
 
 const root = await mkdtemp(join(tmpdir(), 'gv-build-'));
 afterAll(() => rm(root, { recursive: true, force: true }));
@@ -45,6 +45,11 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   drive.pdf('private', 'PRIVATE_CANARY.pdf', 'internt', pdfBytes('PRIVATE_CANARY'));
   drive.pdf('red', 'REDAKTION_CANARY.pdf', 'f-redaktion', pdfBytes('REDAKTION_CANARY'));
   drive.pdf('rootfile', 'ROOT_CANARY.pdf', 'root', pdfBytes('ROOT_CANARY'));
+  drive.sheet('news', 'Nyheder', 'f-nyheder', sheetJson([['ID', 'Dato', 'Titel', 'Tekst', 'Udløber', 'Status'],
+    ['n-live', '2026-10-20', 'Vandet lukkes', 'Mandag kl. 9-12.', '', 'offentlig'],
+    ['n-expired', '2026-01-10', 'EXPIRED_CANARY', 'Tekst', '2026-01-31', 'offentlig'],
+    ['n-future', '2099-01-01', 'FUTURE_CANARY', 'Tekst', '', 'offentlig'],
+    ['n-draft', '2026-10-20', 'DRAFT_CANARY', 'Tekst', '', 'kladde']]));
   await sync();
   await expectGreen();
 
@@ -57,7 +62,12 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect(page).toContain(`<img src="/foreningen/om-foreningen/${image}" alt="Kort over området"`);
   expect(await readFile(dist(`foreningen/om-foreningen/${image}`))).toEqual(png);
   for (const path of await walk(join(root, 'dist'))) expect((await readFile(path)).toString()).not.toMatch(/CANARY|target-pdf|doc-1/);
-  expect(JSON.parse(await html('search.json')).map((x: { url: string }) => x.url).sort()).toEqual(['/dokumenter/vedtaegter/', '/foreningen/om-foreningen/']);
+  expect(JSON.parse(await html('search.json')).map((x: { url: string }) => x.url).sort()).toEqual(['/dokumenter/vedtaegter/', '/foreningen/om-foreningen/', '/nyheder/2026-10-20-vandet-lukkes/']);
+  // News: expired and future rows are in content/ but not built; drafts never reach content/.
+  expect(await html('nyheder/2026-10-20-vandet-lukkes/index.html')).toContain('<time datetime="2026-10-20">20. oktober 2026</time>');
+  expect(await html('nyheder/index.html')).toContain('Mandag kl. 9-12.');
+  expect(await Bun.file(join(root, 'content/nyheder/n-expired.json')).exists()).toBe(true);
+  expect(await Bun.file(join(root, 'content/nyheder/n-draft.json')).exists()).toBe(false);
 
   // 2. Renaming keeps the URL and changes the title.
   drive.update('doc-1', { name: 'Om Grøndalsvænge', modifiedTime: '2026-10-22T08:00:00Z' });

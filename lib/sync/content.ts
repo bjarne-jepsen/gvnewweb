@@ -24,6 +24,15 @@ export const guideMetaSchema = z.strictObject({
   id: driveIdSchema, title: z.string().min(1).max(300), updatedAt: z.iso.datetime(), summary: z.string().max(400),
 });
 export type GuideMeta = z.infer<typeof guideMetaSchema>;
+/** content/<section>/<newsId>.json, one file per published row of the news sheet. */
+export const newsIdPattern = /^[a-zA-Z0-9_-]{3,64}$/;
+export const newsMetaSchema = z.strictObject({
+  id: z.string().regex(newsIdPattern), title: z.string().min(1).max(300), date: z.iso.date(), expires: z.iso.date().optional(),
+  summary: z.string().max(400), body: z.string().min(1).max(20_000), updatedAt: z.iso.datetime(),
+});
+export type NewsMeta = z.infer<typeof newsMetaSchema>;
+export const newsFingerprint = (m: Omit<NewsMeta, 'updatedAt'>) => digest(JSON.stringify([m.id, m.title, m.date, m.expires ?? null, m.summary, m.body]));
+export const serializeNews = (meta: NewsMeta) => JSON.stringify(newsMetaSchema.parse(meta), null, 2) + '\n';
 export const imageNamePattern = /^[a-f0-9]{16}\.(png|jpg|webp)$/;
 /** Markdown may only reference images in the document's own folder: ./<driveId>/<hash>.<ext> */
 export const localImage = (id: string) => (url: string) => url.startsWith(`./${id}/`) && imageNamePattern.test(url.slice(id.length + 3));

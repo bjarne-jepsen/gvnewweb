@@ -15,7 +15,7 @@ const docsToken = await readToken(process.env.GOOGLE_DOCS_ACCESS_TOKEN_FILE);
 const client = new GoogleReadClient(token), docsClient = docsToken ? new GoogleReadClient(docsToken) : client;
 const drive: DriveSource = {
   listFolder: id => client.listFolder(id), getFile: id => client.getFile(id), downloadPdf: id => client.downloadPdf(id),
-  readDocument: id => docsClient.readDocument(id), downloadImage: uri => client.downloadImage(uri),
+  readDocument: id => docsClient.readDocument(id), downloadImage: uri => client.downloadImage(uri), readSheet: id => client.readSheet(id),
 };
 await mkdir('.sync', { recursive: true });
 try {

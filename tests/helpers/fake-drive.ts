@@ -1,6 +1,15 @@
-import { DriveAccessError, FOLDER, GDOC, PDF, SHORTCUT, type DriveItem, type DriveSource } from '../../lib/sync/drive';
+import { DriveAccessError, FOLDER, GDOC, PDF, SHEET, SHORTCUT, type DriveItem, type DriveSource } from '../../lib/sync/drive';
 
-type Stored = DriveItem & { parent: string; bytes?: Uint8Array; doc?: unknown };
+type Stored = DriveItem & { parent: string; bytes?: Uint8Array; doc?: unknown; sheet?: unknown };
+type CellSpec = string | number | { text: string; number?: number; links?: { start: number; end: number; uri: string }[]; hyperlink?: string };
+/** A minimal Sheets API grid-data response (first sheet). */
+export function sheetJson(rows: CellSpec[][]) {
+  const cell = (c: CellSpec) => typeof c === 'number' ? { formattedValue: String(c), effectiveValue: { numberValue: c } }
+    : typeof c === 'string' ? (c ? { formattedValue: c, effectiveValue: { stringValue: c } } : {})
+    : { formattedValue: c.text, effectiveValue: c.number !== undefined ? { numberValue: c.number } : { stringValue: c.text }, ...(c.hyperlink ? { hyperlink: c.hyperlink } : {}),
+      ...(c.links ? { textFormatRuns: [{ startIndex: 0, format: {} }, ...c.links.flatMap(l => [{ startIndex: l.start, format: { link: { uri: l.uri } } }, { startIndex: l.end, format: {} }])] } : {}) };
+  return { sheets: [{ properties: { title: 'Ark1' }, data: [{ rowData: rows.map(r => ({ values: r.map(cell) })) }] }] };
+}
 export const pdfBytes = (label: string) => Buffer.from(`%PDF-1.4\n% ${label}\n%%EOF\n`);
 export const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aiv8AAAAASUVORK5CYII=', 'base64');
 type Para = { text: string; style?: string; bold?: boolean; href?: string; bullet?: boolean; image?: string };
@@ -36,6 +45,7 @@ export class FakeDrive implements DriveSource {
   }
   file(id: string, name: string, parent: string, mimeType: string) { return this.add({ id, name, parent, mimeType }); }
   gdoc(id: string, name: string, parent: string, doc: unknown) { return this.add({ id, name, parent, mimeType: GDOC, doc }); }
+  sheet(id: string, name: string, parent: string, sheet: unknown) { return this.add({ id, name, parent, mimeType: SHEET, sheet }); }
   shortcut(id: string, name: string, parent: string, targetId: string, targetMimeType = PDF) {
     return this.add({ id, name, parent, mimeType: SHORTCUT, shortcutDetails: { targetId, targetMimeType } });
   }
@@ -44,7 +54,14 @@ export class FakeDrive implements DriveSource {
     if (patch.bytes) next.size = String(patch.bytes.length);
     this.files.set(id, next);
   }
-  private public(f: Stored): DriveItem { const { parent: _p, bytes: _b, doc: _d, ...item } = f; return structuredClone(item); }
+  private public(f: Stored): DriveItem { const { parent: _p, bytes: _b, doc: _d, sheet: _s, ...item } = f; return structuredClone(item); }
+  async readSheet(fileId: string) {
+    const f = this.files.get(fileId);
+    if (!f || this.denied.has(fileId)) throw new DriveAccessError('Google: ingen adgang');
+    if (this.failDownload.has(fileId)) throw new Error('Google: netværksfejl eller timeout');
+    if (f.sheet === undefined) throw new Error('Google Sheets: ikke et regneark');
+    return structuredClone(f.sheet);
+  }
   async readDocument(fileId: string) {
     const f = this.files.get(fileId);
     if (!f || this.denied.has(fileId)) throw new DriveAccessError('Google: ingen adgang');

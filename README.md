@@ -11,7 +11,7 @@ Grøndalsvænge hjemmeside (fællesdrev)
 ├── foreningen/     Google Docs → faste informationssider
 ├── vejledninger/   Google Docs → vejledninger
 ├── dokumenter/     PDF'er → dokumenter til download
-├── nyheder/        Nyhedsark (fase 3, synkroniseres endnu ikke)
+├── nyheder/        Ét Google Sheets-ark med nyheder
 ├── kalender/       Ikke i brug
 └── redaktion/      Læses ikke
 ```
@@ -69,6 +69,16 @@ bun run slug -- <drive-id> <nyt-slug>
 ```
 
 Den gamle sti flyttes til `previousPaths` og bliver en redirect-side. Det samme sker, når en fil flyttes til en anden sektion.
+
+### Nyheder
+
+Der ligger ét regneark i `nyheder/` med én række pr. nyhed. Første række er overskrifterne `ID`, `Dato`, `Titel`, `Tekst`, `Udløber` og `Status`, i vilkårlig rækkefølge.
+
+- **Status:** Kun status `offentlig` publiceres. `kladde`, en tom status og alt andet publiceres ikke og kommer ikke i `content/`. Ukendt status giver en advarsel.
+- **ID:** ID'et udfyldes automatisk af [scripts/apps-script/nyheder-id.gs](scripts/apps-script/nyheder-id.gs), som indsættes under *Udvidelser → Apps Script*. En række uden ID publiceres ikke. Kopierer man en hel række, følger ID'et med. Så skal ID-cellen i kopien tømmes, ellers rapporteres de to rækker som dubletter.
+- **Dato:** Datoen er publiceringsdatoen. En fremtidig dato vises fra den dag. `Udløber` er valgfri og inklusiv. Begge regnes i dansk tid og filtreres ved build, ikke ved synkronisering.
+- **Tekst:** En tom linje i cellen starter et nyt afsnit. Links i cellen og nøgne `https://`-adresser bliver links.
+- **Adresse:** Adressen dannes af dato og titel, fx `/nyheder/2026-10-21-generalforsamling/`, og bevares derefter.
 
 ### Markdown
 

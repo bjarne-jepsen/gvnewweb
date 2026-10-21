@@ -11,6 +11,8 @@ catch { throw new Error('Build/dev kører allerede. Fjern kun .build/lock efter 
 if (!lock) throw new Error('Build/dev kører allerede (.build/lock).');
 try {
   // content/ is the only source. Invalid content stops here, before dist is touched.
+  // One build instant for this script and Astro, so news filtering cannot differ between them.
+  process.env.BUILD_AT ??= new Date().toISOString();
   const site = await loadSite('.');
   for (const warning of site.warnings) console.warn(`Advarsel: ${warning}`);
   await rm('.build/assets', { recursive: true, force: true });
@@ -33,7 +35,7 @@ try {
     try { await rename('.build/staging', 'dist'); }
     catch (error) { if (previous) await rename('.build/previous', 'dist'); throw error; }
     await rm('.build/previous', { recursive: true, force: true });
-    console.log(`Outputkontrol bestået: ${site.items.length} sider, ${site.redirects.length} redirects, ${site.assets.size} filer (PDF/billeder).`);
+    console.log(`Outputkontrol bestået: ${site.items.length} sider, ${site.redirects.length} redirects, ${site.assets.size} filer (PDF/billeder). Dato: ${site.buildDay}.`);
   }
 } finally {
   await lock.close(); await rm('.build/lock', { force: true });

@@ -13,5 +13,15 @@
     "section": "vejledninger",
     "slug": "vejledning",
     "previousPaths": []
+  },
+  "n-test00001": {
+    "section": "nyheder",
+    "slug": "2026-10-21-testnyhed-velkommen-til-den-nye-hjemmeside",
+    "previousPaths": []
+  },
+  "n-test00002": {
+    "section": "nyheder",
+    "slug": "2026-10-21-testnyhed-med-udloebsdato",
+    "previousPaths": []
   }
 }
