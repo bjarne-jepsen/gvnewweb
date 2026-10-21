@@ -1,0 +1,10 @@
+{
+  "rootFolderId": "0AIbhvNO3KPGaUk9PVA",
+  "sections": {
+    "foreningen": { "type": "guide", "category": "foreningen", "accepts": ["gdoc"] },
+    "vejledninger": { "type": "guide", "category": "vejledning", "accepts": ["gdoc"] },
+    "dokumenter": { "type": "document", "accepts": ["pdf"] },
+    "nyheder": { "type": "notice", "source": "sheet" }
+  },
+  "ignoredFolders": ["kalender", "redaktion"]
+}

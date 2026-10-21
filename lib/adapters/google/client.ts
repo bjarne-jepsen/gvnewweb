@@ -1,6 +1,10 @@
 import { z } from 'zod';
+import { DriveAccessError, driveIdSchema, driveItemSchema, type DriveItem, type DriveSource } from '../../sync/drive';
 
-export const googleIdSchema = z.string().regex(/^[a-zA-Z0-9_-]+$/).max(200);
+export const googleIdSchema = driveIdSchema;
+export class GoogleHttpError extends Error { constructor(readonly status: number, message: string) { super(message); } }
+const itemFields = 'id,name,mimeType,modifiedTime,trashed,size,sha256Checksum,shortcutDetails(targetId,targetMimeType)';
+const listSchema = z.object({ files: z.array(driveItemSchema), nextPageToken: z.string().min(1).optional(), incompleteSearch: z.boolean().optional() });
 const metadataSchema = z.object({
   id: googleIdSchema, mimeType: z.string(), modifiedTime: z.iso.datetime({ offset: true }),
   version: z.string().regex(/^\d+$/), trashed: z.boolean(),
@@ -15,8 +19,8 @@ export interface GoogleReader {
 }
 export type HttpFetch = (url: string, init: RequestInit) => Promise<Response>;
 
-/** Fixed Google endpoints and GET only. No Drive listing or write APIs. */
-export class GoogleReadClient implements GoogleReader {
+/** Fixed Google endpoints and GET only. Folder listing is read-only; no write APIs. */
+export class GoogleReadClient implements GoogleReader, DriveSource {
   constructor(private token: string, private transport: HttpFetch = (url, init) => fetch(url, init)) {
     if (!token || /\s/.test(token)) throw new Error('Google: ugyldigt eller manglende adgangstoken');
   }
@@ -27,7 +31,7 @@ export class GoogleReadClient implements GoogleReader {
     } catch { throw new Error('Google: netværksfejl eller timeout; ingen data er godkendt'); }
     if (!response.ok) {
       await response.body?.cancel();
-      throw new Error(`Google: HTTP ${response.status}; kontrollér adgang, token og de valgte fil-ID'er`);
+      throw new GoogleHttpError(response.status, `Google: HTTP ${response.status}; kontrollér adgang, token og de valgte fil-ID'er`);
     }
     if (Number(response.headers.get('content-length') ?? 0) > limit) { await response.body?.cancel(); throw new Error('Google: svar overskrider pilotens størrelsesgrænse'); }
     const reader = response.body?.getReader();
@@ -74,4 +78,37 @@ export class GoogleReadClient implements GoogleReader {
     googleIdSchema.parse(id);
     return this.get(`https://www.googleapis.com/drive/v3/files/${id}?alt=media&supportsAllDrives=true`, 20 * 1024 * 1024);
   }
+  private async access<T>(call: () => Promise<T>): Promise<T> {
+    try { return await call(); }
+    catch (error) {
+      if (error instanceof GoogleHttpError && error.status === 404) throw new DriveAccessError('Google: filen findes ikke, eller synkroniseringskontoen har ikke adgang');
+      if (error instanceof z.ZodError) throw new Error('Google: ugyldigt svar fra Drive');
+      throw error;
+    }
+  }
+  async listFolder(folderId: string): Promise<DriveItem[]> {
+    googleIdSchema.parse(folderId);
+    const items = new Map<string, DriveItem>(), tokens = new Set<string>();
+    let pageToken: string | undefined;
+    for (let page = 0; page < 100; page++) {
+      // The ID is validated above, so it cannot break out of the quoted query value.
+      const query = new URLSearchParams({ q: `'${folderId}' in parents and trashed = false`, fields: `nextPageToken,incompleteSearch,files(${itemFields})`,
+        pageSize: '1000', corpora: 'allDrives', supportsAllDrives: 'true', includeItemsFromAllDrives: 'true', ...(pageToken ? { pageToken } : {}) });
+      const result = await this.access(async () => listSchema.parse(await this.json(`https://www.googleapis.com/drive/v3/files?${query}`)));
+      if (result.incompleteSearch) throw new Error('Google: Drive returnerede en ufuldstændig mappelistning');
+      for (const item of result.files) items.set(item.id, item);
+      if (!result.nextPageToken) return [...items.values()];
+      if (tokens.has(result.nextPageToken)) throw new Error('Google: mappelistningen gentager en side');
+      tokens.add(pageToken = result.nextPageToken);
+    }
+    throw new Error('Google: mappelistningen har for mange sider');
+  }
+  async getFile(fileId: string) {
+    googleIdSchema.parse(fileId);
+    const query = new URLSearchParams({ supportsAllDrives: 'true', fields: itemFields });
+    const item = await this.access(async () => driveItemSchema.parse(await this.json(`https://www.googleapis.com/drive/v3/files/${fileId}?${query}`)));
+    if (item.id !== fileId) throw new Error('Google: forkert fil i svaret');
+    return item;
+  }
+  downloadPdf(fileId: string) { return this.access(() => this.pdf(fileId)); }
 }

@@ -9,7 +9,9 @@
     "typecheck": "ASTRO_TELEMETRY_DISABLED=1 astro check && tsc --noEmit",
     "content:prepare": "bun run scripts/prepare-content.ts",
     "google:prepare": "bun run scripts/google-prepare.ts",
-    "google:prepare-capture": "bun run scripts/google-prepare-capture.ts"
+    "google:prepare-capture": "bun run scripts/google-prepare-capture.ts",
+    "sync": "bun run scripts/sync.ts",
+    "slug": "bun run scripts/slug.ts"
   },
   "dependencies": {
     "astro": "^6.0.0",
