@@ -1,6 +1,6 @@
 # Mappemodellen — fase 1: afprøvning af Markdown-eksporten
 
-**Status 21. oktober 2026: afsluttet. Det eneste udestående er at bekræfte Docs API'et med et lokalt token (afsnit 3).** Pilotvejledningen, de øvrige kildefiler i fællesdrevet og et testdokument med lister, tabeller, billede, faner og uaccepterede forslag er afprøvet.
+**Status 21. oktober 2026: afsluttet. Docs API'et er bekræftet live (afsnit 3).** Pilotvejledningen, de øvrige kildefiler i fællesdrevet og et testdokument med lister, tabeller, billede, faner og uaccepterede forslag er afprøvet.
 
 **Konklusion:** Drive-eksporten til Markdown **tager uaccepterede forslag med**. Den kan derfor ikke bruges, når redaktører arbejder i forslagstilstand. Anbefalingen er Docs API med `PREVIEW_WITHOUT_SUGGESTIONS` → den eksisterende parser → en egen Markdown-serializer (afsnit 4).
 
@@ -51,9 +51,23 @@ Forbehold: Uden Docs API'ets JSON kan jeg ikke selv se, at ændringerne er regis
 
 Samme sammenligning viste også, at **typografien "Titel" eksporteres som H1** (`# **Tekst i fane 2**`). Den var sat på teksten i fane 2.
 
-### Docs API (udestår)
+### Docs API (bekræftet live 21. oktober 2026)
 
-Docs API'et har `suggestionsViewMode=PREVIEW_WITHOUT_SUGGESTIONS`, som er dokumenteret, og den eksisterende parser bruger allerede Docs API'et. Drive-eksporten har ingen tilsvarende parameter.
+`documents.get` blev kaldt på `fase1-test` med `includeTabsContent=true` og et kortlivet token for admin-kontoen med `documents.readonly`. Rå svar ligger i `.local/fase1/docs-api-*.json`.
+
+| | `SUGGESTIONS_INLINE` | `PREVIEW_WITHOUT_SUGGESTIONS` |
+|---|---|---|
+| `suggested*`-felter | 7 | **0** |
+| `FORSLAGINDSAT` | Med (`suggestedInsertionIds`) | **Mangler** |
+| "Slut på testdokumentet." | Med (`suggestedDeletionIds`) | Med |
+| "Første punkt" | `suggestedTextStyleChanges`, grundtekst ikke fed | **Ikke fed** |
+
+Det bekræfter to ting:
+
+1. Alle tre ændringer er registreret som rigtige forslag. Resultatet for Drive-eksporten ovenfor står derfor fast.
+2. `PREVIEW_WITHOUT_SUGGESTIONS` giver netop den accepterede tekst uden spor af forslag. Begge visninger returnerede to faner.
+
+Drive-eksporten har ingen parameter, der svarer til `PREVIEW_WITHOUT_SUGGESTIONS`.
 
 Oprindelig testplan:
 
@@ -71,7 +85,7 @@ Oprindelig testplan:
 - Markdown'en i Git bliver læsbar og forudsigelig. Det samme allowlist-tjek bruges ved build, som foreslået i fase 0.
 - Drive-eksporten kan bruges senere til et grovtjek af, at parseren ikke mister tekst: ordsammenligningen i afsnit 2 kan køres automatisk. Den er ikke nødvendig for at komme i gang.
 
-Forslagstesten (afsnit 3) gør det afgørende: Drive-eksporten tager uaccepterede forslag med og kan derfor ikke bruges som kilde. Den kan stadig bruges som det grovtjek af tekst, der er nævnt ovenfor, men kun i dokumenter uden forslag. Den første opgave i fase 2b er at bekræfte, at `PREVIEW_WITHOUT_SUGGESTIONS` udelader de tre forslag i `fase1-test`. Det kræver et kortlivet lokalt token. Parserens eksisterende forslagstjek gøres samtidig til en sikkerhedsregel: findes der `suggested*`-felter i svaret, afvises dokumentet, og det beholder sin sidste gyldige version.
+Forslagstesten (afsnit 3) gør det afgørende: Drive-eksporten tager uaccepterede forslag med og kan derfor ikke bruges som kilde. Den kan stadig bruges som det grovtjek af tekst, der er nævnt ovenfor, men kun i dokumenter uden forslag. At `PREVIEW_WITHOUT_SUGGESTIONS` udelader de tre forslag, er bekræftet live (afsnit 3). Parserens eksisterende forslagstjek gøres samtidig til en sikkerhedsregel: findes der `suggested*`-felter i svaret, afvises dokumentet, og det beholder sin sidste gyldige version.
 
 ## 5. De øvrige kildefiler (admin@groendalsvaenge.dk)
 
