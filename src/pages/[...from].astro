@@ -1,0 +1,20 @@
+---
+import { getCollection } from 'astro:content';
+// Old paths (renamed slugs, moved files, manual WordPress list) become static redirect pages.
+// Real 301s need the host and come later.
+export async function getStaticPaths() {
+  return (await getCollection('redirects')).map(({ data }) => ({ params: { from: data.from.slice(1, -1) }, props: { to: data.to } }));
+}
+const { to } = Astro.props;
+---
+<!doctype html>
+<html lang="da">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="robots" content="noindex" />
+    <meta http-equiv="refresh" content={`0; url=${to}`} />
+    <link rel="canonical" href={to} />
+    <title>Siden er flyttet · Grøndalsvænge</title>
+  </head>
+  <body><p>Siden er flyttet til <a href={to}>{to}</a>.</p></body>
+</html>

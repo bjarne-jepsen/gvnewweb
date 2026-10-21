@@ -1,15 +1,17 @@
 ---
+import { getCollection } from 'astro:content';
 interface Props { title: string; }
 const { title } = Astro.props;
 const path = Astro.url.pathname;
-const navigation = [['/', 'Forside'], ['/dokumenter/', 'Dokumenter'], ['/vejledninger/', 'Vejledninger'], ['/opslag/', 'Opslag'], ['/kalender/', 'Kalender']];
+const sections = (await getCollection('sections')).map(s => s.data).sort((a, b) => a.order - b.order);
+const navigation = [['/', 'Forside'], ...sections.map(s => [s.path, s.label])];
 ---
 <!doctype html>
 <html lang="da">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="En lokal prototype med eksempler på Grøndalsvænges offentlige information." />
+    <meta name="description" content="En lokal prototype med Grøndalsvænges offentlige information fra foreningens Google Drive." />
     <meta name="robots" content="noindex, nofollow" />
     <title>{title} · Grøndalsvænge</title>
   </head>
@@ -22,7 +24,7 @@ const navigation = [['/', 'Forside'], ['/dokumenter/', 'Dokumenter'], ['/vejledn
       </nav>
     </header>
     <main id="indhold"><slot /></main>
-    <footer><p>Grøndalsvænge · Lokal prototype</p><p>Prøveindhold baseret på groendalsvaenge.dk. PDF og kalender er fiktive eksempler.</p></footer>
+    <footer><p>Grøndalsvænge · Lokal prototype</p><p>Indholdet hentes fra hjemmesidens mapper i foreningens Google Drive.</p></footer>
   </body>
 </html>
 <style is:global>
@@ -65,7 +67,8 @@ const navigation = [['/', 'Forside'], ['/dokumenter/', 'Dokumenter'], ['/vejledn
   .table-scroll { overflow-x:auto; margin:2rem 0; }
   .table-scroll table { border-collapse:collapse; width:100%; font-size:1rem; }
   .table-scroll caption { text-align:left; color:var(--muted); font: .85rem/1.7 system-ui,sans-serif; margin-bottom:.5rem; }
-  .table-scroll td { border:1px solid var(--line); padding:.75rem; vertical-align:top; min-width:7rem; }
+  .table-scroll td, .table-scroll th { border:1px solid var(--line); padding:.75rem; vertical-align:top; min-width:7rem; text-align:left; }
+  .table-scroll th { font-weight:600; }
   .table-scroll p { margin:0 0 .5rem; }
   .table-scroll p:last-child { margin-bottom:0; }
   .prose li { padding-left:.25rem; margin-bottom:.5rem; }

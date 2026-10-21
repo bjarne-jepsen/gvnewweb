@@ -1,7 +1,7 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
-import { digest, type ContentRecord } from '../lib/contracts/content';
-import { recordUrl, type PublicRecord } from '../lib/publication/store';
+import { digest } from '../lib/contracts/content';
+import type { Site } from '../lib/site/load';
 export async function walk(root: string): Promise<string[]> {
   const results: string[] = [];
   for (const e of await readdir(root, { withFileTypes: true })) {
@@ -11,29 +11,30 @@ export async function walk(root: string): Promise<string[]> {
   }
   return results;
 }
-export async function verifyOutput(root: string, records: PublicRecord[], assets: Map<string, Uint8Array>, candidates: ContentRecord[]) {
-  const pages = ['index.html', ...['dokumenter', 'vejledninger', 'opslag', 'kalender'].map(x => `${x}/index.html`), ...records.map(r => `${recordUrl(r).slice(1)}index.html`)];
-  const allowed = new Set([...pages, 'search.json', 'sitemap.xml', ...assets.keys()].map(x => x.replace(/^\//, '')));
-  const paths = await walk(root), found = new Set<string>();
-  const selected = new Set(records.map(r => r.id));
-  const approvedText = JSON.stringify(records);
-  // Titles/filenames can legitimately be shared by a withdrawn candidate and an
-  // approved record. Exact approved payloads and the asset allowlist are authoritative.
-  const forbidden = candidates.filter(r => !selected.has(r.id)).flatMap(r => [r.id, r.title, ...(r.type === 'document' ? [r.file.originalFilename] : [])]).filter(token => !approvedText.includes(token));
-  for (const path of paths) {
+const pageFile = (path: string) => `${path.slice(1)}index.html`;
+/** Default deny: dist may contain exactly the pages, files and indexes derived from content/. */
+export async function verifyOutput(root: string, site: Site) {
+  const pages = ['/', ...site.sections.map(s => s.path), ...site.items.map(i => i.path)].map(pageFile);
+  const redirects = new Map(site.redirects.map(r => [pageFile(r.from), r.to]));
+  const allowed = new Set([...pages, ...redirects.keys(), 'search.json', 'sitemap.xml', ...[...site.assets.keys()].map(u => u.slice(1))]);
+  const found = new Set<string>();
+  for (const path of await walk(root)) {
     const rel = relative(root, path); found.add(rel);
     if (!allowed.has(rel) && !/^_astro\/[a-zA-Z0-9_.-]+\.css$/.test(rel)) throw new Error(`Uventet outputfil: ${rel}`);
-    const bytes = await readFile(path);
-    if (assets.has(`/${rel}`) && digest(bytes) !== digest(assets.get(`/${rel}`)!)) throw new Error(`Forkert offentlig asset: ${rel}`);
-    const text = bytes.toString();
-    for (const token of [...forbidden, 'sourceId', 'sourceRevision', 'assetPath', 'approvedBy', 'MEMBERS_ONLY_CANARY', 'BOARD_ONLY_CANARY', 'UNAPPROVED_CANARY']) {
-      if (token && text.includes(token)) throw new Error(`Ikke-offentligt felt/indhold i ${rel}: ${token}`);
-    }
+    const bytes = await readFile(path), asset = site.assets.get(`/${rel}`);
+    if (asset) { if (digest(bytes) !== digest(asset)) throw new Error(`Offentlig fil afviger fra content/: ${rel}`); continue; }
+    const text = bytes.toString('utf8');
+    // Drive IDs are internal identifiers and never needed in public output.
+    for (const id of site.internalIds) if (text.includes(id)) throw new Error(`Internt Drive-ID i ${rel}`);
+    if (rel.endsWith('.html') && /<script/i.test(text)) throw new Error(`Script i ${rel}`);
+    const to = redirects.get(rel);
+    if (to && !text.includes(`url=${to}"`)) throw new Error(`Redirect-siden ${rel} peger ikke på ${to}`);
   }
   for (const path of allowed) if (!found.has(path)) throw new Error(`Forventet output mangler: ${path}`);
   const search = JSON.parse(await readFile(join(root, 'search.json'), 'utf8')) as { url: string }[];
-  const urls = records.map(recordUrl).sort();
-  if (JSON.stringify(search.map(x => x.url).sort()) !== JSON.stringify(urls)) throw new Error('Søgeindeks afviger fra offentlige records');
+  const urls = site.items.map(i => i.path).sort();
+  if (JSON.stringify(search.map(x => x.url).sort()) !== JSON.stringify(urls)) throw new Error('Søgeindeks afviger fra de offentlige sider');
   const sitemap = await readFile(join(root, 'sitemap.xml'), 'utf8');
-  for (const url of urls) if (!sitemap.includes(`https://example.invalid${url}</loc>`)) throw new Error(`Sitemap mangler ${url}`);
+  const listed = [...sitemap.matchAll(/<loc>https:\/\/example\.invalid([^<]*)<\/loc>/g)].map(m => m[1]!).sort();
+  if (JSON.stringify(listed) !== JSON.stringify(['/', ...site.sections.map(s => s.path), ...urls].sort())) throw new Error('Sitemap afviger fra de offentlige sider');
 }

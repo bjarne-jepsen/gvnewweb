@@ -1,2 +1,2 @@
-import { records, url } from '../../lib/site/content';
-export const GET = () => new Response(JSON.stringify(records.map(r => ({ title: r.title, summary: r.summary, url: url(r) }))), { headers: { 'Content-Type': 'application/json' } });
+import { getCollection } from 'astro:content';
+export const GET = async () => new Response(JSON.stringify((await getCollection('items')).map(({ data }) => ({ title: data.title, summary: data.summary, url: data.path }))), { headers: { 'Content-Type': 'application/json' } });

@@ -1,11 +1,8 @@
 ---
-import type { PublicRecord } from '../../lib/publication/store';
-import { url, date } from '../../lib/site/content';
-interface Props { entries: PublicRecord[]; empty?: string; heading?: 'h2' | 'h3'; }
+interface Props { entries: { path: string; title: string; summary: string }[]; empty?: string; heading?: 'h2' | 'h3'; }
 const { heading: Heading = 'h3', entries, empty = 'Der er ingen offentliggjorte elementer her endnu.' } = Astro.props;
 ---
-{entries.length ? <ul class="entries">{entries.map(record => <li>
-  <Heading><a href={url(record)}>{record.title}</a></Heading>
-  <p>{record.summary}</p>
-  {record.type === 'event' && <span class="meta">{date(record.startsAt)}</span>}
+{entries.length ? <ul class="entries">{entries.map(entry => <li>
+  <Heading><a href={entry.path}>{entry.title}</a></Heading>
+  {entry.summary && <p>{entry.summary}</p>}
 </li>)}</ul> : <p>{empty}</p>}

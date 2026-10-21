@@ -14,6 +14,8 @@ export const guideMetaSchema = z.strictObject({
 });
 export type GuideMeta = z.infer<typeof guideMetaSchema>;
 export const imageNamePattern = /^[a-f0-9]{16}\.(png|jpg|webp)$/;
+/** Markdown may only reference images in the document's own folder: ./<driveId>/<hash>.<ext> */
+export const localImage = (id: string) => (url: string) => url.startsWith(`./${id}/`) && imageNamePattern.test(url.slice(id.length + 3));
 export const MAX_PDF_BYTES = 20 * 1024 * 1024;
 export const MAX_IMAGES = 20, MAX_IMAGE_BYTES = 20 * 1024 * 1024;
 export const serializeMeta = (meta: DocumentMeta) => JSON.stringify(documentMetaSchema.parse(meta), null, 2) + '\n';

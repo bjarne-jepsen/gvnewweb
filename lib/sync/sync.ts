@@ -5,23 +5,22 @@ import { googleDocsBlocks } from '../adapters/google/blocks';
 import { digest } from '../contracts/content';
 import { imageFormat } from '../publication/assets';
 import type { SiteConfig } from './config';
-import { documentMetaSchema, guideMetaSchema, imageNamePattern, MAX_IMAGE_BYTES, MAX_IMAGES, MAX_PDF_BYTES, serializeMeta } from './content';
+import { documentMetaSchema, guideMetaSchema, localImage, MAX_IMAGE_BYTES, MAX_IMAGES, MAX_PDF_BYTES, serializeMeta } from './content';
 import { DriveAccessError, FOLDER, GDOC, PDF, SHORTCUT, type DriveItem, type DriveSource } from './drive';
 import { assertRoundTrip, blocksToMarkdown, splitFrontmatter, summaryOf, validateMarkdown, withFrontmatter, type SerializableBlock } from './markdown';
 import { emptyReport, type ReportEntry, type SyncReport } from './report';
 import { pathOf, serializeSlugs, slugify, slugsSchema, takenPaths, type Slugs } from './slugs';
 
 export interface SyncOptions { config: SiteConfig; drive: DriveSource; contentDir: string; allowMassRemoval?: boolean; now?: Date }
-type Kind = 'pdf' | 'gdoc';
+export type Kind = 'pdf' | 'gdoc';
 interface Candidate { section: string; kind: Kind; id: string; title: string; item: DriveItem }
 /** Everything one published item consists of, as files relative to its section folder. */
-interface Entry { section: string; id: string; title: string; updatedAt: string; fingerprint: string; files: Map<string, Uint8Array> }
+export interface Entry { section: string; kind: Kind; id: string; title: string; updatedAt: string; fingerprint: string; files: Map<string, Uint8Array> }
 interface Fetched { fingerprint: string; build(updatedAt: string): Map<string, Uint8Array> }
 
 const isMissing = (error: unknown) => (error as NodeJS.ErrnoException).code === 'ENOENT';
 const message = (error: unknown) => error instanceof Error ? error.message : String(error);
 const utf8 = (s: string) => new Uint8Array(Buffer.from(s, 'utf8'));
-const localImage = (id: string) => (url: string) => url.startsWith(`./${id}/`) && imageNamePattern.test(url.slice(id.length + 3));
 
 async function readJson(path: string): Promise<unknown | undefined> {
   try { return JSON.parse(await readFile(path, 'utf8')); } catch (error) { if (isMissing(error)) return undefined; throw error; }
@@ -39,7 +38,7 @@ async function readSection(dir: string, section: string, kind: Kind, into: Map<s
       const raw = await readFile(join(dir, e.name)), meta = documentMetaSchema.parse(JSON.parse(raw.toString('utf8')));
       const pdf = await readFile(join(dir, `${meta.id}.pdf`));
       if (e.name !== `${meta.id}.json` || digest(pdf) !== meta.sha256) throw new Error(`${where(e.name)}: passer ikke med sin PDF`);
-      add({ section, id: meta.id, title: meta.title, updatedAt: meta.updatedAt, fingerprint: meta.sha256, files: new Map([[`${meta.id}.pdf`, pdf], [e.name, raw]]) });
+      add({ section, kind, id: meta.id, title: meta.title, updatedAt: meta.updatedAt, fingerprint: meta.sha256, files: new Map([[`${meta.id}.pdf`, pdf], [e.name, raw]]) });
     } else if (kind === 'gdoc' && e.isFile() && e.name.endsWith('.md')) {
       const raw = await readFile(join(dir, e.name)), { meta: front, body } = splitFrontmatter(raw.toString('utf8'));
       const meta = guideMetaSchema.parse(front);
@@ -53,11 +52,23 @@ async function readSection(dir: string, section: string, kind: Kind, into: Map<s
         files.set(`${meta.id}/${img.name}`, await readFile(join(dir, meta.id, img.name)));
       }
       for (const name of used) if (!files.has(`${meta.id}/${name}`)) throw new Error(`${where(meta.id)}: billedet ${name} mangler`);
-      add({ section, id: meta.id, title: meta.title, updatedAt: meta.updatedAt, fingerprint: digest(body), files });
+      add({ section, kind, id: meta.id, title: meta.title, updatedAt: meta.updatedAt, fingerprint: digest(body), files });
     } else if (!(kind === 'pdf' && e.isFile() && e.name.endsWith('.pdf')) && !(kind === 'gdoc' && e.isDirectory())) {
       throw new Error(`${where(e.name)}: uventet fil; content/ må kun skrives af sync`);
     }
   }
+}
+/** Sections whose files sync writes today; notices follow in phase 3. */
+export function syncedSections(config: SiteConfig) {
+  const kinds = new Map<string, Kind>();
+  for (const [key, s] of Object.entries(config.sections)) if (s.type === 'document') kinds.set(key, 'pdf'); else if (s.type === 'guide') kinds.set(key, 'gdoc');
+  return kinds;
+}
+/** The same strict reader sync uses on its previous output; the site builds from nothing else. */
+export async function readContent(contentDir: string, config: SiteConfig) {
+  const entries = new Map<string, Entry>();
+  for (const [section, kind] of syncedSections(config)) await readSection(join(contentDir, section), section, kind, entries);
+  return { entries, slugs: slugsSchema.parse(await readJson(join(contentDir, '_slugs.json')) ?? {}) };
 }
 function verifyPdf(item: DriveItem, bytes: Uint8Array) {
   if (bytes.length === 0 || bytes.length > MAX_PDF_BYTES) throw new Error('PDF er tom eller over 20 MB');
@@ -114,10 +125,8 @@ export async function syncContent(o: SyncOptions): Promise<SyncReport> {
       }
     }
     for (const key of Object.keys(config.sections)) if (!folders.has(key)) throw new Error(`Sektionsmappen "${key}" mangler i roden`);
-    const kinds = new Map<string, Kind>();
-    for (const [key, s] of Object.entries(config.sections)) {
-      if (s.type === 'document') kinds.set(key, 'pdf'); else if (s.type === 'guide') kinds.set(key, 'gdoc'); else report.skippedSections.push(key);
-    }
+    const kinds = syncedSections(config);
+    report.skippedSections = Object.keys(config.sections).filter(key => !kinds.has(key));
     const listings = new Map<string, DriveItem[]>();
     for (const key of kinds.keys()) listings.set(key, await drive.listFolder(folders.get(key)!.id));
 
@@ -185,7 +194,7 @@ export async function syncContent(o: SyncOptions): Promise<SyncReport> {
       const prior = existing.get(c.id);
       const same = prior && prior.section === c.section && prior.fingerprint === fetched.fingerprint && prior.title === c.title;
       const updatedAt = same ? prior.updatedAt : new Date(c.item.modifiedTime).toISOString();
-      output.set(c.id, { section: c.section, id: c.id, title: c.title, updatedAt, fingerprint: fetched.fingerprint, files: fetched.build(updatedAt) });
+      output.set(c.id, { section: c.section, kind: c.kind, id: c.id, title: c.title, updatedAt, fingerprint: fetched.fingerprint, files: fetched.build(updatedAt) });
       if (same) report.unchanged++; else (prior ? report.changed : report.added).push({ section: c.section, id: c.id, title: c.title });
     }
     for (const [id, prior] of existing) if (!output.has(id)) report.removed.push({ section: prior.section, id, title: prior.title });

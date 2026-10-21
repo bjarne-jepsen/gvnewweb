@@ -1,7 +1,6 @@
-import { mkdir, readFile, writeFile, rm, rename } from 'node:fs/promises';
+import { mkdir, writeFile, rm, rename } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
-import { MockContentAdapter } from '../lib/adapters/mock';
-import { selectPublic } from '../lib/publication/store';
+import { loadSite } from '../lib/site/load';
 import { verifyOutput } from './verify-output';
 
 const dev = process.argv.includes('--dev');
@@ -11,16 +10,13 @@ try { lock = await Bun.file('.build/lock').exists() ? null : await import('node:
 catch { throw new Error('Build/dev kører allerede. Fjern kun .build/lock efter et afbrudt forløb.'); }
 if (!lock) throw new Error('Build/dev kører allerede (.build/lock).');
 try {
-  const buildAt = process.env.BUILD_AT ?? new Date().toISOString();
-  const candidates = await new MockContentAdapter().listCandidates();
-  const manifest = JSON.parse(await readFile('fixtures/manifest.json', 'utf8'));
-  const approvals = JSON.parse(await readFile('fixtures/approvals.json', 'utf8'));
-  const selected = await selectPublic(manifest, approvals, 'fixtures/snapshots', buildAt);
+  // content/ is the only source. Invalid content stops here, before dist is touched.
+  const site = await loadSite('.');
+  for (const warning of site.warnings) console.warn(`Advarsel: ${warning}`);
   await rm('.build/assets', { recursive: true, force: true });
   await rm('.build/staging', { recursive: true, force: true });
-  await mkdir('.build/assets/downloads', { recursive: true });
-  await writeFile('.build/content.json', JSON.stringify(selected.records));
-  for (const [url, bytes] of selected.assets) {
+  await mkdir('.build/assets', { recursive: true });
+  for (const [url, bytes] of site.assets) {
     const target = join('.build/assets', url.slice(1));
     await mkdir(dirname(target), { recursive: true }); await writeFile(target, bytes);
   }
@@ -29,7 +25,7 @@ try {
   const exit = await processResult.exited;
   if (exit !== 0) throw new Error(`Astro fejlede med exit ${exit}; dist er bevaret`);
   if (!dev) {
-    await verifyOutput('.build/staging', selected.records, selected.assets, candidates);
+    await verifyOutput('.build/staging', site);
     await rm('.build/previous', { recursive: true, force: true });
     let previous = false;
     try { await rename('dist', '.build/previous'); previous = true; }
@@ -37,7 +33,7 @@ try {
     try { await rename('.build/staging', 'dist'); }
     catch (error) { if (previous) await rename('.build/previous', 'dist'); throw error; }
     await rm('.build/previous', { recursive: true, force: true });
-    console.log(`Outputkontrol bestået: ${selected.records.length} offentlige snapshots, ${selected.assets.size} filer (PDF/billeder). buildAt=${buildAt}`);
+    console.log(`Outputkontrol bestået: ${site.items.length} sider, ${site.redirects.length} redirects, ${site.assets.size} filer (PDF/billeder).`);
   }
 } finally {
   await lock.close(); await rm('.build/lock', { force: true });
