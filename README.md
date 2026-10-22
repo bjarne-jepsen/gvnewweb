@@ -10,7 +10,6 @@ Statisk Astro + TypeScript-site for Andelsboligforeningen Grøndalsvænge. Indho
 Grøndalsvænge hjemmeside (fællesdrev)
 ├── foreningen/     Google Docs → faste informationssider
 ├── vejledninger/   Google Docs → vejledninger
-├── dokumenter/     PDF'er → dokumenter til download
 ├── nyheder/        Ét Google Sheets-ark med nyheder
 ├── kalender/       Ikke i brug
 └── redaktion/      Læses ikke
@@ -19,7 +18,8 @@ Grøndalsvænge hjemmeside (fællesdrev)
 Sammenhængen mellem mappe og indholdstype ligger i [config/site.json](config/site.json). Navigation og sektionstekster ligger i [lib/site/sections.ts](lib/site/sections.ts).
 
 - **Genveje:** En genvej publicerer målfilens indhold. Genvejens navn bliver titlen, og målets ID bliver indholdets ID.
-- **Titel:** Filens navn (eller genvejens). En PDF mister `.pdf`.
+- **Titel:** Filens navn (eller genvejens).
+- **Ingen dokumenter:** Vedtægter, regulativer, referater og andre dokumenter ligger i ProBo hos administrator. En PDF i en sektionsmappe publiceres ikke og giver en advarsel.
 - **Forslag:** Google Docs hentes med Docs API i visningen `PREVIEW_WITHOUT_SUGGESTIONS`. Ikke-accepterede forslag kommer aldrig med. Et svar, der alligevel indeholder forslag, afvises.
 - **Fejl:** Et dokument, der ikke kan hentes eller konverteres, beholder sin sidste gyldige version, og resten synkroniseres. En fejlet eller ufuldstændig mappelistning ændrer intet.
 
@@ -67,13 +67,11 @@ Den natlige og manuelle kørsel er endnu ikke sat op. Forslaget står i [docs/ma
 content/
 ├── _slugs.json              id → { section, slug, previousPaths }
 ├── _redirects.json          valgfri, manuel: gammel sti → ny sti (fx WordPress)
-├── dokumenter/<id>.pdf      uændrede bytes
-├── dokumenter/<id>.json     titel, updatedAt, størrelse, sha256
 ├── <sektion>/<id>.md        frontmatter (id, title, updatedAt, summary) + Markdown
 └── <sektion>/<id>/<hash>.png  billeder for ét dokument
 ```
 
-Filerne i `content/` skrives af sync. De må ikke rettes i hånden, undtagen `_slugs.json` og `_redirects.json`. Sync og build afviser filer, de ikke selv kan have skrevet.
+Filerne i `content/` skrives af sync. `content/` må kun indeholde de konfigurerede sektioner, `_slugs.json` og `_redirects.json`. Fjernes en sektion fra konfigurationen, rydder næste sync den op, og build afviser alt andet. De må ikke rettes i hånden, undtagen `_slugs.json` og `_redirects.json`. Sync og build afviser filer, de ikke selv kan have skrevet.
 
 **URL'er ændrer sig ikke ved omdøbning.** Slug dannes af titlen første gang, et ID ses, og gemmes. Kun en udvikler ændrer det:
 
@@ -99,7 +97,7 @@ Serializeren skriver en lille dialekt: overskrift 2–6, afsnit, fed, kursiv, ht
 
 ## Output og sikkerhed
 
-- Sider ligger på `/<sektion>/<slug>/`, PDF'er på `/<sektion>/<slug>.pdf` og billeder ved siden af deres side.
+- Sider ligger på `/<sektion>/<slug>/` og billeder ved siden af deres side.
 - Outputkontrollen ([scripts/verify-output.ts](scripts/verify-output.ts)) tillader kun de forventede filer. Bytes skal være identiske med `content/`. Der må ikke være Drive-ID'er og ingen `<script>`. Sitemap og søgeindeks skal være præcis de offentlige sider.
 - Sitemap bruger `https://example.invalid`, og prototypen har `noindex`. Domæne og indeksering besluttes senere.
 - Redirects er meta-refresh-sider. Rigtige 301'ere kræver hosting.

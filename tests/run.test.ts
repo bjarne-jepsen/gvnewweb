@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { runOnce } from '../lib/run';
 import { siteConfigSchema } from '../lib/sync/config';
 import { commitMessage, emptyReport } from '../lib/sync/report';
-import { FakeDrive, pdfBytes } from './helpers/fake-drive';
+import { docJson, FakeDrive } from './helpers/fake-drive';
 
 const roots: string[] = [];
 afterEach(async () => { await Promise.all(roots.splice(0).map(p => rm(p, { recursive: true, force: true }))); });
@@ -20,8 +20,8 @@ async function repo() {
   await git(root, 'init', '--quiet'); await git(root, 'config', 'user.name', 'Test'); await git(root, 'config', 'user.email', 'test@example.invalid');
   await writeFile(join(root, 'README.md'), 'start\n'); await writeFile(join(root, '.gitignore'), '.sync/\n'); await git(root, 'add', 'README.md', '.gitignore'); await git(root, 'commit', '--quiet', '-m', 'start');
   const drive = new FakeDrive();
-  drive.folder('f-dokumenter', 'dokumenter', 'root');
-  const config = siteConfigSchema.parse({ rootFolderId: 'root', sections: { dokumenter: { type: 'document', accepts: ['pdf'] } } });
+  drive.folder('f-foreningen', 'foreningen', 'root');
+  const config = siteConfigSchema.parse({ rootFolderId: 'root', sections: { foreningen: { type: 'guide', accepts: ['gdoc'] } } });
   const run = (commit = true) => runOnce({ root, config, drive, commit, now: new Date('2026-10-21T20:00:00Z') });
   const log = async () => (await git(root, 'log', '--format=%s')).trim().split('\n');
   return { root, drive, run, log };
@@ -29,13 +29,13 @@ async function repo() {
 
 test('ændringer giver ét commit med kun content/ og en beskrivende besked; uændret kørsel giver intet', async () => {
   const r = await repo();
-  r.drive.pdf('doc-a', 'Vedtægter.pdf', 'f-dokumenter'); r.drive.pdf('doc-b', 'Husorden.pdf', 'f-dokumenter');
+  r.drive.gdoc('doc-a', 'Vedtægter', 'f-foreningen', docJson('doc-a', [{ text: 'A' }])); r.drive.gdoc('doc-b', 'Husorden', 'f-foreningen', docJson('doc-b', [{ text: 'B' }]));
   // Unrelated work in progress, one file staged and one not, must stay out of the commit.
   await writeFile(join(r.root, 'README.md'), 'lokal ændring\n'); await writeFile(join(r.root, 'noter.txt'), 'staged\n'); await git(r.root, 'add', 'noter.txt');
   expect((await r.run()).committed).toBe(true);
   expect(await r.log()).toEqual(['content: synkronisering 2026-10-21 (2 nye, 0 ændrede, 0 fjernede)', 'start']);
-  expect((await git(r.root, 'show', '--name-only', '--format=', 'HEAD')).trim().split('\n').sort()).toEqual(['content/_slugs.json', 'content/dokumenter/doc-a.json', 'content/dokumenter/doc-a.pdf', 'content/dokumenter/doc-b.json', 'content/dokumenter/doc-b.pdf']);
-  expect(await git(r.root, 'show', '--format=%B', '--no-patch', 'HEAD')).toContain('Nye:\n- dokumenter: Vedtægter\n- dokumenter: Husorden'); // stable order: by ID
+  expect((await git(r.root, 'show', '--name-only', '--format=', 'HEAD')).trim().split('\n').sort()).toEqual(['content/_slugs.json', 'content/foreningen/doc-a.md', 'content/foreningen/doc-b.md']);
+  expect(await git(r.root, 'show', '--format=%B', '--no-patch', 'HEAD')).toContain('Nye:\n- foreningen: Vedtægter\n- foreningen: Husorden'); // stable order: by ID
   expect((await git(r.root, 'status', '--porcelain')).split('\n').filter(Boolean).sort()).toEqual([' M README.md', 'A  noter.txt']);
   expect((await r.run()).committed).toBe(false);
   expect(await r.log()).toHaveLength(2);
@@ -56,11 +56,12 @@ test('afbrudt sync giver hverken commit eller ændringer; rapporten forklarer hv
 
 test('fejl i enkelte filer committes stadig; --no-commit committer intet', async () => {
   const r = await repo();
-  r.drive.pdf('doc-a', 'A.pdf', 'f-dokumenter'); r.drive.pdf('bad', 'Ødelagt.pdf', 'f-dokumenter', Buffer.from('ikke en pdf'));
+  const bad = docJson('bad', [{ text: 'x' }]); bad.tabs.push(structuredClone(bad.tabs[0]!));
+  r.drive.gdoc('doc-a', 'A', 'f-foreningen', docJson('doc-a', [{ text: 'A' }])); r.drive.gdoc('bad', 'Ødelagt', 'f-foreningen', bad);
   const result = await r.run();
   expect(result.committed).toBe(true); expect(result.ok && result.report.errors).toHaveLength(1);
   expect(await git(r.root, 'show', '--format=%B', '--no-patch', 'HEAD')).toContain('1 fejl og 0 advarsler');
-  r.drive.pdf('doc-c', 'C.pdf', 'f-dokumenter', pdfBytes('c'));
+  r.drive.gdoc('doc-c', 'C', 'f-foreningen', docJson('doc-c', [{ text: 'C' }]));
   expect((await r.run(false)).committed).toBe(false);
   expect(await r.log()).toHaveLength(2);
   expect(await git(r.root, 'status', '--porcelain', '--', 'content')).toContain('content/');

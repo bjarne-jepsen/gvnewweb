@@ -3,14 +3,14 @@ import { rejects } from 'node:assert/strict';
 import { GoogleReadClient } from '../lib/google/client';
 import { DriveAccessError } from '../lib/sync/drive';
 
-const item = (id: string, extra: Record<string, unknown> = {}) => ({ id, name: `${id}.pdf`, mimeType: 'application/pdf', modifiedTime: '2026-10-21T08:00:00Z', trashed: false, ...extra });
+const item = (id: string, extra: Record<string, unknown> = {}) => ({ id, name: id, mimeType: 'application/vnd.google-apps.document', modifiedTime: '2026-10-21T08:00:00Z', trashed: false, ...extra });
 
 test('listFolder paginerer med læseparametre for fællesdrev og sender kun GET', async () => {
   const calls: URL[] = [];
   const client = new GoogleReadClient('test-token', async (url, init) => {
     expect(init.method).toBe('GET'); expect(init.redirect).toBe('error');
     const parsed = new URL(url); calls.push(parsed);
-    return Response.json(parsed.searchParams.get('pageToken') ? { files: [item('c')] } : { files: [item('a'), item('b', { mimeType: 'application/vnd.google-apps.shortcut', shortcutDetails: { targetId: 't', targetMimeType: 'application/pdf' } })], nextPageToken: 'page-2' });
+    return Response.json(parsed.searchParams.get('pageToken') ? { files: [item('c')] } : { files: [item('a'), item('b', { mimeType: 'application/vnd.google-apps.shortcut', shortcutDetails: { targetId: 't', targetMimeType: 'application/vnd.google-apps.document' } })], nextPageToken: 'page-2' });
   });
   const items = await client.listFolder('folder_1');
   expect(items.map(i => i.id)).toEqual(['a', 'b', 'c']);
@@ -36,7 +36,7 @@ test('listFolder afviser ufuldstændige, gentagne og ugyldige listninger', async
 test('404 bliver til DriveAccessError uden token; andre fejl afbryder', async () => {
   const secret = 'SENSITIVE_TOKEN_CANARY';
   const client = new GoogleReadClient(secret, async () => new Response(`private ${secret}`, { status: 404 }));
-  for (const call of [() => client.getFile('abc'), () => client.downloadPdf('abc'), () => client.listFolder('abc')]) {
+  for (const call of [() => client.getFile('abc'), () => client.readDocument('abc'), () => client.readSheet('abc'), () => client.listFolder('abc')]) {
     await rejects(call(), error => { expect(error).toBeInstanceOf(DriveAccessError); expect(String(error)).not.toContain(secret); return true; });
   }
   await rejects(new GoogleReadClient(secret, async () => new Response('x', { status: 500 })).getFile('abc'), error => !(error instanceof DriveAccessError) && /HTTP 500/.test(String(error)));
@@ -74,12 +74,12 @@ test('fejl viser hverken HTTP-svar, token eller rå netværksfejl', async () => 
     });
     await rejects(client.readDocument('doc'), error => { expect(String(error)).not.toContain(secret); expect(String(error)).not.toContain('private body'); return true; });
   }
-  await rejects(new GoogleReadClient(secret, async () => { throw new Error(secret); }).downloadPdf('pdf'), error => /netværksfejl/.test(String(error)) && !String(error).includes(secret));
+  await rejects(new GoogleReadClient(secret, async () => { throw new Error(secret); }).readDocument('doc'), error => /netværksfejl/.test(String(error)) && !String(error).includes(secret));
 });
 
 test('ugyldigt JSON og for store svar afvises', async () => {
   await rejects(new GoogleReadClient('t', async () => new Response('not json')).readDocument('doc'), /JSON/);
-  await rejects(new GoogleReadClient('t', async () => new Response('x', { headers: { 'content-length': String(21 * 1024 * 1024) } })).downloadPdf('pdf'), /størrelsesgrænsen/);
+  await rejects(new GoogleReadClient('t', async () => new Response('x', { headers: { 'content-length': String(3 * 1024 * 1024) } })).readDocument('doc'), /størrelsesgrænsen/);
   await rejects(new GoogleReadClient('t', async () => new Response(new Uint8Array(6 * 1024 * 1024))).downloadImage('https://lh3.googleusercontent.com/x'), /for stort/);
 });
 

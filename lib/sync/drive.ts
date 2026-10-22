@@ -4,7 +4,6 @@ export const driveIdSchema = z.string().regex(/^[a-zA-Z0-9_-]+$/).max(200);
 export const FOLDER = 'application/vnd.google-apps.folder';
 export const SHORTCUT = 'application/vnd.google-apps.shortcut';
 export const GDOC = 'application/vnd.google-apps.document';
-export const PDF = 'application/pdf';
 export const SHEET = 'application/vnd.google-apps.spreadsheet';
 
 export const driveItemSchema = z.object({
@@ -23,7 +22,6 @@ export class DriveAccessError extends Error {}
 export interface DriveSource {
   listFolder(folderId: string): Promise<DriveItem[]>;
   getFile(fileId: string): Promise<DriveItem>;
-  downloadPdf(fileId: string): Promise<Uint8Array>;
   /** Docs API JSON rendered without suggestions (PREVIEW_WITHOUT_SUGGESTIONS), all tabs included. */
   readDocument(fileId: string): Promise<unknown>;
   /** Short-lived image URL from a Docs response; fetched without credentials. */

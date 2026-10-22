@@ -7,13 +7,14 @@ import { siteConfigSchema } from '../lib/sync/config';
 import { serializeSlugs, setSlug, slugsSchema } from '../lib/sync/slugs';
 import { syncContent } from '../lib/sync/sync';
 import { walk } from '../scripts/verify-output';
-import { docJson, FakeDrive, pdfBytes, png, sheetJson } from './helpers/fake-drive';
+import { docJson, FakeDrive, png, sheetJson } from './helpers/fake-drive';
 
 const root = await mkdtemp(join(tmpdir(), 'gv-build-'));
 afterAll(() => rm(root, { recursive: true, force: true }));
 const config = { rootFolderId: 'root', sections: {
-  foreningen: { type: 'guide', category: 'foreningen', accepts: ['gdoc'] }, vejledninger: { type: 'guide', category: 'vejledning', accepts: ['gdoc'] },
-  dokumenter: { type: 'document', accepts: ['pdf'] }, nyheder: { type: 'notice', source: 'sheet' } }, ignoredFolders: ['redaktion'] };
+  foreningen: { type: 'guide', accepts: ['gdoc'] }, vejledninger: { type: 'guide', accepts: ['gdoc'] },
+  nyheder: { type: 'notice', source: 'sheet' } }, ignoredFolders: ['redaktion'] };
+const canary = (id: string, label: string) => docJson(id, [{ text: label }]);
 const drive = new FakeDrive();
 const sync = () => syncContent({ config: siteConfigSchema.parse(config), drive, contentDir: join(root, 'content') });
 async function build() {
@@ -34,17 +35,17 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   for (const path of ['src', 'lib', 'scripts', 'astro.config.mjs', 'tsconfig.json', 'package.json']) await cp(path, join(root, path), { recursive: true });
   await symlink(resolve('node_modules'), join(root, 'node_modules'), 'dir');
   await mkdir(join(root, 'config')); await writeFile(join(root, 'config/site.json'), JSON.stringify(config));
-  for (const name of ['foreningen', 'vejledninger', 'dokumenter', 'nyheder', 'redaktion']) drive.folder(`f-${name}`, name, 'root');
+  for (const name of ['foreningen', 'vejledninger', 'nyheder', 'redaktion']) drive.folder(`f-${name}`, name, 'root');
   drive.folder('internt', 'Internt', 'elsewhere');
-  const vedtaegter = pdfBytes('vedtægter v3');
-  drive.pdf('target-pdf', 'Vedtaegter_endelig_v3.pdf', 'internt', vedtaegter);
-  drive.shortcut('sc-pdf', 'Vedtægter', 'f-dokumenter', 'target-pdf');
+  drive.gdoc('target-doc', 'Lokaleleje_intern_v3', 'internt', docJson('target-doc', [{ text: 'Sådan lejer du lokalerne.' }]));
+  drive.shortcut('sc-doc', 'Leje af lokaler', 'f-vejledninger', 'target-doc');
+  drive.file('a-pdf', 'Vedtægter.pdf', 'f-vejledninger', 'application/pdf'); // documents live in ProBo
   drive.images.set('https://lh3.googleusercontent.com/kort', png);
   const doc = (title: string) => docJson('doc-1', [{ text: title, style: 'HEADING_1' }, { text: 'Første afsnit.' }, { text: '', image: 'i1' }], { i1: { uri: 'https://lh3.googleusercontent.com/kort', alt: 'Kort over området' } });
   drive.gdoc('doc-1', 'Om foreningen', 'f-foreningen', doc('Velkommen'));
-  drive.pdf('private', 'PRIVATE_CANARY.pdf', 'internt', pdfBytes('PRIVATE_CANARY'));
-  drive.pdf('red', 'REDAKTION_CANARY.pdf', 'f-redaktion', pdfBytes('REDAKTION_CANARY'));
-  drive.pdf('rootfile', 'ROOT_CANARY.pdf', 'root', pdfBytes('ROOT_CANARY'));
+  drive.gdoc('private', 'PRIVATE_CANARY', 'internt', canary('private', 'PRIVATE_CANARY'));
+  drive.gdoc('red', 'REDAKTION_CANARY', 'f-redaktion', canary('red', 'REDAKTION_CANARY'));
+  drive.gdoc('rootfile', 'ROOT_CANARY', 'root', canary('rootfile', 'ROOT_CANARY'));
   drive.sheet('news', 'Nyheder', 'f-nyheder', sheetJson([['ID', 'Dato', 'Titel', 'Tekst', 'Udløber', 'Status'],
     ['n-live', '2026-10-20', 'Vandet lukkes', 'Mandag kl. 9-12.', '', 'offentlig'],
     ['n-expired', '2026-01-10', 'EXPIRED_CANARY', 'Tekst', '2026-01-31', 'offentlig'],
@@ -53,16 +54,17 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   await sync();
   await expectGreen();
 
-  // 1. Pages, unchanged bytes, nothing from outside the section folders.
+  // 1. Pages, unchanged image bytes, nothing from outside the section folders, no PDFs.
   const image = `${digest(png).slice(7, 23)}.png`;
-  expect(await html('dokumenter/vedtaegter/index.html')).toContain('href="/dokumenter/vedtaegter.pdf"');
-  expect(await readFile(dist('dokumenter/vedtaegter.pdf'))).toEqual(vedtaegter);
+  const shortcutPage = await html('vejledninger/leje-af-lokaler/index.html');
+  expect(shortcutPage).toContain('<h1>Leje af lokaler</h1>'); expect(shortcutPage).toContain('<p>Sådan lejer du lokalerne.</p>');
+  expect((await walk(join(root, 'dist'))).filter(p => /\.pdf$/i.test(p))).toEqual([]);
   const page = await html('foreningen/om-foreningen/index.html');
   expect(page).toContain('<h1>Om foreningen</h1>'); expect(page).toContain('<h2>Velkommen</h2>');
   expect(page).toContain(`<img src="/foreningen/om-foreningen/${image}" alt="Kort over området"`);
   expect(await readFile(dist(`foreningen/om-foreningen/${image}`))).toEqual(png);
-  for (const path of await walk(join(root, 'dist'))) expect((await readFile(path)).toString()).not.toMatch(/CANARY|target-pdf|doc-1/);
-  expect(JSON.parse(await html('search.json')).map((x: { url: string }) => x.url).sort()).toEqual(['/dokumenter/vedtaegter/', '/foreningen/om-foreningen/', '/nyheder/2026-10-20-vandet-lukkes/']);
+  for (const path of await walk(join(root, 'dist'))) expect((await readFile(path)).toString()).not.toMatch(/CANARY|target-doc|doc-1/);
+  expect(JSON.parse(await html('search.json')).map((x: { url: string }) => x.url).sort()).toEqual(['/foreningen/om-foreningen/', '/nyheder/2026-10-20-vandet-lukkes/', '/vejledninger/leje-af-lokaler/']);
   // News: expired and future rows are in content/ but not built; drafts never reach content/.
   expect(await html('nyheder/2026-10-20-vandet-lukkes/index.html')).toContain('<time datetime="2026-10-20">20. oktober 2026</time>');
   expect(await html('nyheder/index.html')).toContain('Mandag kl. 9-12.');
@@ -92,7 +94,7 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
 
   // 5. Errors keep the last valid dist: a redirect over a live page, hand-written HTML in content/.
   const valid = await release();
-  await writeFile(join(root, 'content/_redirects.json'), JSON.stringify({ '/dokumenter/': '/foreningen/om-os/' }));
+  await writeFile(join(root, 'content/_redirects.json'), JSON.stringify({ '/vejledninger/': '/foreningen/om-os/' }));
   let result = await build(); expect(result.exit).not.toBe(0); expect(result.log).toContain('rammer en eksisterende side');
   expect(await release()).toEqual(valid);
   await rm(join(root, 'content/_redirects.json'));
@@ -102,10 +104,9 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect(await release()).toEqual(valid);
   await writeFile(mdPath, original);
 
-  // 6. Removing the shortcut removes the page and its PDF from dist.
-  drive.files.delete('sc-pdf');
+  // 6. Removing the shortcut removes the page from dist.
+  drive.files.delete('sc-doc');
   await sync(); await expectGreen();
-  expect(await exists('dokumenter/vedtaegter/index.html')).toBe(false);
-  expect(await exists('dokumenter/vedtaegter.pdf')).toBe(false);
-  expect(await html('dokumenter/index.html')).toContain('Der er ingen offentliggjorte elementer her endnu.');
+  expect(await exists('vejledninger/leje-af-lokaler/index.html')).toBe(false);
+  expect(await html('vejledninger/index.html')).toContain('Der er ingen offentliggjorte elementer her endnu.');
 }, 90000);

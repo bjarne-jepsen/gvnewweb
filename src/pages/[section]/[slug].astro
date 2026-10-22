@@ -13,8 +13,7 @@ const { item, section } = Astro.props;
   <article>
     <h1>{item.title}</h1>
     {item.kind === 'notice' && <p class="meta"><time datetime={item.date}>{date(item.date)}</time></p>}
-    {(item.kind === 'page' || item.kind === 'notice') && <div class="prose" set:html={item.html} />}
-    {item.kind === 'document' && <p><a class="download" href={item.download} download>Hent PDF · {Math.ceil(item.sizeBytes / 1024)} KB</a></p>}
+    <div class="prose" set:html={item.html} />
     {item.kind !== 'notice' && <p class="meta">Opdateret {date(item.updatedAt)}</p>}
   </article>
 </Base>

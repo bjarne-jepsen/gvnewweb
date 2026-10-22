@@ -22,7 +22,7 @@ test('renderer escaper tekst og attributter og kender kun dialekten', () => {
 
 const roots: string[] = [];
 afterEach(async () => { await Promise.all(roots.splice(0).map(p => rm(p, { recursive: true, force: true }))); });
-async function site(sections: Record<string, unknown> = { foreningen: { type: 'guide', category: 'f', accepts: ['gdoc'] } }) {
+async function site(sections: Record<string, unknown> = { foreningen: { type: 'guide', accepts: ['gdoc'] } }) {
   const root = await mkdtemp(join(tmpdir(), 'gv-site-')); roots.push(root);
   const config = { rootFolderId: 'root', sections };
   await mkdir(join(root, 'config')); await writeFile(join(root, 'config/site.json'), JSON.stringify(config));
@@ -47,7 +47,7 @@ test('loadSite afviser manglende slug, redirect over en side og sektion uden nav
   const { ['doc-a']: _gone, ...rest } = slugs;
   await writeFile(slugsPath, JSON.stringify(rest));
   await rejects(loadSite(root), /doc-a mangler/);
-  await rejects(loadSite(await site({ foreningen: { type: 'guide', category: 'f', accepts: ['gdoc'] }, arkiv: { type: 'document', accepts: ['pdf'] } })), /arkiv mangler tekst/);
+  await rejects(loadSite(await site({ foreningen: { type: 'guide', accepts: ['gdoc'] }, arkiv: { type: 'guide', accepts: ['gdoc'] } })), /arkiv mangler tekst/);
 });
 
 test('nyheder filtreres ved build: fra datoen, til og med udløbsdagen i dansk tid, nyeste først', async () => {

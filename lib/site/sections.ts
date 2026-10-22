@@ -2,7 +2,6 @@
 export const sectionTexts: Record<string, { label: string; intro: string }> = {
   foreningen: { label: 'Foreningen', intro: 'Om andelsboligforeningen, og hvordan den drives.' },
   vejledninger: { label: 'Vejledninger', intro: 'Praktisk information og hjælp til hverdagen.' },
-  dokumenter: { label: 'Dokumenter', intro: 'Hent foreningens dokumenter som PDF.' },
   nyheder: { label: 'Nyheder', intro: 'Nyt fra foreningen.' },
 };
 /** Long Danish date. Calendar dates (YYYY-MM-DD) are shown as that day, timestamps in Copenhagen time. */

@@ -4,15 +4,15 @@ import { z } from 'zod';
 import { googleDocsBlocks } from '../google/docs';
 import { sheetRows } from '../google/sheets';
 import type { SiteConfig } from './config';
-import { digest, documentMetaSchema, guideMetaSchema, imageFormat, localImage, MAX_IMAGE_BYTES, MAX_IMAGES, MAX_PDF_BYTES, newsFingerprint, newsMetaSchema, serializeMeta, serializeNews } from './content';
-import { DriveAccessError, FOLDER, GDOC, PDF, SHEET, SHORTCUT, type DriveItem, type DriveSource } from './drive';
+import { digest, guideMetaSchema, imageFormat, localImage, MAX_IMAGE_BYTES, MAX_IMAGES, newsFingerprint, newsMetaSchema, serializeNews } from './content';
+import { DriveAccessError, FOLDER, GDOC, SHEET, SHORTCUT, type DriveItem, type DriveSource } from './drive';
 import { assertRoundTrip, blocksToMarkdown, splitFrontmatter, summaryOf, validateMarkdown, withFrontmatter, type SerializableBlock } from './markdown';
 import { parseNews, type NewsRow } from './news';
 import { emptyReport, type ReportEntry, type SyncReport } from './report';
 import { pathOf, serializeSlugs, slugify, slugsSchema, takenPaths, type Slugs } from './slugs';
 
 export interface SyncOptions { config: SiteConfig; drive: DriveSource; contentDir: string; allowMassRemoval?: boolean; now?: Date }
-export type Kind = 'pdf' | 'gdoc' | 'notice';
+export type Kind = 'gdoc' | 'notice';
 /** A file, or for notices one published row of the section's news sheet (item = the sheet). */
 interface Candidate { section: string; kind: Kind; id: string; title: string; item: DriveItem; news?: NewsRow }
 /** Everything one published item consists of, as files relative to its section folder. */
@@ -35,12 +35,7 @@ async function readSection(dir: string, section: string, kind: Kind, into: Map<s
   const add = (entry: Entry) => { if (into.has(entry.id)) throw new Error(`${where(entry.id)}: ID findes i flere sektioner`); into.set(entry.id, entry); };
   const entries = await list(dir);
   for (const e of entries) {
-    if (kind === 'pdf' && e.isFile() && e.name.endsWith('.json')) {
-      const raw = await readFile(join(dir, e.name)), meta = documentMetaSchema.parse(JSON.parse(raw.toString('utf8')));
-      const pdf = await readFile(join(dir, `${meta.id}.pdf`));
-      if (e.name !== `${meta.id}.json` || digest(pdf) !== meta.sha256) throw new Error(`${where(e.name)}: passer ikke med sin PDF`);
-      add({ section, kind, id: meta.id, title: meta.title, updatedAt: meta.updatedAt, fingerprint: meta.sha256, files: new Map([[`${meta.id}.pdf`, pdf], [e.name, raw]]) });
-    } else if (kind === 'gdoc' && e.isFile() && e.name.endsWith('.md')) {
+    if (kind === 'gdoc' && e.isFile() && e.name.endsWith('.md')) {
       const raw = await readFile(join(dir, e.name)), { meta: front, body } = splitFrontmatter(raw.toString('utf8'));
       const meta = guideMetaSchema.parse(front);
       if (e.name !== `${meta.id}.md`) throw new Error(`${where(e.name)}: ID passer ikke til filnavnet`);
@@ -59,31 +54,31 @@ async function readSection(dir: string, section: string, kind: Kind, into: Map<s
       if (e.name !== `${meta.id}.json`) throw new Error(`${where(e.name)}: ID passer ikke til filnavnet`);
       validateMarkdown(meta.body, () => false);
       add({ section, kind, id: meta.id, title: meta.title, updatedAt: meta.updatedAt, fingerprint: newsFingerprint(meta), files: new Map([[e.name, raw]]) });
-    } else if (!(kind === 'pdf' && e.isFile() && e.name.endsWith('.pdf')) && !(kind === 'gdoc' && e.isDirectory())) {
+    } else if (!(kind === 'gdoc' && e.isDirectory())) {
       throw new Error(`${where(e.name)}: uventet fil; content/ må kun skrives af sync`);
     }
   }
 }
 export function syncedSections(config: SiteConfig) {
-  return new Map(Object.entries(config.sections).map(([key, s]) => [key, ({ document: 'pdf', guide: 'gdoc', notice: 'notice' } as const)[s.type] as Kind]));
+  return new Map(Object.entries(config.sections).map(([key, s]) => [key, ({ guide: 'gdoc', notice: 'notice' } as const)[s.type] as Kind]));
+}
+const manualFiles = new Set(['_slugs.json', '_redirects.json']);
+/** Top-level entries of content/ that do not belong to a configured section or the two manual files. */
+async function strayEntries(contentDir: string, config: SiteConfig) {
+  return (await list(contentDir)).filter(e => !(e.isFile() && manualFiles.has(e.name)) && !(e.isDirectory() && e.name in config.sections));
 }
 /** The same strict reader sync uses on its previous output; the site builds from nothing else. */
 export async function readContent(contentDir: string, config: SiteConfig) {
+  const stray = await strayEntries(contentDir, config);
+  if (stray.length) throw new Error(`content/${stray[0]!.name}: hører ikke til en konfigureret sektion; kør sync, som rydder op`);
   const entries = new Map<string, Entry>();
   for (const [section, kind] of syncedSections(config)) await readSection(join(contentDir, section), section, kind, entries);
   return { entries, slugs: slugsSchema.parse(await readJson(join(contentDir, '_slugs.json')) ?? {}) };
 }
-function verifyPdf(item: DriveItem, bytes: Uint8Array) {
-  if (bytes.length === 0 || bytes.length > MAX_PDF_BYTES) throw new Error('PDF er tom eller over 20 MB');
-  if (!Buffer.from(bytes).subarray(0, 5).equals(Buffer.from('%PDF-'))) throw new Error('Filen er ikke en PDF');
-  if (item.size !== undefined && BigInt(item.size) !== BigInt(bytes.length)) throw new Error('Størrelsen passer ikke med Drive');
-  if (item.sha256Checksum && digest(bytes) !== `sha256:${item.sha256Checksum}`) throw new Error('Checksum passer ikke med Drive');
-}
-async function fetchPdf(drive: DriveSource, c: Candidate): Promise<Fetched> {
-  const bytes = await drive.downloadPdf(c.id);
-  verifyPdf(c.item, bytes);
-  const sha256 = digest(bytes);
-  return { fingerprint: sha256, build: updatedAt => new Map([[`${c.id}.pdf`, bytes], [`${c.id}.json`, utf8(serializeMeta({ id: c.id, title: c.title, updatedAt, sizeBytes: bytes.length, sha256 }))]]) };
+async function countFiles(path: string): Promise<number> {
+  let n = 0;
+  for (const e of await list(path)) n += e.isDirectory() ? await countFiles(join(path, e.name)) : 1;
+  return n;
 }
 /** Docs API (accepted text only) → existing block parser → own Markdown, validated and round-tripped. */
 async function fetchGuide(drive: DriveSource, c: Candidate): Promise<Fetched> {
@@ -137,7 +132,6 @@ export async function syncContent(o: SyncOptions): Promise<SyncReport> {
     }
     for (const key of Object.keys(config.sections)) if (!folders.has(key)) throw new Error(`Sektionsmappen "${key}" mangler i roden`);
     const kinds = syncedSections(config);
-    report.skippedSections = Object.keys(config.sections).filter(key => !kinds.has(key));
     const listings = new Map<string, DriveItem[]>();
     for (const key of kinds.keys()) listings.set(key, await drive.listFolder(folders.get(key)!.id));
 
@@ -165,9 +159,9 @@ export async function syncContent(o: SyncOptions): Promise<SyncReport> {
         }
         if (target.trashed) { warn({ section, id: target.id, title: item.name, message: 'Målfilen ligger i papirkurven; siden fjernes' }); continue; }
       }
-      if (target.mimeType !== { pdf: PDF, gdoc: GDOC, notice: SHEET }[kind]) { warn({ section, id: target.id, title: item.name, message: `Filtypen ${target.mimeType} accepteres ikke i ${section}` }); continue; }
+      if (target.mimeType !== { gdoc: GDOC, notice: SHEET }[kind]) { warn({ section, id: target.id, title: item.name, message: `Filtypen ${target.mimeType} accepteres ikke i ${section}` }); continue; }
       if (kind === 'notice') { sheets.get(section)!.push(target); continue; }
-      const title = (kind === 'pdf' ? item.name.replace(/\.pdf$/i, '') : item.name).normalize('NFC').trim();
+      const title = item.name.normalize('NFC').trim();
       if (!title) { fail({ section, id: target.id, title: item.name, message: 'Tom titel' }); keep.add(target.id); continue; }
       candidates.push({ section, kind, id: target.id, title, item: target });
     }
@@ -203,7 +197,7 @@ export async function syncContent(o: SyncOptions): Promise<SyncReport> {
     keep.forEach(keepPrior);
     for (const c of unique) {
       let fetched: Fetched;
-      try { fetched = await { pdf: fetchPdf, gdoc: fetchGuide, notice: fetchNotice }[c.kind](drive, c); }
+      try { fetched = await { gdoc: fetchGuide, notice: fetchNotice }[c.kind](drive, c); }
       catch (error) {
         keepPrior(c.id);
         fail({ section: c.section, id: c.id, title: c.title, message: `${error instanceof DriveAccessError ? 'Ingen adgang til filen' : message(error)}; sidste gyldige version beholdes` });
@@ -231,6 +225,10 @@ export async function syncContent(o: SyncOptions): Promise<SyncReport> {
       if (same) report.unchanged++; else (prior ? report.changed : report.added).push({ section: c.section, id: c.id, title: c.title });
     }
     for (const [id, prior] of existing) if (!output.has(id)) report.removed.push({ section: prior.section, id, title: prior.title });
+    // A section taken out of config/site.json is a developer decision: its folder in content/ goes too.
+    // _slugs.json keeps its entries, so a returning page gets its old address back.
+    const stray = await strayEntries(contentDir, config);
+    for (const e of stray) report.removed.push({ section: e.name, title: e.isDirectory() ? '(mappe uden for de konfigurerede sektioner)' : '(fil uden for sektionerne)', message: `${e.isDirectory() ? await countFiles(join(contentDir, e.name)) : 1} filer fjernet` });
     // A hand-edited _slugs.json must not let two live pages, or a page and a redirect, share a path.
     for (const id of output.keys()) {
       const entry = slugs[id];
@@ -245,9 +243,10 @@ export async function syncContent(o: SyncOptions): Promise<SyncReport> {
     // 4. Build the complete new tree in staging, validate it, then swap it in.
     const staging = join(workDir, 'staging'), previous = join(workDir, 'previous');
     await rm(staging, { recursive: true, force: true }); await rm(previous, { recursive: true, force: true });
-    // Other sections, _redirects.json etc. are carried over byte for byte.
+    // _redirects.json is carried over byte for byte; everything else is rebuilt or removed.
     try { await cp(contentDir, staging, { recursive: true, errorOnExist: true }); }
     catch (error) { if (!isMissing(error)) throw error; await mkdir(staging, { recursive: true }); }
+    for (const e of stray) await rm(join(staging, e.name), { recursive: true, force: true });
     for (const section of kinds.keys()) {
       await rm(join(staging, section), { recursive: true, force: true }); await mkdir(join(staging, section), { recursive: true });
     }

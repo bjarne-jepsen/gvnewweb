@@ -17,7 +17,6 @@ export const collections = {
     loader: async () => (await load()).items,
     schema: z.discriminatedUnion('kind', [
       z.object({ ...base, kind: z.literal('page'), html: z.string() }),
-      z.object({ ...base, kind: z.literal('document'), download: z.string(), sizeBytes: z.number() }),
       z.object({ ...base, kind: z.literal('notice'), html: z.string(), date: z.iso.date(), expires: z.iso.date().optional() }),
     ]),
   }),

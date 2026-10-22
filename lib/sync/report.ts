@@ -3,10 +3,9 @@ export interface SyncReport {
   startedAt: string;
   added: ReportEntry[]; changed: ReportEntry[]; removed: ReportEntry[];
   unchanged: number; warnings: ReportEntry[]; errors: ReportEntry[];
-  skippedSections: string[];
 }
 export const emptyReport = (startedAt: string): SyncReport =>
-  ({ startedAt, added: [], changed: [], removed: [], unchanged: 0, warnings: [], errors: [], skippedSections: [] });
+  ({ startedAt, added: [], changed: [], removed: [], unchanged: 0, warnings: [], errors: [] });
 export const hasChanges = (r: SyncReport) => r.added.length + r.changed.length + r.removed.length > 0;
 
 const line = (e: ReportEntry) => `- ${e.section}: ${e.title.replace(/\s+/g, ' ')}${e.message ? ` — ${e.message}` : ''}`;
@@ -26,6 +25,5 @@ export function renderReport(r: SyncReport) {
   for (const [heading, entries] of [['Fejl', r.errors], ['Advarsler', r.warnings], ['Nye', r.added], ['Ændrede', r.changed], ['Fjernede', r.removed]] as const) {
     if (entries.length) out.push(`## ${heading}`, '', ...entries.map(line), '');
   }
-  if (r.skippedSections.length) out.push(`Ikke synkroniseret endnu: ${r.skippedSections.join(', ')}.`, '');
   return out.join('\n');
 }

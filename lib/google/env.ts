@@ -11,7 +11,7 @@ export async function driveFromEnv(env = process.env): Promise<DriveSource> {
   const docsToken = await readToken(env.GOOGLE_DOCS_ACCESS_TOKEN_FILE);
   const client = new GoogleReadClient(token), docsClient = docsToken ? new GoogleReadClient(docsToken) : client;
   return {
-    listFolder: id => client.listFolder(id), getFile: id => client.getFile(id), downloadPdf: id => client.downloadPdf(id),
+    listFolder: id => client.listFolder(id), getFile: id => client.getFile(id),
     readDocument: id => docsClient.readDocument(id), downloadImage: uri => client.downloadImage(uri), readSheet: id => client.readSheet(id),
   };
 }

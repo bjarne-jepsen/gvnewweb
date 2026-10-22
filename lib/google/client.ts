@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { MAX_PDF_BYTES } from '../sync/content';
 import { DriveAccessError, driveIdSchema, driveItemSchema, type DriveItem, type DriveSource } from '../sync/drive';
 
 export class GoogleHttpError extends Error { constructor(readonly status: number, message: string) { super(message); } }
@@ -7,7 +6,7 @@ const itemFields = 'id,name,mimeType,modifiedTime,trashed,size,sha256Checksum,sh
 const listSchema = z.object({ files: z.array(driveItemSchema), nextPageToken: z.string().min(1).optional(), incompleteSearch: z.boolean().optional() });
 export type HttpFetch = (url: string, init: RequestInit) => Promise<Response>;
 
-/** Fixed Google endpoints and GET only: read-only listing, metadata, PDFs, Docs, Sheets and images. */
+/** Fixed Google endpoints and GET only: read-only listing, metadata, Docs, Sheets and images. */
 export class GoogleReadClient implements DriveSource {
   constructor(private token: string, private transport: HttpFetch = (url, init) => fetch(url, init)) {
     if (!token || /\s/.test(token)) throw new Error('Google: ugyldigt eller manglende adgangstoken');
@@ -73,10 +72,6 @@ export class GoogleReadClient implements DriveSource {
     const item = await this.access(async () => driveItemSchema.parse(await this.json(`https://www.googleapis.com/drive/v3/files/${fileId}?${query}`)));
     if (item.id !== fileId) throw new Error('Google: forkert fil i svaret');
     return item;
-  }
-  async downloadPdf(fileId: string) {
-    driveIdSchema.parse(fileId);
-    return this.access(() => this.get(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&supportsAllDrives=true`, MAX_PDF_BYTES));
   }
   async readDocument(fileId: string) {
     driveIdSchema.parse(fileId);

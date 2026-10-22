@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { z } from 'zod';
 import { siteConfigSchema } from '../sync/config';
-import { documentMetaSchema, guideMetaSchema, localImage, newsMetaSchema } from '../sync/content';
+import { guideMetaSchema, localImage, newsMetaSchema } from '../sync/content';
 import { splitFrontmatter } from '../sync/markdown';
 import { pathOf } from '../sync/slugs';
 import { readContent, syncedSections } from '../sync/sync';
@@ -11,8 +11,7 @@ import { copenhagenDay, sectionTexts } from './sections';
 
 export interface SiteSection { key: string; order: number; label: string; intro: string; path: string }
 interface ItemBase { id: string; section: string; slug: string; path: string; title: string; updatedAt: string }
-export type SiteItem = ItemBase & ({ kind: 'page'; summary: string; html: string } | { kind: 'document'; summary: string; download: string; sizeBytes: number }
-  | { kind: 'notice'; summary: string; html: string; date: string; expires?: string });
+export type SiteItem = ItemBase & ({ kind: 'page'; summary: string; html: string } | { kind: 'notice'; summary: string; html: string; date: string; expires?: string });
 export interface SiteRedirect { from: string; to: string }
 export interface Site { sections: SiteSection[]; items: SiteItem[]; redirects: SiteRedirect[]; assets: Map<string, Uint8Array>; warnings: string[]; internalIds: string[]; buildDay: string }
 
@@ -39,12 +38,7 @@ export async function loadSite(root = '.', buildAt = new Date(process.env.BUILD_
     const slug = slugs[entry.id];
     if (!slug || slug.section !== entry.section) throw new Error(`content/_slugs.json: ${entry.id} mangler eller peger på en anden sektion`);
     const path = pathOf(slug), base = { id: entry.id, section: entry.section, slug: slug.slug, path, title: entry.title, updatedAt: entry.updatedAt };
-    if (entry.kind === 'pdf') {
-      const meta = documentMetaSchema.parse(JSON.parse(Buffer.from(entry.files.get(`${entry.id}.json`)!).toString('utf8')));
-      const download = `/${entry.section}/${slug.slug}.pdf`;
-      assets.set(download, entry.files.get(`${entry.id}.pdf`)!);
-      items.push({ ...base, kind: 'document', summary: '', download, sizeBytes: meta.sizeBytes });
-    } else if (entry.kind === 'notice') {
+    if (entry.kind === 'notice') {
       const meta = newsMetaSchema.parse(JSON.parse(Buffer.from(entry.files.get(`${entry.id}.json`)!).toString('utf8')));
       if (meta.date > buildDay || (meta.expires && meta.expires < buildDay)) continue;
       const html = renderBody(meta.body, () => false, () => { throw new Error('Nyheder kan ikke have billeder'); });

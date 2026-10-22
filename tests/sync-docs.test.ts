@@ -16,11 +16,11 @@ afterEach(async () => { await Promise.all(roots.splice(0).map(p => rm(p, { recur
 async function world() {
   const dir = await mkdtemp(join(tmpdir(), 'gv-docs-')); roots.push(dir);
   const drive = new FakeDrive();
-  for (const name of ['foreningen', 'vejledninger', 'dokumenter', 'nyheder']) drive.folder(`f-${name}`, name, 'root');
+  for (const name of ['foreningen', 'vejledninger', 'nyheder']) drive.folder(`f-${name}`, name, 'root');
   drive.folder('internt', 'Internt', 'elsewhere');
   const config = siteConfigSchema.parse({ rootFolderId: 'root', sections: {
-    foreningen: { type: 'guide', category: 'foreningen', accepts: ['gdoc'] }, vejledninger: { type: 'guide', category: 'vejledning', accepts: ['gdoc'] },
-    dokumenter: { type: 'document', accepts: ['pdf'] }, nyheder: { type: 'notice', source: 'sheet' } } });
+    foreningen: { type: 'guide', accepts: ['gdoc'] }, vejledninger: { type: 'guide', accepts: ['gdoc'] },
+    nyheder: { type: 'notice', source: 'sheet' } } });
   const contentDir = join(dir, 'content');
   const run = () => syncContent({ config, drive, contentDir, now: new Date('2026-10-21T20:00:00Z') });
   const tree = async () => Object.fromEntries(await Promise.all((await walk(contentDir).catch(() => [])).sort().map(async p => [relative(contentDir, p), digest(await readFile(p))])));
