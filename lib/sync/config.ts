@@ -12,6 +12,8 @@ export const siteConfigSchema = z.strictObject({
   rootFolderId: driveIdSchema,
   sections: z.record(sectionKey, section).refine(s => Object.keys(s).length > 0, 'Mindst én sektion kræves'),
   ignoredFolders: z.array(z.string().min(1)).default([]),
+  // External links shown by the site. ProBo holds the association's documents.
+  links: z.strictObject({ probo: z.url().refine(u => new URL(u).protocol === 'https:', 'ProBo-linket skal bruge https').optional() }).default({}),
 }).superRefine((c, ctx) => {
   for (const name of c.ignoredFolders) if (name in c.sections) ctx.addIssue({ code: 'custom', message: `${name}: både sektion og ignoreret mappe` });
 });

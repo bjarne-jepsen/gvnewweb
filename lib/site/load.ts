@@ -7,13 +7,15 @@ import { splitFrontmatter } from '../sync/markdown';
 import { pathOf } from '../sync/slugs';
 import { readContent, syncedSections } from '../sync/sync';
 import { renderBody } from './render';
-import { copenhagenDay, sectionTexts } from './sections';
+import { copenhagenDay, frontpage, sectionTexts } from './sections';
 
 export interface SiteSection { key: string; order: number; label: string; intro: string; path: string }
 interface ItemBase { id: string; section: string; slug: string; path: string; title: string; updatedAt: string }
 export type SiteItem = ItemBase & ({ kind: 'page'; summary: string; html: string } | { kind: 'notice'; summary: string; html: string; date: string; expires?: string });
 export interface SiteRedirect { from: string; to: string }
-export interface Site { sections: SiteSection[]; items: SiteItem[]; redirects: SiteRedirect[]; assets: Map<string, Uint8Array>; warnings: string[]; internalIds: string[]; buildDay: string }
+/** A front-page shortcut or footer link. Internal links always point at a page that exists. */
+export interface SiteLink { id: string; group: 'shortcut' | 'footer'; order: number; label: string; href: string; external: boolean }
+export interface Site { sections: SiteSection[]; items: SiteItem[]; redirects: SiteRedirect[]; links: SiteLink[]; assets: Map<string, Uint8Array>; warnings: string[]; internalIds: string[]; buildDay: string }
 
 // Manual redirects, e.g. from old WordPress URLs. Directory-style paths only.
 const redirectPath = z.string().regex(/^\/(?:[a-zA-Z0-9._~-]+\/)+$/).refine(p => !p.split('/').some(s => s === '.' || s === '..'));
@@ -60,7 +62,12 @@ export async function loadSite(root = '.', buildAt = new Date(process.env.BUILD_
     if (live.has(item.path)) throw new Error(`${item.path} bruges af flere sider`);
     live.add(item.path);
   }
-  const warnings: string[] = [], redirects: SiteRedirect[] = [];
+  const warnings: string[] = [], redirects: SiteRedirect[] = [], links: SiteLink[] = [];
+  for (const [group, where, list] of [['shortcut', 'Forsiden', frontpage.shortcuts], ['footer', 'Sidefoden', frontpage.footer]] as const) list.forEach((link, order) => {
+    if (live.has(link.path)) links.push({ id: `${group}-${order}`, group, order, label: link.label, href: link.path, external: false });
+    else warnings.push(`${where}: "${link.label}" → ${link.path} springes over, fordi siden ikke findes`);
+  });
+  if (config.links.probo) links.push({ id: 'footer-probo', group: 'footer', order: frontpage.footer.length, label: 'Dokumenter i ProBo', href: config.links.probo, external: true });
   for (const item of items) for (const from of slugs[item.id]!.previousPaths) redirects.push({ from, to: item.path });
   const manual = manualRedirectsSchema.parse(JSON.parse(await readFile(join(contentDir, '_redirects.json'), 'utf8').catch(() => '{}')));
   for (const [from, to] of Object.entries(manual)) {
@@ -75,5 +82,5 @@ export async function loadSite(root = '.', buildAt = new Date(process.env.BUILD_
   redirects.sort((a, b) => a.from < b.from ? -1 : 1);
   // Drive IDs must never reach the output; news IDs are editor-facing and not secret.
   const internalIds = [...entries.values()].filter(e => e.kind !== 'notice').map(e => e.id);
-  return { sections, items, redirects, assets, warnings, internalIds, buildDay };
+  return { sections, items, redirects, links, assets, warnings, internalIds, buildDay };
 }

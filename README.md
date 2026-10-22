@@ -8,14 +8,15 @@ Statisk Astro + TypeScript-site for Andelsboligforeningen Grøndalsvænge. Indho
 
 ```text
 Grøndalsvænge hjemmeside (fællesdrev)
-├── foreningen/     Google Docs → faste informationssider
-├── vejledninger/   Google Docs → vejledninger
-├── nyheder/        Ét Google Sheets-ark med nyheder
-├── kalender/       Ikke i brug
-└── redaktion/      Læses ikke
+├── om-groendalsvaenge/  Google Docs → historie, kvarteret, sådan får du et hus
+├── bo-her/              Google Docs → praktisk information til andelshavere
+├── faellesskab/         Google Docs → fester, klubber, legepladser
+├── foreningen/          Google Docs → bestyrelse, udvalg, generalforsamling, kontakt
+├── nyheder/             Ét Google Sheets-ark med nyheder
+└── dokumenter/, vejledninger/, kalender/, redaktion/   Læses ikke
 ```
 
-Sammenhængen mellem mappe og indholdstype ligger i [config/site.json](config/site.json). Navigation og sektionstekster ligger i [lib/site/sections.ts](lib/site/sections.ts).
+Sammenhængen mellem mappe og indholdstype ligger i [config/site.json](config/site.json). Navigation, sektionstekster, forsidens genveje og sidefodens links ligger i [lib/site/sections.ts](lib/site/sections.ts). En genvej til en side, der ikke findes endnu, udelades med en advarsel ved build. ProBo-linket i sidefoden sættes i `links.probo` i konfigurationen (kun https).
 
 - **Genveje:** En genvej publicerer målfilens indhold. Genvejens navn bliver titlen, og målets ID bliver indholdets ID.
 - **Titel:** Filens navn (eller genvejens).
@@ -71,7 +72,7 @@ content/
 └── <sektion>/<id>/<hash>.png  billeder for ét dokument
 ```
 
-Filerne i `content/` skrives af sync. `content/` må kun indeholde de konfigurerede sektioner, `_slugs.json` og `_redirects.json`. Fjernes en sektion fra konfigurationen, rydder næste sync den op, og build afviser alt andet. De må ikke rettes i hånden, undtagen `_slugs.json` og `_redirects.json`. Sync og build afviser filer, de ikke selv kan have skrevet.
+Filerne i `content/` skrives af sync og må ikke rettes i hånden, undtagen `_slugs.json` og `_redirects.json`. `content/` må kun indeholde de konfigurerede sektioner og de to filer. Fjernes en sektion fra konfigurationen, rydder næste sync den op, og build afviser alt andet. Sync og build afviser også filer, de ikke selv kan have skrevet.
 
 **URL'er ændrer sig ikke ved omdøbning.** Slug dannes af titlen første gang, et ID ses, og gemmes. Kun en udvikler ændrer det:
 

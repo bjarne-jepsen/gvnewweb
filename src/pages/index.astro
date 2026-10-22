@@ -2,15 +2,31 @@
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Entries from '../components/Entries.astro';
+import { frontpage } from '../../lib/site/sections';
 const sections = (await getCollection('sections')).map(s => s.data).sort((a, b) => a.order - b.order);
-const items = (await getCollection('items')).map(i => i.data);
+const shortcuts = (await getCollection('links')).map(l => l.data).filter(l => l.group === 'shortcut').sort((a, b) => a.order - b.order);
+// Items are sorted newest news first, so the first three notices are the latest visible ones.
+const news = (await getCollection('items')).map(i => i.data).filter(i => i.kind === 'notice').slice(0, 3);
+const newsSection = sections.find(s => s.key === 'nyheder');
 ---
 <Base title="Forside">
   <p class="prototype">Lokal prototype med indhold fra foreningens Google Drive</p>
-  <h1>Information til livet i Grøndalsvænge</h1>
-  <p class="intro">Find information om foreningen, praktiske vejledninger og dokumenter samlet ét sted.</p>
-  {sections.map(s => <section aria-labelledby={`sektion-${s.key}`}>
-    <h2 id={`sektion-${s.key}`}><a href={s.path}>{s.label}</a></h2>
-    <Entries entries={items.filter(i => i.section === s.key)} />
-  </section>)}
+  <h1>Velkommen til Grøndalsvænge</h1>
+  <p class="intro">{frontpage.intro}</p>
+  {shortcuts.length > 0 && <section aria-labelledby="genveje">
+    <h2 id="genveje">Det vigtigste</h2>
+    <ul class="shortcuts">{shortcuts.map(l => <li><a href={l.href}>{l.label}</a></li>)}</ul>
+  </section>}
+  {newsSection && <section aria-labelledby="seneste-nyt">
+    <h2 id="seneste-nyt">Seneste nyt</h2>
+    <Entries entries={news} empty="Der er ingen nyheder lige nu." />
+    {news.length > 0 && <p><a href={newsSection.path}>Alle nyheder</a></p>}
+  </section>}
+  <section aria-labelledby="sektioner">
+    <h2 id="sektioner">Find rundt</h2>
+    <ul class="entries">{sections.filter(s => s.key !== 'nyheder').map(s => <li>
+      <h3><a href={s.path}>{s.label}</a></h3>
+      <p>{s.intro}</p>
+    </li>)}</ul>
+  </section>
 </Base>

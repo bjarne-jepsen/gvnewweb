@@ -20,6 +20,10 @@ export const collections = {
       z.object({ ...base, kind: z.literal('notice'), html: z.string(), date: z.iso.date(), expires: z.iso.date().optional() }),
     ]),
   }),
+  links: defineCollection({
+    loader: async () => (await load()).links,
+    schema: z.object({ group: z.enum(['shortcut', 'footer']), order: z.number(), label: z.string(), href: z.string(), external: z.boolean() }),
+  }),
   redirects: defineCollection({
     loader: async () => (await load()).redirects.map(r => ({ id: r.from, ...r })),
     schema: z.object({ from: z.string(), to: path }),

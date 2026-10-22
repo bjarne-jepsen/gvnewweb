@@ -5,6 +5,7 @@ const { title } = Astro.props;
 const path = Astro.url.pathname;
 const sections = (await getCollection('sections')).map(s => s.data).sort((a, b) => a.order - b.order);
 const navigation = [['/', 'Forside'], ...sections.map(s => [s.path, s.label])];
+const footerLinks = (await getCollection('links')).map(l => l.data).filter(l => l.group === 'footer').sort((a, b) => a.order - b.order);
 ---
 <!doctype html>
 <html lang="da">
@@ -24,7 +25,11 @@ const navigation = [['/', 'Forside'], ...sections.map(s => [s.path, s.label])];
       </nav>
     </header>
     <main id="indhold"><slot /></main>
-    <footer><p>Grøndalsvænge · Lokal prototype</p><p>Indholdet hentes fra hjemmesidens mapper i foreningens Google Drive.</p></footer>
+    <footer>
+      {footerLinks.length > 0 && <nav aria-label="Sidefod"><ul class="footer-links">{footerLinks.map(l => <li><a href={l.href} rel={l.external ? 'noreferrer' : undefined}>{l.label}</a></li>)}</ul></nav>}
+      <p>Andelsboligforeningen Grøndalsvænge · Lokal prototype</p>
+      <p>Indholdet hentes fra hjemmesidens mapper i foreningens Google Drive.</p>
+    </footer>
   </body>
 </html>
 <style is:global>
@@ -75,6 +80,11 @@ const navigation = [['/', 'Forside'], ...sections.map(s => [s.path, s.label])];
   .back { display:inline-block; font: .95rem/1.6 system-ui, sans-serif; margin-bottom:2rem; }
   footer { border-top:1px solid var(--line); padding-block:2rem; font: .85rem/1.7 system-ui, sans-serif; color:var(--muted); }
   footer p { margin:0; }
+  .footer-links, .shortcuts { list-style:none; padding:0; display:flex; flex-wrap:wrap; gap:.5rem 1.5rem; }
+  .footer-links { margin:0 0 1rem; }
+  .shortcuts { margin:1rem 0 2rem; font:1.05rem/1.6 system-ui, sans-serif; }
+  .shortcuts a { display:inline-block; padding:.6rem 1rem; border:1px solid var(--line); text-decoration:none; }
+  .shortcuts a:hover { border-color:var(--accent); text-decoration:underline; }
   .skip { position:absolute; left:1rem; top:-5rem; padding:.5rem 1rem; background:var(--paper); }
   .skip:focus { top:1rem; }
   @media (max-width:700px) { .columns { grid-template-columns:1fr; gap:0; } header { align-items:flex-start; } nav { width:100%; } }

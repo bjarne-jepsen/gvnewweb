@@ -102,6 +102,21 @@ Ikke kode. Udføres kun efter udtrykkelig godkendelse:
 | Håndrettet `_slugs.json` | "to aktive sider med samme adresse …" |
 | Andre filer bevares | Erstattet af "en sektion, der fjernes fra konfigurationen, og løse filer ryddes op; `_redirects.json` bevares" |
 
+## Resultat for 5b (22. oktober 2026)
+
+- **Tests og typekontrol:** 86 tests består, og typekontrollen giver 0 fejl, advarsler og hints. Integrationstesten viser:
+  - Forsiden har kun genveje til sider, der findes, og advarer om resten.
+  - Kun de tre seneste nyheder vises på forsiden, mens den fjerde står på `/nyheder/`.
+  - Sidefoden linker til Kontakt.
+  - Navigationen følger konfigurationens rækkefølge.
+
+  `site.test` dækker ProBo: Linket vises kun med https, og ukendte link-nøgler afvises.
+- **Konfiguration:** `config/site.json` har de fem sektioner. `dokumenter` og `vejledninger` står som ignorerede mapper, og `links` er tom, indtil ProBo-adressen kendes.
+- **`content/vejledninger/` er fjernet med `git rm`,** ligesom `content/dokumenter/` i 5a. Tokenet er udløbet.
+- **Visuelt tjek:** Forsiden er set i brugerens kørende dev-server (port 4321). Navigationen viser de fem sektioner, "Seneste nyt" viser de to testnyheder, og "Find rundt" viser de fire sektioner. "Det vigtigste" og sidefodens links vises ikke endnu, fordi siderne ikke findes.
+- **Ikke kørt:** Et rigtigt `bun run build` i arbejdsmappen, fordi brugerens dev-server holder `.build/lock`. Integrationstestens fulde build dækker det.
+- **Live-sync virker først efter 5d.** Sync stopper med "Sektionsmappen "om-groendalsvaenge" mangler i roden", indtil de tre mapper er oprettet i Drive. Det er den tilsigtede sikkerhed mod omdøbte eller slettede mapper.
+
 ## Åbne punkter, der ikke blokerer planen
 
 - ProBo-adressen og hvem der har adgang. Kræves til 5b, men kan tilføjes senere i konfigurationen.

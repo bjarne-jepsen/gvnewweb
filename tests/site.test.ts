@@ -36,7 +36,7 @@ async function site(sections: Record<string, unknown> = { foreningen: { type: 'g
 test('loadSite giver sorterede sider, stier og interne ID\'er kun til kontrol', async () => {
   const s = await loadSite(await site());
   expect(s.items.map(i => [i.title, i.path])).toEqual([['Bestyrelsen', '/foreningen/bestyrelsen/'], ['Om foreningen', '/foreningen/om-foreningen/']]);
-  expect(s.sections).toEqual([{ key: 'foreningen', order: 0, label: 'Foreningen', intro: 'Om andelsboligforeningen, og hvordan den drives.', path: '/foreningen/' }]);
+  expect(s.sections).toEqual([{ key: 'foreningen', order: 0, label: 'Foreningen', intro: 'Bestyrelse, udvalg, generalforsamling, regler og kontakt.', path: '/foreningen/' }]);
   expect(s.internalIds.sort()).toEqual(['doc-a', 'doc-b']);
 });
 test('loadSite afviser manglende slug, redirect over en side og sektion uden navigation', async () => {
@@ -68,4 +68,16 @@ test('nyheder filtreres ved build: fra datoen, til og med udløbsdagen i dansk t
   expect(s.internalIds).toEqual([]); expect(s.buildDay).toBe('2026-10-21');
   expect(s.items[0]).toMatchObject({ kind: 'notice', path: '/nyheder/2026-10-01-udloeber/', date: '2026-10-01', expires: '2026-10-31', html: '<p>Tekst</p>' });
   await rejects(loadSite(root, new Date('ugyldig')), /BUILD_AT/);
+});
+
+test('genveje og sidefod peger kun på sider, der findes; ProBo kun med https', async () => {
+  const root = await site();
+  const config = JSON.parse(await readFile(join(root, 'config/site.json'), 'utf8'));
+  await writeFile(join(root, 'config/site.json'), JSON.stringify({ ...config, links: { probo: 'https://probo.example.test/' } }));
+  const s = await loadSite(root);
+  expect(s.links).toEqual([{ id: 'footer-probo', group: 'footer', order: 2, label: 'Dokumenter i ProBo', href: 'https://probo.example.test/', external: true }]);
+  expect(s.warnings).toContain('Forsiden: "Kontakt" → /foreningen/kontakt/ springes over, fordi siden ikke findes');
+  expect(s.warnings).toContain('Sidefoden: "Regler og dokumenter" → /foreningen/regler-og-dokumenter/ springes over, fordi siden ikke findes');
+  expect(() => siteConfigSchema.parse({ ...config, links: { probo: 'http://probo.example.test/' } })).toThrow('https');
+  expect(() => siteConfigSchema.parse({ ...config, links: { andet: 'https://x.test/' } })).toThrow();
 });
