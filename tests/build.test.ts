@@ -69,6 +69,10 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect(first.log).toContain('Forsiden: "Sælg dit hus" → /bo-her/saelg-dit-hus/ springes over, fordi siden ikke findes');
   expect([...home.matchAll(/href="(\/nyheder\/[^"]+)"/g)].map(m => m[1])).toEqual(['/nyheder/2026-10-20-vandet-lukkes/', '/nyheder/2026-09-01-aeldre-nyhed-a/', '/nyheder/2026-08-01-aeldre-nyhed-b/']);
   expect(home).not.toContain('OLDEST_NEWS');
+  // CVI L2: the news are cards, "Find rundt" lists every section except the news in config order.
+  expect(home.match(/<ul class="entries cards">/g)).toHaveLength(1);
+  expect(home).toContain('<p class="more"><a href="/nyheder/">Alle nyheder</a></p>');
+  expect([...home.matchAll(/<ul class="sections">([\s\S]*?)<\/ul>/g)][0]![1]!.match(/href="([^"]+)"/g)).toEqual(['href="/foreningen/"', 'href="/bo-her/"']);
   expect(await html('nyheder/index.html')).toContain('OLDEST_NEWS');
   expect(home).toMatch(/<nav aria-label="Sidefod"><ul class="footer-links"><li><a href="\/foreningen\/kontakt\/">Kontakt<\/a><\/li><\/ul><\/nav>/);
   expect([...home.matchAll(/<nav aria-label="Hovednavigation">([\s\S]*?)<\/nav>/g)][0]![1]!.match(/href="([^"]+)"/g)).toEqual(['href="/"', 'href="/foreningen/"', 'href="/bo-her/"', 'href="/nyheder/"']);

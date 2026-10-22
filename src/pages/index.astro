@@ -19,12 +19,12 @@ const newsSection = sections.find(s => s.key === 'nyheder');
   </section>}
   {newsSection && <section aria-labelledby="seneste-nyt">
     <h2 id="seneste-nyt">Seneste nyt</h2>
-    <Entries entries={news} empty="Der er ingen nyheder lige nu." />
-    {news.length > 0 && <p><a href={newsSection.path}>Alle nyheder</a></p>}
+    <Entries cards entries={news} empty="Der er ingen nyheder lige nu." />
+    {news.length > 0 && <p class="more"><a href={newsSection.path}>Alle nyheder</a></p>}
   </section>}
   <section aria-labelledby="sektioner">
     <h2 id="sektioner">Find rundt</h2>
-    <ul class="entries">{sections.filter(s => s.key !== 'nyheder').map(s => <li>
+    <ul class="sections">{sections.filter(s => s.key !== 'nyheder').map(s => <li>
       <h3><a href={s.path}>{s.label}</a></h3>
       <p>{s.intro}</p>
     </li>)}</ul>
