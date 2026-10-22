@@ -7,13 +7,15 @@ export async function getStaticPaths() {
   return (await getCollection('items')).map(({ data: item }) => ({ params: { section: item.section, slug: item.slug }, props: { item, section: sections.get(item.section)! } }));
 }
 const { item, section } = Astro.props;
+// "Til om Grøndalsvænge": only the first letter is lowered, so proper nouns keep their capital.
+const back = section.label.charAt(0).toLocaleLowerCase('da-DK') + section.label.slice(1);
 ---
 <Base title={item.title}>
-  <a class="back" href={section.path}>Til {section.label.toLocaleLowerCase('da-DK')}</a>
+  <a class="back" href={section.path}>Til {back}</a>
   <article>
     <h1>{item.title}</h1>
     {item.kind === 'notice' && <p class="meta"><time datetime={item.date}>{date(item.date)}</time></p>}
     <div class="prose" set:html={item.html} />
-    {item.kind !== 'notice' && <p class="meta">Opdateret {date(item.updatedAt)}</p>}
+    {item.kind !== 'notice' && <p class="meta updated">Opdateret {date(item.updatedAt)}</p>}
   </article>
 </Base>

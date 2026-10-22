@@ -89,6 +89,11 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   const page = await html('foreningen/om-foreningen/index.html');
   expect(page).toContain('<h1>Om foreningen</h1>'); expect(page).toContain('<h2>Velkommen</h2>');
   expect(page).toContain(`<img src="/foreningen/om-foreningen/${image}" alt="Kort over området"`);
+  // CVI L3: guide sections are plain lists, the news section shows cards; pages end with the update date.
+  expect(page).toContain('<a class="back" href="/foreningen/">Til foreningen</a>');
+  expect(page).toMatch(/<p class="meta updated">Opdateret \d+\. \w+ \d{4}<\/p>/);
+  expect(await html('foreningen/index.html')).toContain('<ul class="entries"><li>');
+  expect(await html('nyheder/index.html')).toContain('<ul class="entries cards"><li>');
   expect(await readFile(dist(`foreningen/om-foreningen/${image}`))).toEqual(png);
   for (const path of await walk(join(root, 'dist'))) expect((await readFile(path)).toString()).not.toMatch(/CANARY|target-doc|doc-1/);
   expect(JSON.parse(await html('search.json')).map((x: { url: string }) => x.url).sort()).toEqual(['/bo-her/leje-af-lokaler/', '/foreningen/kontakt/', '/foreningen/om-foreningen/',
