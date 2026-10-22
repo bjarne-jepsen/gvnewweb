@@ -36,7 +36,7 @@ bun run build
 bun run dev
 ```
 
-`bun run build` bygger fra `content/` i `.build/staging`, kontrollerer output og erstatter derefter `dist`. Fejler buildet, bevares det eksisterende `dist`. Build og dev beskyttes af `.build/lock`. Efter en afbrudt dev-server kan låsen blive liggende. Fjern den kun, når ingen build- eller dev-proces kører.
+`bun run build` bygger fra `content/` i `.build/staging`, kontrollerer output og erstatter derefter `dist`. Fejler buildet, bevares det eksisterende `dist`. Build og dev beskyttes af `.build/lock`, og sync af `.sync/lock`. Låsen gemmer proces-ID og starttid. Kører den proces ikke længere, fx efter en afbrudt dev-server, fjernes låsen automatisk med en advarsel. Kører den stadig, afvises kørslen med proces-ID'et i fejlen. En lås uden proces-ID røres ikke. Fjern den kun i hånden, når ingen build-, dev- eller sync-proces kører.
 
 ## Synkronisering
 

@@ -177,6 +177,49 @@ Ikke kode. Udføres kun efter udtrykkelig godkendelse:
   
   Alle tre stod allerede på det gamle site. Det er redaktionens ansvar, om de skal stå på det nye site.
 
+## 5f — Låse med proces-ID
+
+**Baggrund:** `.build/lock` er blevet efterladt fire gange, når dev-serveren blev afbrudt. Derefter starter hverken `bun run dev` eller `bun run build`, før nogen fjerner filen i hånden. Låsefilen er tom, så ingen kan se, om den proces, der oprettede den, stadig kører. `.sync/lock` har samme svaghed.
+
+**Mål:** En lås gemmer, hvilken proces der holder den. Er den proces væk, fjernes låsen automatisk, og kørslen fortsætter med en advarsel. Kører processen stadig, afvises kørslen som før, og fejlen nævner proces-ID og starttidspunkt.
+
+**Regler:**
+1. Låsen oprettes atomisk som før (`wx`). Indholdet er `{"pid": …, "startedAt": …}`.
+2. Findes låsen, læses den. Er processen væk, fjernes låsen, men kun hvis filen stadig har samme indhold. Derefter forsøges igen.
+3. En lås uden gyldigt indhold afvises. Det gælder tomme låse fra før denne ændring og låse, der lige er oprettet, men endnu ikke skrevet. Default deny: kan vi ikke se, hvem der holder låsen, rører vi den ikke.
+4. Ved afslutning fjerner en proces kun låsen, hvis den stadig er dens egen.
+
+| Fil | Ændring |
+|---|---|
+| `lib/lock.ts` | Ny fælles `acquireLock(path, label)`. Returnerer `release()` og eventuelt den efterladte lås, der blev fjernet |
+| `scripts/build.ts` | Bruger `acquireLock` til `.build/lock` og skriver en advarsel, hvis en efterladt lås blev fjernet |
+| `lib/sync/sync.ts` | Bruger `acquireLock` til `.sync/lock`. En fjernet efterladt lås kommer med som advarsel i rapporten |
+| `tests/lock.test.ts` | Nye tests |
+| `README.md` | Afsnittet om `.build/lock` opdateres |
+
+**Testkriterier:**
+1. Låsen indeholder proces-ID og starttid og fjernes ved `release()`. En lås, der holdes, afviser en ny kørsel med proces-ID i fejlen.
+2. En lås fra en proces, der er afsluttet, fjernes, og den nye kørsel får låsen.
+3. En lås fra en anden proces, der kører, afvises og bliver liggende.
+4. En tom eller ugyldig lås afvises og bliver liggende.
+5. `release()` fjerner ikke en lås, som en anden proces har overtaget.
+6. Sync og build kører igennem med en efterladt lås, og sync skriver en advarsel i rapporten.
+7. Hele suiten, typekontrollen og et rigtigt `bun run build` består.
+
+**Risici:**
+- **Genbrugt proces-ID.** Hvis styresystemet har givet det gamle proces-ID til en ny proces, ser låsen ud til at blive holdt. Så afvises kørslen, og fejlen nævner proces-ID'et. Det er den sikre retning.
+- **Kapløb.** To kørsler, der starter inden for få millisekunder af hinanden, kan begge se den samme efterladte lås. Tjekket af filens indhold lige før fjernelsen gør vinduet meget lille. Det er ikke helt lukket, men det er ikke realistisk ved lokal brug.
+- **Efterladt Astro-proces.** Hvis `bun` dør, mens Astro-dev-serveren lever videre, frigives låsen, og en ny dev-server vælger en anden port. Det skader ikke indholdet.
+- **Den nuværende tomme lås** fjernes ikke automatisk, fordi den er uden proces-ID. Den skal fjernes i hånden en sidste gang.
+
+### Resultat for 5f
+
+- `lib/lock.ts` med `acquireLock` bruges nu af både `scripts/build.ts` og `lib/sync/sync.ts`.
+- Ny testfil `tests/lock.test.ts` med fem tests for kriterie 1–5. `tests/sync.test.ts` og byggetesten i `tests/build.test.ts` har fået hver sin test af en efterladt lås (kriterie 6).
+- Hele suiten giver 98 bestået og 0 fejlet. Typekontrollen giver 0 fejl, og et rigtigt `bun run build` består outputkontrollen.
+- **Afprøvet i praksis:** En dev-server blev startet og dræbt med `kill -9`. Den efterlod `.build/lock` med sit proces-ID. Det efterfølgende `bun run build` fjernede låsen med en advarsel og byggede uden fejl.
+- **Ingen afvigelse om den tomme lås:** Den tomme lås fra kl. 18:39 var allerede fjernet i hånden, før ændringen blev lavet.
+
 ## Åbne punkter, der ikke blokerer planen
 
 - ProBo-adressen og hvem der har adgang. Kræves til 5b, men kan tilføjes senere i konfigurationen.

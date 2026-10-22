@@ -1,8 +1,9 @@
-import { cp, mkdir, open, readdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, readdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { z } from 'zod';
 import { googleDocsBlocks } from '../google/docs';
 import { sheetRows } from '../google/sheets';
+import { acquireLock } from '../lock';
 import type { SiteConfig } from './config';
 import { digest, guideMetaSchema, imageFormat, localImage, MAX_IMAGE_BYTES, MAX_IMAGES, newsFingerprint, newsMetaSchema, serializeNews } from './content';
 import { DriveAccessError, FOLDER, GDOC, SHEET, SHORTCUT, type DriveItem, type DriveSource } from './drive';
@@ -118,7 +119,8 @@ export async function syncContent(o: SyncOptions): Promise<SyncReport> {
   const warn = (e: ReportEntry) => report.warnings.push(e), fail = (e: ReportEntry) => report.errors.push(e);
   const workDir = join(dirname(contentDir), '.sync');
   await mkdir(workDir, { recursive: true });
-  const lock = await open(join(workDir, 'lock'), 'wx').catch(() => { throw new Error('Sync kører allerede. Fjern kun .sync/lock efter et afbrudt forløb.'); });
+  const lock = await acquireLock(join(workDir, 'lock'), 'Sync');
+  if (lock.recovered) warn({ section: '.sync', title: 'lock', message: `Efterladt lås fra proces ${lock.recovered.pid} (startet ${lock.recovered.startedAt}) er fjernet; processen kører ikke længere` });
   try {
     // 1. Complete listings. Any error here aborts before anything is written.
     const folders = new Map<string, DriveItem>();
@@ -264,6 +266,6 @@ export async function syncContent(o: SyncOptions): Promise<SyncReport> {
     await rm(previous, { recursive: true, force: true });
     return report;
   } finally {
-    await lock.close(); await rm(join(workDir, 'lock'), { force: true });
+    await lock.release();
   }
 }

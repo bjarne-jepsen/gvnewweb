@@ -55,7 +55,13 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
     ['n-future', '2099-01-01', 'FUTURE_CANARY', 'Tekst', '', 'offentlig'],
     ['n-draft', '2026-10-20', 'DRAFT_CANARY', 'Tekst', '', 'kladde']]));
   await sync();
+  // An interrupted dev server left its lock behind (phase 5f): the build takes it over.
+  const gone = Bun.spawn(['true']); await gone.exited;
+  await mkdir(join(root, '.build'), { recursive: true });
+  await writeFile(join(root, '.build/lock'), JSON.stringify({ pid: gone.pid, startedAt: '2026-10-22T16:39:00.000Z' }));
   const first = await expectGreen();
+  expect(first.log).toContain(`fjernede .build/lock efterladt af proces ${gone.pid}`);
+  expect(await Bun.file(join(root, '.build/lock')).exists()).toBe(false);
 
   // 0. Front page and footer: existing shortcut targets only, the three latest news, navigation in config order.
   const home = await html('index.html');

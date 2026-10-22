@@ -163,6 +163,18 @@ test('fejl i listning eller manglende sektionsmappe ændrer intet', async () => 
   expect(await Bun.file(join(w.contentDir, '../.sync/lock')).exists()).toBe(false);
 });
 
+test('en efterladt .sync/lock fra en afsluttet proces fjernes og nævnes i rapporten', async () => {
+  const w = await world();
+  w.drive.gdoc('doc-a', 'A', 'f-foreningen', doc('doc-a'));
+  const gone = Bun.spawn(['true']); await gone.exited;
+  await mkdir(join(w.contentDir, '../.sync'), { recursive: true });
+  await writeFile(join(w.contentDir, '../.sync/lock'), JSON.stringify({ pid: gone.pid, startedAt: '2026-10-22T16:39:00.000Z' }));
+  const report = await w.run();
+  expect(report.added.map(e => e.title)).toEqual(['A']);
+  expect(report.warnings.filter(e => e.section === '.sync')).toEqual([{ section: '.sync', title: 'lock', message: `Efterladt lås fra proces ${gone.pid} (startet 2026-10-22T16:39:00.000Z) er fjernet; processen kører ikke længere` }]);
+  expect(await Bun.file(join(w.contentDir, '../.sync/lock')).exists()).toBe(false);
+});
+
 test('ulæseligt mål, fejlet hentning og ugyldigt dokument beholder sidste gyldige version', async () => {
   const w = await world();
   w.drive.gdoc('target', 'intern', 'internt', doc('target')); w.drive.shortcut('sc', 'Vedtægter', 'f-foreningen', 'target', GDOC);

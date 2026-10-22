@@ -1,14 +1,13 @@
 import { mkdir, writeFile, rm, rename } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
+import { acquireLock } from '../lib/lock';
 import { loadSite } from '../lib/site/load';
 import { verifyOutput } from './verify-output';
 
 const dev = process.argv.includes('--dev');
 await mkdir('.build', { recursive: true });
-let lock;
-try { lock = await Bun.file('.build/lock').exists() ? null : await import('node:fs/promises').then(fs => fs.open('.build/lock', 'wx')); }
-catch { throw new Error('Build/dev kører allerede. Fjern kun .build/lock efter et afbrudt forløb.'); }
-if (!lock) throw new Error('Build/dev kører allerede (.build/lock).');
+const lock = await acquireLock('.build/lock', 'Build/dev');
+if (lock.recovered) console.warn(`Advarsel: fjernede .build/lock efterladt af proces ${lock.recovered.pid} (startet ${lock.recovered.startedAt}), som ikke kører længere.`);
 try {
   // content/ is the only source. Invalid content stops here, before dist is touched.
   // One build instant for this script and Astro, so news filtering cannot differ between them.
@@ -38,5 +37,5 @@ try {
     console.log(`Outputkontrol bestået: ${site.items.length} sider, ${site.redirects.length} redirects, ${site.assets.size} billeder. Dato: ${site.buildDay}.`);
   }
 } finally {
-  await lock.close(); await rm('.build/lock', { force: true });
+  await lock.release();
 }
