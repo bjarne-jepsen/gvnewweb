@@ -2,7 +2,7 @@ import { fromMarkdown } from 'mdast-util-from-markdown';
 import { gfmTableFromMarkdown } from 'mdast-util-gfm-table';
 import { gfmTable } from 'micromark-extension-gfm-table';
 import type { Nodes, Root } from 'mdast';
-import type { BodyBlock, Inline, TextBlock } from '../contracts/blocks';
+import { safeHref, type BodyBlock, type Inline, type TextBlock } from '../contracts/blocks';
 
 /** A block whose image already has its final, document-local file name. */
 export type SerializableBlock = Exclude<BodyBlock, { type: 'image' }> | { type: 'image'; alt: string; name: string };
@@ -12,7 +12,7 @@ const escapeText = (s: string) => s.replace(/[\\`*_[\]<>|~&#]/g, '\\$&')
   .replace(/(^|\n)[ \t]+/g, '$1')            // leading indentation could start a code block
   .replace(/(^|\n)([-+=])/g, '$1\\$2')        // list markers and setext underlines
   .replace(/(^|\n)(\d+)([.)])/g, '$1$2\\$3'); // ordered-list markers
-const escapeUrl = (href: string) => new URL(href).href.replace(/[()<> ]/g, c => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
+const escapeUrl = (href: string) => safeHref(href)!.replace(/[()<> ]/g, c => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
 const punct = /[\p{P}\p{S}]/u, space = /\s/;
 const loose = (c: string | undefined) => !c || space.test(c) || punct.test(c);
 
@@ -99,7 +99,7 @@ export function validateMarkdown(md: string, isLocalImage: (url: string) => bool
     if (!allowed.has(node.type)) problems.add(node.type);
     if (node.type === 'heading' && node.depth < 2) problems.add('heading-1');
     if (node.type === 'list' && node.ordered) problems.add('ordered-list');
-    if (node.type === 'link' && !/^https?:$/.test((() => { try { return new URL(node.url).protocol; } catch { return ''; } })())) problems.add(`link:${node.url.slice(0, 40)}`);
+    if (node.type === 'link' && !safeHref(node.url)) problems.add(`link:${node.url.slice(0, 40)}`);
     if (node.type === 'image' && (!isLocalImage(node.url) || !node.alt?.trim())) problems.add(`image:${node.url.slice(0, 40)}`);
     if ('children' in node) node.children.forEach(child => walk(child as Nodes));
   };

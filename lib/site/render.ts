@@ -1,4 +1,5 @@
 import type { Nodes, PhrasingContent, RootContent } from 'mdast';
+import { safeHref } from '../contracts/blocks';
 import { validateMarkdown } from '../sync/markdown';
 
 const escape = (s: string) => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
@@ -17,9 +18,9 @@ export function renderBody(body: string, isLocalImage: (url: string) => boolean,
     if (n.type === 'break') return '<br>';
     if (n.type === 'image') return img(n);
     if (n.type === 'link') {
-      const url = new URL(n.url); // validateMarkdown already allows http(s) only; checked again here
-      if (url.protocol !== 'https:' && url.protocol !== 'http:') throw new Error('Usikker linkprotokol');
-      return `<a href="${escape(url.href)}" rel="noreferrer">${inline(n.children)}</a>`;
+      const href = safeHref(n.url); // validateMarkdown already applies the same rule; checked again here
+      if (!href) throw new Error('Usikker linkprotokol');
+      return `<a href="${escape(href)}" rel="noreferrer">${inline(n.children)}</a>`;
     }
     return unsupported(n);
   }).join('');

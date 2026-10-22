@@ -20,9 +20,15 @@ test('alle mål er en sektion eller en side i en konfigureret sektion', () => {
   expect(Object.keys(redirects)).toEqual(Object.keys(redirects).sort()); // kept sorted for review
 });
 
-test('redirects til sektioner virker med det samme; resten venter med en advarsel, til siden findes', async () => {
+test('hvert redirect er enten aktivt eller venter med en advarsel, til siden findes', async () => {
+  // Independent of which pages content/ holds right now: every entry is accounted for exactly once.
   const site = await loadSite('.');
-  const live = site.redirects.filter(r => r.from in redirects);
-  expect(live.map(r => `${r.from} → ${r.to}`)).toEqual(expect.arrayContaining(['/andelshaveren/ → /bo-her/', '/groendalsvaenge-socialt/ → /faellesskab/', '/internt-2/nyhedsarkiv/ → /nyheder/']));
-  expect(site.warnings).toContain('_redirects.json: /husorden-fuld/ → /bo-her/husorden-kort-fortalt/ springes over, fordi /bo-her/husorden-kort-fortalt/ ikke findes');
+  const live = new Set([...site.sections.map(s => s.path), ...site.items.map(i => i.path)]);
+  for (const [from, to] of Object.entries(redirects)) {
+    const active = site.redirects.some(r => r.from === from && r.to === to);
+    const waiting = site.warnings.includes(`_redirects.json: ${from} → ${to} springes over, fordi ${to} ikke findes`);
+    expect([from, active, waiting]).toEqual([from, live.has(to), !live.has(to)]);
+  }
+  // Section targets always exist, so these work from day one.
+  expect(site.redirects.map(r => `${r.from} → ${r.to}`)).toEqual(expect.arrayContaining(['/andelshaveren/ → /bo-her/', '/groendalsvaenge-socialt/ → /faellesskab/', '/internt-2/nyhedsarkiv/ → /nyheder/']));
 });

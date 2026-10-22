@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { BodyBlock, Inline, TextBlock } from '../contracts/blocks';
+import { safeHref, type BodyBlock, type Inline, type TextBlock } from '../contracts/blocks';
 const obj = z.record(z.string(), z.unknown());
 type Obj = Record<string, unknown>;
 const object = (v: unknown): Obj => obj.parse(v);
@@ -69,8 +69,8 @@ export async function googleDocsBlocks(input: unknown, expectedId: string, resol
         if (element.textRun) {
           const run = object(element.textRun), style = object(run.textStyle ?? {});
           const link = style.link ? object(style.link) : undefined;
-          const href = link ? z.url().parse(link.url) : undefined;
-          if (href && !['http:', 'https:'].includes(new URL(href).protocol)) throw new Error('Google Docs: kun HTTP(S)-links understøttes');
+          const href = link ? safeHref(link.url) : undefined;
+          if (link && !href) throw new Error('Google Docs: kun links til websider (http/https) og e-mail til én adresse understøttes');
           content.push({ text: z.string().parse(run.content).replace(/\u000b/g, '\n'), ...(href ? { href } : {}), ...(style.bold ? { bold: true } : {}), ...(style.italic ? { italic: true } : {}) });
         } else if (element.inlineObjectElement) {
           if (inCell) throw new Error('Google Docs: billeder i tabelceller understøttes ikke');

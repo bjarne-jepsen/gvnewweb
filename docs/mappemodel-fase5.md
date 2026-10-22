@@ -130,6 +130,53 @@ Ikke kode. Udføres kun efter udtrykkelig godkendelse:
   Integrationstesten fra 2c viser fortsat, at et WordPress-redirect bliver en side, og at et manglende mål springes over med en advarsel. Typekontrollen giver 0 fejl.
 - **Dev-serveren** viser endnu ikke de nye redirects (404 på `/andelshaveren/`), fordi den indlæste `content/` ved opstart. En genstart løser det. Den er ikke genstartet, fordi den er brugerens. Et rigtigt `bun run build` er ikke kørt af samme grund.
 
+## Status for 5d (22. oktober 2026)
+
+- **Punkt 1 er udført** med brugerens godkendelse. Mapperne `om-groendalsvaenge` (`1ohEjrJQ…`), `bo-her` (`1d4cJjVW…`) og `faellesskab` (`1Z7KDNh0…`) er oprettet i roden af fællesdrevet. Roden indeholder nu præcis de fem konfigurerede sektioner og de fire ignorerede mapper (`dokumenter`, `vejledninger`, `kalender`, `redaktion`), så en sync giver ingen advarsler om roden.
+- **Punkt 2 og 3 venter:** testdokumenterne og eventuelle udkast til sider. Ingen eksisterende filer er rørt.
+- **Live-sync kl. 17:07 UTC** med ét token for admin-kontoen (`drive.readonly` og `documents.readonly`):
+  - 3 uændrede: siden "foreningen" og de to testnyheder. Exit-kode 0 og 0 fejl.
+  - 2 advarsler for de to Google Docs i `nyheder/`. Ingen advarsler om roden.
+  - `content/` er byte-identisk med det committede. Det bekræfter, at `git rm` af `content/dokumenter/` og `content/vejledninger/` gav det samme som sync.
+  - `fase1-test` læses ikke længere, fordi `vejledninger` er ignoreret.
+
+## 5e — E-mail-links (`mailto:`)
+
+**Baggrund:** Fire udkast blev afvist ved sync, fordi de indeholder e-mail-links: Kontakt, Udvalg og arbejdsgrupper, Sælg dit hus og Forsikringsskader. Sitet tillod kun http(s)-links. En kontaktside har brug for klikbare e-mailadresser.
+
+**Mål:** Links til en enkelt e-mailadresse er tilladt overalt, hvor http(s)-links er tilladt. Alt andet afvises som hidtil.
+
+**Regel:** Et link er tilladt, hvis det er `http:` eller `https:`, eller hvis det har formen `mailto:navn@domæne.tld` med **én** adresse og **intet andet**: ingen `?subject`, `?cc`, `?bcc`, `?body` og ingen flere modtagere. Andre protokoller (`javascript:`, `data:`, `file:` osv.) afvises som før.
+
+| Fil | Ændring |
+|---|---|
+| `lib/contracts/blocks.ts` | Ny fælles funktion `safeHref(value)`, som returnerer det normaliserede link eller `undefined`. Blokkontraktens `href` bruger den |
+| `lib/google/docs.ts` | Parseren bruger `safeHref`. Et link, der ikke er tilladt, afviser fortsat dokumentet |
+| `lib/sync/markdown.ts` | Valideringen bruger `safeHref`. Serializeren beholder `mailto:` uændret |
+| `lib/site/render.ts` | Rendereren bruger `safeHref` som ekstra sikring og skriver `<a href="mailto:…">` |
+| `lib/google/sheets.ts` | Links i celler i nyhedsarket bruger `safeHref`. Nøgne e-mailadresser i tekst bliver ikke automatisk til links |
+
+**Testkriterier:**
+1. `safeHref` godkender http, https og `mailto:` med én adresse og afviser `mailto:` med parametre eller flere modtagere samt `javascript:`, `data:` og `file:`.
+2. Parseren omsætter et `mailto:`-link til et link, men afviser et dokument med `mailto:…?bcc=…`.
+3. Serializer og validering bevarer `mailto:`-links ved rundturen gennem Markdown. Valideringen afviser `mailto:` med parametre.
+4. Rendereren skriver `<a href="mailto:…">`. Et `mailto:`-link i en celle i nyhedsarket bliver et link.
+5. Hele suiten, typekontrollen og en live-sync, hvor de fire udkast nu går igennem.
+
+**Risici:** Synlige e-mailadresser kan blive høstet til spam. De står dog allerede som tekst på både det nuværende og det nye site, og der er ingen personlige adresser i udkastene. En `mailto:` med `?body` eller `?bcc` kunne bruges til at sende mails med skjult indhold eller modtagere. Derfor afvises parametre helt.
+
+### Resultat for 5e
+
+- Ny testfil `tests/links.test.ts` med fire tests, der dækker kriterie 1–4. Hele suiten giver 92 bestået og 0 fejlet, og typekontrollen giver 0 fejl.
+- `tests/redirects.test.ts` afhænger ikke længere af, hvilke sider `content/` indeholder lige nu. Hvert redirect er enten aktivt, eller det springes over med en advarsel, til siden findes.
+- **Live-sync** kl. 17:33 UTC: 4 nye, 22 uændrede og 0 fejl. De fire nye er netop de fire udkast, der før blev afvist. De to advarsler gælder testdokumenterne "nyhed 1" og "nyhed 2" i `nyheder/` (oprydning i 5d).
+- **Afvigelse fra antagelsen om adresser:** udkastene indeholder 9 forskellige adresser. De fleste er foreningens funktionsadresser (`fu@`, `kom@`, `byg@`, `tek@`, `vur@` og `andelsboligforeningen@groendalsvaenge.dk`). Tre andre bør redaktionen se på:
+  - `ps@andelsbo-adm.dk` ligner en personlig adresse hos administrator.
+  - `socialudvalggrondalsvaenge@gmail.com` er en privat Gmail-konto.
+  - `erhvervsskade@gjensidige.dk` er forsikringsselskabets adresse.
+  
+  Alle tre stod allerede på det gamle site. Det er redaktionens ansvar, om de skal stå på det nye site.
+
 ## Åbne punkter, der ikke blokerer planen
 
 - ProBo-adressen og hvem der har adgang. Kræves til 5b, men kan tilføjes senere i konfigurationen.

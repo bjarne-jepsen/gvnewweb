@@ -1,10 +1,8 @@
 import { z } from 'zod';
-import type { Inline } from '../contracts/blocks';
+import { safeHref, type Inline } from '../contracts/blocks';
 
 export interface SheetCell { text: string; number?: number; runs: Inline[] }
-const httpUrl = (value: unknown) => {
-  try { const url = new URL(String(value)); return url.protocol === 'https:' || url.protocol === 'http:' ? url.href : undefined; } catch { return undefined; }
-};
+const httpUrl = safeHref; // cell links: http(s) or mailto to one address; anything else stays plain text
 const cellSchema = z.looseObject({
   formattedValue: z.string().optional(), hyperlink: z.string().optional(),
   effectiveValue: z.looseObject({ numberValue: z.number().optional() }).optional(),

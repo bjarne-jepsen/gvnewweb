@@ -1,6 +1,15 @@
 import { z } from 'zod';
 const text = z.string().transform(s => s.replace(/\r\n?/g, '\n').normalize('NFC'));
-const url = z.url().refine(s => ['http:', 'https:'].includes(new URL(s).protocol));
+const mailto = /^mailto:[A-Za-z0-9._+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/;
+/** The one link rule for parser, Markdown validation, rendering and news: http(s), or a mailto with
+ * exactly one address and no parameters (no ?subject/?cc/?bcc/?body). Returns the normalized href. */
+export function safeHref(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined;
+  const v = value.trim();
+  if (/^mailto:/i.test(v)) { const href = `mailto:${v.slice(7)}`; return mailto.test(href) ? href : undefined; }
+  try { const url = new URL(v); return url.protocol === 'https:' || url.protocol === 'http:' ? url.href : undefined; } catch { return undefined; }
+}
+const url = z.string().refine(s => safeHref(s) !== undefined, 'Kun http(s)-links og mailto til én adresse er tilladt');
 export const assetFields = {
   assetPath: z.string().regex(/^[a-zA-Z0-9_-]+\/[a-zA-Z0-9_.-]+$/).refine(s => !s.includes('..')),
   assetHash: z.string().regex(/^sha256:[a-f0-9]{64}$/), sizeBytes: z.number().int().nonnegative(),
