@@ -117,6 +117,19 @@ Ikke kode. Udføres kun efter udtrykkelig godkendelse:
 - **Ikke kørt:** Et rigtigt `bun run build` i arbejdsmappen, fordi brugerens dev-server holder `.build/lock`. Integrationstestens fulde build dækker det.
 - **Live-sync virker først efter 5d.** Sync stopper med "Sektionsmappen "om-groendalsvaenge" mangler i roden", indtil de tre mapper er oprettet i Drive. Det er den tilsigtede sikkerhed mod omdøbte eller slettede mapper.
 
+## Resultat for 5c (22. oktober 2026)
+
+- **`content/_redirects.json`** har 48 redirects. Listen er kontrolleret mod sideinventaret: De 17 WordPress-sider uden redirect er præcis dem, analysen markerer "Udgår". To indlæg, der indgår i nye sider, er også med.
+  - **Virker straks:** Tre redirects peger på sektioner, der altid findes: `/andelshaveren/`, `/groendalsvaenge-socialt/` og `/internt-2/nyhedsarkiv/`.
+  - **Venter:** Resten giver en advarsel ved build, indtil målsiden findes.
+- **Afvigelse:** Siden "Om Grøndalsvænge" hedder i stedet **Historie og arkitektur**, så adressen ikke bliver `/om-groendalsvaenge/om-groendalsvaenge/`. Analysen er rettet og har fået et bilag med hele listen.
+- **Tests:** 88 består, heraf 2 nye i `tests/redirects.test.ts`:
+  - Den ene tjekker, at alle mål ligger i en konfigureret sektion med et gyldigt slug, at ingen gammel adresse skygger for en sektion, og at listen er sorteret.
+  - Den anden tjekker, at redirects til sektioner virker med det samme, og at resten giver en advarsel.
+
+  Integrationstesten fra 2c viser fortsat, at et WordPress-redirect bliver en side, og at et manglende mål springes over med en advarsel. Typekontrollen giver 0 fejl.
+- **Dev-serveren** viser endnu ikke de nye redirects (404 på `/andelshaveren/`), fordi den indlæste `content/` ved opstart. En genstart løser det. Den er ikke genstartet, fordi den er brugerens. Et rigtigt `bun run build` er ikke kørt af samme grund.
+
 ## Åbne punkter, der ikke blokerer planen
 
 - ProBo-adressen og hvem der har adgang. Kræves til 5b, men kan tilføjes senere i konfigurationen.

@@ -19,7 +19,7 @@ export interface Site { sections: SiteSection[]; items: SiteItem[]; redirects: S
 
 // Manual redirects, e.g. from old WordPress URLs. Directory-style paths only.
 const redirectPath = z.string().regex(/^\/(?:[a-zA-Z0-9._~-]+\/)+$/).refine(p => !p.split('/').some(s => s === '.' || s === '..'));
-const manualRedirectsSchema = z.record(redirectPath, redirectPath);
+export const manualRedirectsSchema = z.record(redirectPath, redirectPath);
 const collator = new Intl.Collator('da-DK');
 
 /** The one public dataset: pages, files, sitemap and search index are all derived from it.

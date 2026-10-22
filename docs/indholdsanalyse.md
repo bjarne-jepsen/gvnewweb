@@ -28,7 +28,7 @@ Fem sektioner. Hver sektion er en mappe i fællesdrevet, og mappenavnet bliver f
 
 | Sektion (mappe og URL) | Til hvem | Sider |
 |---|---|---|
-| `om-groendalsvaenge/` | Udefra og nye beboere | Om Grøndalsvænge (historie, arkitektur, 389 huse) · Kort og nærområde · Sådan får du et hus |
+| `om-groendalsvaenge/` | Udefra og nye beboere | Historie og arkitektur (389 huse) · Kort og nærområde · Sådan får du et hus |
 | `bo-her/` | Andelshavere, praktisk | Planlægger du at bygge? · Sælg dit hus · Ventelister · Forsikringsskader · Affald og renovation · Parkering · Hjertestarter · Udlån af fællesudstyr · Stolper og stakitter · Husorden kort fortalt · Leje af lokaler |
 | `faellesskab/` | Alle | Fester og traditioner · Aktiviteter og klubber (inkl. De Gule Spejdere) · Legepladser · Grøndalsvænge på Facebook |
 | `foreningen/` | Andelshavere og udefra | Bestyrelsen (inkl. medlemmer) · Udvalg og arbejdsgrupper · Generalforsamling · Regler og dokumenter (henvisning til ProBo) · Kontakt (inkl. administration og Grøndalsvænge Nyt) |
@@ -45,8 +45,8 @@ Forsiden skrives i koden: en kort introduktion, genveje til det, folk oftest led
 | Nuværende side | Ord | Anbefaling | Ny placering og bemærkning |
 |---|---|---|---|
 | `/` Forside | 257 | Erstattes | Ny forside med genveje og nyheder. I dag er forsiden en liste af indlæg |
-| `/andelsboligforeningen/` | 242 | Saml | → Om Grøndalsvænge |
-| `/om-foreningen/` | 79 | Saml | → Om Grøndalsvænge. Siden er ikke opdateret siden 2022 |
+| `/andelsboligforeningen/` | 242 | Saml | → Historie og arkitektur |
+| `/om-foreningen/` | 79 | Saml | → Historie og arkitektur. Siden er ikke opdateret siden 2022 |
 | `/andelsboligforeningen/hvordan-faar-jeg-hus/` | 520 | **Behold** | → Sådan får du et hus. Den vigtigste side for folk udefra. PDF-linket erstattes af en henvisning til ProBo |
 | `/andelsboligforeningen/groendalsvaenge-andelsboligforening-oversigtskort/` | 38 | Saml | → Kort og nærområde. Det indlejrede kort bliver til et billede med link, fordi sitet ikke indlejrer andre sider |
 | `/andelsboligforeningen/kontakt/` | 238 | **Behold** | → Kontakt |
@@ -153,3 +153,58 @@ Jeg kan lave udkast til disse dokumenter ud fra WordPress-teksterne og lægge de
 2. Skal PDF-understøttelsen fjernes helt fra koden, eller kun sektionen?
 3. Husorden: "kort fortalt" på sitet og den gældende version i ProBo, eller kun ProBo?
 4. Hvad er adressen på ProBo, og har alle andelshavere adgang? Det afgør, hvordan henvisningerne formuleres.
+
+## Bilag: redirects fra WordPress (fase 5c)
+
+Listen ligger i `content/_redirects.json` og er gennemgået mod sideinventaret. 48 gamle adresser peger på en ny adresse. De 17 sider, der udgår, giver 404. Et redirect bliver aktivt, så snart målsiden findes. Indtil da giver build en advarsel. Siden "Om Grøndalsvænge" har fået titlen **Historie og arkitektur**, så adressen ikke bliver `/om-groendalsvaenge/om-groendalsvaenge/`.
+
+| Gammel adresse | Ny adresse |
+|---|---|
+| `/andelsboligforeningen/` | `/om-groendalsvaenge/historie-og-arkitektur/` |
+| `/andelsboligforeningen/generalforsamling/` | `/foreningen/generalforsamling/` |
+| `/andelsboligforeningen/groendalsvaenge-andelsboligforening-oversigtskort/` | `/om-groendalsvaenge/kort-og-naeromraade/` |
+| `/andelsboligforeningen/hvordan-faar-jeg-hus/` | `/om-groendalsvaenge/saadan-faar-du-et-hus/` |
+| `/andelsboligforeningen/kommunikation-i-foreningen/` | `/foreningen/kontakt/` |
+| `/andelsboligforeningen/kontakt/` | `/foreningen/kontakt/` |
+| `/andelsboligforeningen/oversigt-over-vedtaegter-og-regler/` | `/foreningen/regler-og-dokumenter/` |
+| `/andelsboligforeningen/oversigt-over-vedtaegter-og-regler/regulativ-for-medlemmers-fortrinsret-til-ledige-huse/` | `/foreningen/regler-og-dokumenter/` |
+| `/andelshaveren/` | `/bo-her/` |
+| `/andelshaveren/anmeldelse-af-forsikringsskader/` | `/bo-her/forsikringsskader/` |
+| `/andelshaveren/byggeprojekter/` | `/bo-her/planlaegger-du-at-bygge/` |
+| `/andelshaveren/ekspektance-og-internliste/` | `/bo-her/ventelister/` |
+| `/andelshaveren/hjertestarter/` | `/bo-her/hjertestarter/` |
+| `/andelshaveren/hvordan-saelger-jeg-mit-hus/` | `/bo-her/saelg-dit-hus/` |
+| `/andelshaveren/oversigtskort-over-groendalsvaenge/` | `/om-groendalsvaenge/kort-og-naeromraade/` |
+| `/andelshaveren/parkering-i-groendalsvaenge/` | `/bo-her/parkering/` |
+| `/andelshaveren/renovation/` | `/bo-her/affald-og-renovation/` |
+| `/bestyrelse-og-udvalg/` | `/foreningen/bestyrelsen/` |
+| `/bestyrelse-og-udvalg/afloenningspolitik-for-bestyrelsen/` | `/foreningen/regler-og-dokumenter/` |
+| `/bestyrelse-og-udvalg/bestyrelsen/` | `/foreningen/bestyrelsen/` |
+| `/bestyrelse-og-udvalg/bestyrelsens-udvalg/` | `/foreningen/udvalg-og-arbejdsgrupper/` |
+| `/bestyrelse-og-udvalg/bestyrelsesmedlemmer-2/` | `/foreningen/bestyrelsen/` |
+| `/bestyrelse-og-udvalg/eksterne-udvalg-og-arbejdsgrupper/` | `/foreningen/udvalg-og-arbejdsgrupper/` |
+| `/dokumenter/vedtaegter-paragraf-3-nyt-design/` | `/foreningen/regler-og-dokumenter/` |
+| `/groendalsvaenge-socialt/` | `/faellesskab/` |
+| `/groendalsvaenge-socialt/aktiviteter-og-faellesskab-i-groendalsvaenge/` | `/faellesskab/aktiviteter-og-klubber/` |
+| `/groendalsvaenge-socialt/de-gule-spejdere-i-groendalsvaenge/` | `/faellesskab/aktiviteter-og-klubber/` |
+| `/groendalsvaenge-socialt/facebook-sider-for-groendalsvaenge/` | `/faellesskab/groendalsvaenge-paa-facebook/` |
+| `/groendalsvaenge-socialt/fester-og-traditioner-i-groendalsvaenge/` | `/faellesskab/fester-og-traditioner/` |
+| `/groendalsvaenge-socialt/legepladser-i-groendalsvaenge/` | `/faellesskab/legepladser/` |
+| `/groendalsvaenge-socialt/leje-af-lokaler-i-forretningsbygningen/` | `/bo-her/leje-af-lokaler/` |
+| `/husorden-fuld/` | `/bo-her/husorden-kort-fortalt/` |
+| `/information-om-anmeldelse-og-forebyggelse-af-skader-i-skybruds-og-stormsaesonen/` | `/bo-her/forsikringsskader/` |
+| `/internt-2/aarets-andelsoverdragelser/` | `/foreningen/regler-og-dokumenter/` |
+| `/internt-2/arkiv-over-groendalsvaenge-nyt/` | `/foreningen/regler-og-dokumenter/` |
+| `/internt-2/nyhedsarkiv/` | `/nyheder/` |
+| `/internt-2/oversigt-over-andelsvaerdier/` | `/foreningen/regler-og-dokumenter/` |
+| `/internt-2/referater-af-bestyrelsesmoeder/` | `/foreningen/regler-og-dokumenter/` |
+| `/internt-2/retssager/` | `/foreningen/regler-og-dokumenter/` |
+| `/internt-2/stolper-og-stakitter/` | `/bo-her/stolper-og-stakitter/` |
+| `/internt-2/ting-til-udlaan-i-foreningen/` | `/bo-her/udlaan-af-faellesudstyr/` |
+| `/internt-2/valuarvurdering-for-groendalsvaenge/` | `/foreningen/regler-og-dokumenter/` |
+| `/jeg-skal-koebe-stolper-eller-hegn/` | `/bo-her/stolper-og-stakitter/` |
+| `/om-foreningen/` | `/om-groendalsvaenge/historie-og-arkitektur/` |
+| `/om-foreningen/aarsregnskab/` | `/foreningen/regler-og-dokumenter/` |
+| `/om-foreningen/administration/` | `/foreningen/kontakt/` |
+| `/om-foreningen/bevarende-lokalplan/` | `/bo-her/planlaegger-du-at-bygge/` |
+| `/regulativ-for-ekspektanter/` | `/foreningen/regler-og-dokumenter/` |
