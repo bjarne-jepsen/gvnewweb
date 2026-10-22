@@ -1,6 +1,6 @@
 # CVI for Grøndalsvænge 2.0
 
-Status: **godkendt 22. oktober 2026**. Visuelt udkast: [`cvi-udkast.html`](cvi-udkast.html). Åbn det direkte i en browser. Det er ikke en del af buildet.
+Status: **godkendt og gennemført 22. oktober 2026**. Visuelt udkast: [`cvi-udkast.html`](cvi-udkast.html). Åbn det direkte i en browser. Det er ikke en del af buildet.
 
 ## Udgangspunkt
 
@@ -72,7 +72,7 @@ Tekst må ikke stå med versaler, undtagen korte mærkater med spatiering. Kursi
 - Skala: `--space-2xs` .25 · `xs` .5 · `s` .75 · `m` 1 · `l` 1,5 · `xl` 2 · `2xl` 3 · `3xl` 4,5 (rem).
 - Sidebredde `--page-max: 72rem`, sidemargin `--gutter: clamp(1rem, 5vw, 3rem)` og tekstbredde `--measure: 68ch`.
 - Hjørneradius er `--radius: 4px` på flader, tabeller og billeder. Der er ingen skygger.
-- Alt klikbart er mindst 44 px højt på mobilen.
+- Alle selvstændige links og knapper er mindst 44 px høje på alle skærmstørrelser. Links i løbende tekst er undtaget.
 - Ingen vandret rulning af siden ved 320 px bredde. Kun tabeller må rulle vandret, og det sker inden i `.table-scroll`.
 
 ## 5. Komponenter
@@ -114,36 +114,37 @@ Teksten skal være kort, venlig og konkret. Skriv "du" til læseren og "vi" elle
 
 ---
 
-## Implementeringsplan (efter godkendelse)
+## Gennemførelse
 
-Hver leverance laves på sin egen gren, testes og flettes ind i main som fast-forward. Der pushes ikke.
+CVI'en er bygget i fire leverancer. Hver leverance blev lavet på sin egen gren og flettet ind i main som fast-forward. Intet er pushet.
 
-**L1: Tokens, grundtypografi, header og footer**
-- Mål: CVI-tokens og basisstil er i brug på alle sider, og bomærke, favicon og footer følger CVI.
-- Filer: nye `src/styles/tokens.css` og `src/styles/site.css`, der erstatter `<style is:global>` i `src/layouts/Base.astro`. Ny `src/components/Mark.astro`. `scripts/verify-output.ts`. Nye tests i `tests/cvi.test.ts` og `tests/build.test.ts`.
-- Testkriterier:
-  - En test læser `tokens.css` og kræver kontrast på mindst 4,5:1 for alle tilladte tekstkombinationer og mindst 3:1 for fokusringen.
-  - Outputkontrollen afviser eksterne adresser i CSS (`url(http…)`, `@import`) og i `<link href>` og `src` i HTML. En test viser, at det fanges.
-  - `bun test`, `bun run typecheck` og `bun run build` består.
-- Risici:
-  - Astro samler importeret CSS i `_astro/*.css`, som outputkontrollen allerede tillader. Det skal bekræftes.
-  - Den nye kontrol mod eksterne adresser må ikke ramme almindelige `<a href>` til eksterne sider.
+| Leverance | Indhold |
+|---|---|
+| L1 | `src/styles/tokens.css` og `site.css`, bomærke (`src/components/Mark.astro`), favicon som `data:`-URI, header og footer. Outputkontrollen afviser eksterne ressourcer, og `tests/cvi.test.ts` tjekker kontrasten i farvetokens. |
+| L2 | Forsiden: genvejsfliser, nyhedskort og Find rundt i to spalter. |
+| L3 | Sektions- og indholdssider: tilbagelinks, brødtekst, tabeller, figurer, nyhedskort i nyhedssektionen og printstil. |
+| L4 | Gennemgang af tilgængelighed og rettelse af fund (se nedenfor). |
 
-**L2: Forsiden**
-- Mål: Genvejsfliser, nyhedskort og Find rundt følger CVI.
-- Filer: `src/pages/index.astro`, `src/components/Entries.astro` (en variant med kort) og `src/styles/site.css`.
-- Testkriterier: Forsiden har stadig præcis tre nyheder og alle genveje. Det tjekkes i den eksisterende site-test eller en ny. Build og outputkontrol består.
-- Risici: Lange titler i genveje og kort. Det tjekkes ved 320 px.
+**Tilgængelighedsgennemgang (L4).** Alle 32 sider i sitemap'en er tjekket ved 320 og 1024 px:
+- Ingen sider ruller vandret. Kun tabeller ruller inden i deres egen boks.
+- Hver side har præcis én H1 og springer ingen overskriftsniveauer over.
+- Ingen billeder mangler alt-tekst, og der er ingen tomme links.
+- Alle selvstændige links er mindst 44 px høje.
 
-**L3: Sektions- og indholdssider**
-- Mål: Tilbagelinks, brødtekst, tabeller, figurer og metadata følger CVI. Desuden en enkel printstil, der skjuler navigation og footer.
-- Filer: `src/pages/[section]/index.astro`, `src/pages/[section]/[slug].astro` og `src/styles/site.css`.
-- Testkriterier: Build og outputkontrol består. Siderne gennemgås i browseren ved 320, 768 og 1280 px.
-- Risici: Indhold fra Drive med usædvanlige tabeller eller dybe overskrifter (H5–H6).
+**Tastatur.** "Spring til indhold" er det første element og vises ved fokus. Tab-rækkefølgen følger siden, og alle links har en synlig fokusring på 3 px. Den er havegrøn på lys baggrund og kalkhvid i footeren.
 
-**L4: Tilgængelighedsgennemgang**
-- Mål: Bekræfte, at sitet er brugbart med tastatur, ved 200 % zoom og ved 320 px bredde. Ret det, der findes.
-- Testkriterier: Hele forløbet "Færdig" er opfyldt, og `docs/cvi.md` markeres som godkendt og gennemført.
+**200 % zoom.** Det er tjekket som 640 × 400 px, svarende til en skærm på 1280 × 800. Indholdet flyder om uden tab. Afstandene i headeren er strammet på smalle skærme.
+
+**Print.** Det er tjekket som PDF fra Chrome. Navigation og footer er skjult, teksten står i venstre margen, og adressen på eksterne links står efter linket.
+
+**Fund og rettelser i L4:**
+- Titellinks i lister, "Alle nyheder", tilbagelink og footerlinks var 22–42 px høje. Nu er de mindst 44 px.
+- Headeren fyldte næsten halvdelen af skærmen ved 200 % zoom. Afstandene er strammet.
+- Ved print var teksten rykket ind i forhold til navnet, og adressen efter et link var understreget. Begge dele er rettet.
+
+**Ikke tjekket:**
+- Billeder og tabeller fra rigtigt Drive-indhold, fordi indholdet ikke har nogen endnu. Tabelstilen er kun tjekket med en tabel, der blev indsat midlertidigt.
+- Skærmlæsere (VoiceOver, NVDA) og Windows' tilstand for høj kontrast.
 
 ## Antagelser
 

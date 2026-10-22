@@ -42,8 +42,12 @@ main { min-height: 60vh; padding-block: var(--space-2xl) var(--space-3xl); overf
 .intro { font-size: var(--text-lg); max-width: 54ch; color: var(--color-muted); margin-bottom: var(--space-xl); }
 .prototype { display: block; font-size: var(--text-sm); color: var(--color-muted); margin-bottom: var(--space-xl); }
 .meta { font-size: var(--text-sm); color: var(--color-muted); }
-.back { display: inline-block; font-size: 1rem; margin-bottom: var(--space-l); }
-.back::before { content: "← "; }
+.back { font-size: 1rem; margin-bottom: var(--space-l); }
+.back::before { content: "←"; }
+
+/* Stand-alone links are at least 44 px high (docs/cvi.md); the negative margin keeps the layout. */
+.back, .more a, .footer-links a { display: inline-flex; align-items: center; gap: .3em; min-height: 44px; }
+.entries :is(h2, h3) a, .sections h3 a { display: inline-block; padding-block: .6rem; margin-block: -.6rem; }
 
 /* Lists of entries (section pages, news). */
 .entries { list-style: none; padding: 0; margin: var(--space-l) 0; max-width: 48rem; }
@@ -69,7 +73,7 @@ main { min-height: 60vh; padding-block: var(--space-2xl) var(--space-3xl); overf
 .sections > li { border-top: 1px solid var(--color-line); padding-block: var(--space-l); }
 .sections p { color: var(--color-muted); margin: 0; }
 .more { font-weight: 600; margin-top: var(--space-l); }
-.more a::after { content: " →"; }
+.more a::after { content: "→"; }
 
 /* Content pages and the body text from lib/site/render.ts. */
 article > .meta { margin-top: calc(-1 * var(--space-xs)); }
@@ -104,10 +108,10 @@ article > .meta { margin-top: calc(-1 * var(--space-xs)); }
 .site-footer p { margin: 0; }
 .site-footer .colophon { grid-column: 1 / -1; }
 .footer-links { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--space-xs) var(--space-l); }
-.footer-links a { display: inline-block; padding-block: var(--space-xs); }
 
 @media (max-width: 700px) {
-  .site-header .wrap { align-items: flex-start; }
+  .site-header .wrap { align-items: flex-start; padding-block: var(--space-m) 0; gap: var(--space-xs) var(--space-xl); }
+  main { padding-top: var(--space-xl); }
   .site-header nav { width: 100%; }
   .site-footer .wrap { grid-template-columns: 1fr; }
 }
@@ -117,11 +121,11 @@ article > .meta { margin-top: calc(-1 * var(--space-xs)); }
   html { background: #fff; }
   body { font-size: 11pt; }
   .skip, .site-header nav, .site-footer, .back, .more { display: none; }
-  .site-header { border-bottom: 0; }
-  .site-header .wrap, main { padding: 0; }
-  .wrap { max-width: none; }
+  .site-header { border-bottom: 0; margin-bottom: var(--space-l); }
+  .wrap { max-width: none; padding-inline: 0; }
+  .site-header .wrap, main { padding-block: 0; }
   main { min-height: 0; }
-  .prose a[href^="http"]::after { content: " (" attr(href) ")"; font-size: .85em; color: var(--color-muted); overflow-wrap: anywhere; }
+  .prose a[href^="http"]::after { content: "(" attr(href) ")"; display: inline-block; margin-left: .3em; text-decoration: none; font-size: .85em; color: var(--color-muted); overflow-wrap: anywhere; }
   .table-scroll { overflow: visible; }
   h2, h3, h4 { break-after: avoid; }
   figure, tr { break-inside: avoid; }
