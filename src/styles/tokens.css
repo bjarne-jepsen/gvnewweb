@@ -1,0 +1,39 @@
+/* CVI tokens (docs/cvi.md). tests/cvi.test.ts checks the colour contrasts. */
+:root {
+  color-scheme: light;
+
+  --color-ink: #17251E;
+  --color-green: #24513A;
+  --color-tegl: #A8432A;
+  --color-muted: #56625B;
+  --color-paper: #FAF7F0;
+  --color-surface: #EFE6D2;
+  --color-surface-hover: #E7DBC1;
+  --color-line: #D8D0BF;
+  --color-on-dark: #FAF7F0;
+
+  --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", P052, Georgia, serif;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  --text-sm: .875rem;
+  --text-base: 1.125rem;
+  --text-lg: 1.3rem;
+  --text-h1: clamp(2.25rem, 5vw, 3.5rem);
+  --text-h2: clamp(1.5rem, 3vw, 2rem);
+  --text-h3: 1.35rem;
+
+  --space-2xs: .25rem;
+  --space-xs: .5rem;
+  --space-s: .75rem;
+  --space-m: 1rem;
+  --space-l: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4.5rem;
+
+  --page-max: 72rem;
+  --measure: 68ch;
+  --gutter: clamp(1rem, 5vw, 3rem);
+  --radius: 4px;
+  --focus-ring: 3px solid var(--color-green);
+}

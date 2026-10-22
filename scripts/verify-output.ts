@@ -12,6 +12,22 @@ export async function walk(root: string): Promise<string[]> {
   return results;
 }
 const pageFile = (path: string) => `${path.slice(1)}index.html`;
+// A URL with a scheme or a protocol-relative URL, except data: URIs.
+const remote = /^\s*(?!data:)(?:[a-z][a-z0-9+.-]*:|\/\/)/i;
+const cssRemote = /@import|url\(\s*['"]?\s*(?!data:)(?:[a-z][a-z0-9+.-]*:|\/\/)/i;
+/** The page loads nothing from other hosts: no CDN, no web fonts. Links (<a href>) may point anywhere.
+ * Returns the first offending reference in a CSS or HTML file, or undefined. */
+export function externalReference(rel: string, text: string): string | undefined {
+  if (rel.endsWith('.css')) return text.match(cssRemote)?.[0];
+  if (!rel.endsWith('.html')) return undefined;
+  for (const [tag] of text.matchAll(/<(?:link|img|source|iframe|embed|object|video|audio|track|input)\b[^>]*>/gi))
+    for (const [, name, , value] of tag.matchAll(/\s(href|src|srcset|data|poster)\s*=\s*(["'])(.*?)\2/gi)) {
+      const urls = name!.toLowerCase() === 'srcset' ? value!.split(',') : [value!];
+      if (urls.some(url => remote.test(url))) return tag;
+    }
+  for (const [css] of text.matchAll(/<style\b[^>]*>[\s\S]*?<\/style>|\sstyle\s*=\s*"[^"]*"/gi)) if (cssRemote.test(css)) return css;
+  return undefined;
+}
 /** Default deny: dist may contain exactly the pages, files and indexes derived from content/. */
 export async function verifyOutput(root: string, site: Site) {
   const pages = ['/', ...site.sections.map(s => s.path), ...site.items.map(i => i.path)].map(pageFile);
@@ -27,6 +43,8 @@ export async function verifyOutput(root: string, site: Site) {
     // Drive IDs are internal identifiers and never needed in public output.
     for (const id of site.internalIds) if (text.includes(id)) throw new Error(`Internt Drive-ID i ${rel}`);
     if (rel.endsWith('.html') && /<script/i.test(text)) throw new Error(`Script i ${rel}`);
+    const external = externalReference(rel, text);
+    if (external) throw new Error(`Ekstern adresse i ${rel}: ${external.slice(0, 120)}`);
     const to = redirects.get(rel);
     if (to && !text.includes(`url=${to}"`)) throw new Error(`Redirect-siden ${rel} peger ikke på ${to}`);
   }

@@ -1,11 +1,16 @@
 ---
 import { getCollection } from 'astro:content';
+import Mark from '../components/Mark.astro';
+import '../styles/tokens.css';
+import '../styles/site.css';
 interface Props { title: string; }
 const { title } = Astro.props;
 const path = Astro.url.pathname;
 const sections = (await getCollection('sections')).map(s => s.data).sort((a, b) => a.order - b.order);
 const navigation = [['/', 'Forside'], ...sections.map(s => [s.path, s.label])];
 const footerLinks = (await getCollection('links')).map(l => l.data).filter(l => l.group === 'footer').sort((a, b) => a.order - b.order);
+// The mark as a data URI, so the favicon adds no file to the output. Colours are the tegl, green and paper tokens.
+const favicon = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M2 15 16 3l14 12z" fill="#A8432A"/><path d="M6 15h20v14H6z" fill="#24513A"/><path d="M14 20h4v9h-4z" fill="#FAF7F0"/></svg>')}`;
 ---
 <!doctype html>
 <html lang="da">
@@ -14,78 +19,26 @@ const footerLinks = (await getCollection('links')).map(l => l.data).filter(l => 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="En lokal prototype med Grøndalsvænges offentlige information fra foreningens Google Drive." />
     <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" type="image/svg+xml" href={favicon} />
     <title>{title} · Grøndalsvænge</title>
   </head>
   <body>
     <a class="skip" href="#indhold">Spring til indhold</a>
-    <header>
-      <a class="brand" href="/">Grøndalsvænge<span>Andelsboligforeningen</span></a>
-      <nav aria-label="Hovednavigation">
-        {navigation.map(([href, label]) => <a href={href} aria-current={(href === '/' ? path === '/' : path.startsWith(href!)) ? 'page' : undefined}>{label}</a>)}
-      </nav>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="brand" href="/"><Mark /><span><span class="brand-name">Grøndalsvænge</span><span class="brand-sub">Andelsboligforeningen</span></span></a>
+        <nav aria-label="Hovednavigation">
+          {navigation.map(([href, label]) => <a href={href} aria-current={(href === '/' ? path === '/' : path.startsWith(href!)) ? 'page' : undefined}>{label}</a>)}
+        </nav>
+      </div>
     </header>
-    <main id="indhold"><slot /></main>
-    <footer>
-      {footerLinks.length > 0 && <nav aria-label="Sidefod"><ul class="footer-links">{footerLinks.map(l => <li><a href={l.href} rel={l.external ? 'noreferrer' : undefined}>{l.label}</a></li>)}</ul></nav>}
-      <p>Andelsboligforeningen Grøndalsvænge · Lokal prototype</p>
-      <p>Indholdet hentes fra hjemmesidens mapper i foreningens Google Drive.</p>
+    <main id="indhold" class="wrap"><slot /></main>
+    <footer class="site-footer">
+      <div class="wrap">
+        <p class="brand"><Mark /><span><span class="brand-name">Grøndalsvænge</span><span class="brand-sub">Andelsboligforeningen</span></span></p>
+        {footerLinks.length > 0 && <nav aria-label="Sidefod"><ul class="footer-links">{footerLinks.map(l => <li><a href={l.href} rel={l.external ? 'noreferrer' : undefined}>{l.label}</a></li>)}</ul></nav>}
+        <p class="colophon">Dokumenter for andelshavere ligger i ProBo hos administrator. Lokal prototype: indholdet hentes fra hjemmesidens mapper i foreningens Google Drive.</p>
+      </div>
     </footer>
   </body>
 </html>
-<style is:global>
-  :root { color-scheme: light; --ink:#213b30; --paper:#faf9f4; --muted:#4e6258; --line:#ccd3c9; --accent:#28573e; }
-  * { box-sizing:border-box; }
-  html { background:var(--paper); color:var(--ink); font-family: Georgia, 'Times New Roman', serif; }
-  body { margin:0; font-size:1.125rem; line-height:1.65; }
-  a { color:var(--accent); text-underline-offset:.22em; text-decoration-thickness:1px; }
-  a:hover { text-decoration-thickness:2px; }
-  :focus-visible { outline:3px solid var(--accent); outline-offset:5px; }
-  ::selection { color:var(--paper); background:var(--accent); }
-  header, main, footer { max-width:1120px; margin-inline:auto; padding-inline:clamp(1.25rem, 5vw, 4rem); }
-  header { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:1.5rem; padding-block:2rem; border-bottom:1px solid var(--line); }
-  .brand { color:var(--ink); text-decoration:none; font-size:1.6rem; line-height:1.2; }
-  .brand span { display:block; font: .8rem/1.8 system-ui, sans-serif; color:var(--muted); }
-  nav { display:flex; flex-wrap:wrap; gap:.6rem 1.25rem; font: .95rem/1.6 system-ui, sans-serif; }
-  nav a { text-decoration:none; padding-block:.3rem; }
-  nav a[aria-current] { text-decoration:underline; text-decoration-thickness:2px; }
-  main { min-height:60vh; padding-block:clamp(2.5rem, 6vw, 5rem); }
-  h1,h2,h3 { font-weight:400; line-height:1.16; text-wrap:balance; }
-  h1 { font-size:clamp(2.3rem, 5vw, 4.25rem); max-width:18ch; margin-top:0; margin-bottom:1.25rem; }
-  h2 { font-size:clamp(1.65rem, 3vw, 2.25rem); margin:3rem 0 1rem; }
-  h3 { font-size:1.4rem; margin:0 0 .5rem; }
-  p { max-width:68ch; margin:0 0 1.25rem; }
-  .intro { font-size:1.3rem; max-width:54ch; color:var(--muted); margin-bottom:2.5rem; }
-  .prototype { display:block; font: .9rem/1.6 system-ui, sans-serif; color:var(--muted); margin-bottom:2rem; }
-  .entries { list-style:none; padding:0; margin:1.5rem 0; }
-  .entries > li { border-top:1px solid var(--line); padding-block:1.5rem; }
-  .entries > li:last-child { border-bottom:1px solid var(--line); }
-  .entries h2 { font-size:1.4rem; margin:0 0 .5rem; }
-  .entries p { color:var(--muted); margin-bottom:.5rem; }
-  .meta { color:var(--muted); font: .9rem/1.6 system-ui, sans-serif; }
-  .columns { display:grid; grid-template-columns: 1.35fr 1fr; gap:4rem; }
-  .prose { max-width:68ch; }
-  .prose h2 { margin-top:2.5rem; }
-  .prose figure { margin:2rem 0; }
-  .prose img { display:block; max-width:100%; height:auto; }
-  .prose .rich-text { white-space:pre-line; }
-  .prose hr { border:0; border-top:1px solid var(--line); margin:2rem 0; }
-  .table-scroll { overflow-x:auto; margin:2rem 0; }
-  .table-scroll table { border-collapse:collapse; width:100%; font-size:1rem; }
-  .table-scroll caption { text-align:left; color:var(--muted); font: .85rem/1.7 system-ui,sans-serif; margin-bottom:.5rem; }
-  .table-scroll td, .table-scroll th { border:1px solid var(--line); padding:.75rem; vertical-align:top; min-width:7rem; text-align:left; }
-  .table-scroll th { font-weight:600; }
-  .table-scroll p { margin:0 0 .5rem; }
-  .table-scroll p:last-child { margin-bottom:0; }
-  .prose li { padding-left:.25rem; margin-bottom:.5rem; }
-  .back { display:inline-block; font: .95rem/1.6 system-ui, sans-serif; margin-bottom:2rem; }
-  footer { border-top:1px solid var(--line); padding-block:2rem; font: .85rem/1.7 system-ui, sans-serif; color:var(--muted); }
-  footer p { margin:0; }
-  .footer-links, .shortcuts { list-style:none; padding:0; display:flex; flex-wrap:wrap; gap:.5rem 1.5rem; }
-  .footer-links { margin:0 0 1rem; }
-  .shortcuts { margin:1rem 0 2rem; font:1.05rem/1.6 system-ui, sans-serif; }
-  .shortcuts a { display:inline-block; padding:.6rem 1rem; border:1px solid var(--line); text-decoration:none; }
-  .shortcuts a:hover { border-color:var(--accent); text-decoration:underline; }
-  .skip { position:absolute; left:1rem; top:-5rem; padding:.5rem 1rem; background:var(--paper); }
-  .skip:focus { top:1rem; }
-  @media (max-width:700px) { .columns { grid-template-columns:1fr; gap:0; } header { align-items:flex-start; } nav { width:100%; } }
-</style>

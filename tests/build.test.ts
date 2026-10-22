@@ -72,6 +72,10 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect(await html('nyheder/index.html')).toContain('OLDEST_NEWS');
   expect(home).toMatch(/<nav aria-label="Sidefod"><ul class="footer-links"><li><a href="\/foreningen\/kontakt\/">Kontakt<\/a><\/li><\/ul><\/nav>/);
   expect([...home.matchAll(/<nav aria-label="Hovednavigation">([\s\S]*?)<\/nav>/g)][0]![1]!.match(/href="([^"]+)"/g)).toEqual(['href="/"', 'href="/foreningen/"', 'href="/bo-her/"', 'href="/nyheder/"']);
+  // CVI (docs/cvi.md): the mark is inline and the favicon a data URI, so neither adds an output file.
+  expect(home).toContain('<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,');
+  expect(home.match(/<svg class="mark"/g)).toHaveLength(2);
+  expect(home).toMatch(/<link rel="stylesheet" href="\/_astro\/[^"]+\.css">/);
 
   // 1. Pages, unchanged image bytes, nothing from outside the section folders, no PDFs.
   const image = `${digest(png).slice(7, 23)}.png`;

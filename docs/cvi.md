@@ -11,7 +11,7 @@ Status: **godkendt 22. oktober 2026**. Visuelt udkast: [`cvi-udkast.html`](cvi-u
 ## 1. Bomærke og navn
 
 - **Bomærket** er en hussilhuet med saddeltag i teglrød og en krop i havegrøn med en kalkhvid dør. Det tegnes i et 32×32-gitter med tre flader og ingen streger. Det skal kunne læses ned til 16 px.
-- **Navnet** er "Grøndalsvænge" sat i serif med "Andelsboligforeningen" som undertitel i sans-serif. Det formelle navn "AB Grøndalsvænge" bruges i footer og metadata.
+- **Navnet** er "Grøndalsvænge" sat i serif med "Andelsboligforeningen" som undertitel i sans-serif. Header og footer bruger samme navn og undertitel.
 - På mørk baggrund (footer) står mærket i kalkhvid med en havegrøn dør.
 - **Teknik:** mærket ligger som inline SVG i HTML med `aria-hidden="true"`, fordi navnet altid står som tekst ved siden af. Favicon er samme SVG som `data:`-URI i `<link rel="icon">`. Derfor kommer der ingen nye filer i output, og outputkontrollen skal ikke ændres for at tillade dem.
 - Mærket må ikke strækkes, roteres, have skygge eller ændre farver ud over de to varianter.
@@ -26,6 +26,7 @@ Status: **godkendt 22. oktober 2026**. Visuelt udkast: [`cvi-udkast.html`](cvi-u
 | `--color-muted` | Grå | `#56625B` | Datoer, ingresser og metadata |
 | `--color-paper` | Kalkhvid | `#FAF7F0` | Sidebaggrund |
 | `--color-surface` | Halm | `#EFE6D2` | Flader: genveje, tabelhoved |
+| `--color-surface-hover` | Mørk halm | `#E7DBC1` | Flader ved hover |
 | `--color-line` | Linje | `#D8D0BF` | Dekorative skillelinjer |
 
 **Kontrast (WCAG 2.2 AA):** Al tekst skal have mindst 4,5:1, og fokusringe og andre nødvendige grafiske elementer mindst 3:1. De tilladte kombinationer er målt:
