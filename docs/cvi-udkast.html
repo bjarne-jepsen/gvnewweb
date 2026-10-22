@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CVI-udkast · Grøndalsvænge</title>
+<!-- Statisk udkast til docs/cvi.md. Ikke en del af buildet. Åbn direkte i en browser. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M2 15 16 3l14 12z' fill='%23A8432A'/%3E%3Cpath d='M6 15h20v14H6z' fill='%2324513A'/%3E%3Cpath d='M14 20h4v9h-4z' fill='%23FAF7F0'/%3E%3C/svg%3E">
+<style>
+  :root {
+    color-scheme: light;
+    /* Farver */
+    --color-ink: #17251E;        /* overskrifter og brødtekst */
+    --color-green: #24513A;      /* links, aktive elementer, footer */
+    --color-tegl: #A8432A;       /* accent: nyheder, aktiv navigation, bomærkets tag */
+    --color-muted: #56625B;      /* metadata og ingresser */
+    --color-paper: #FAF7F0;      /* sidebaggrund */
+    --color-surface: #EFE6D2;    /* flader: genveje, tabelhoved */
+    --color-line: #D8D0BF;       /* dekorative skillelinjer */
+    --color-on-dark: #FAF7F0;    /* tekst på havegrøn */
+    /* Typografi */
+    --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", P052, Georgia, serif;
+    --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --text-sm: .875rem; --text-base: 1.125rem; --text-lg: 1.3rem;
+    --text-h1: clamp(2.25rem, 5vw, 3.5rem); --text-h2: clamp(1.5rem, 3vw, 2rem); --text-h3: 1.35rem;
+    /* Afstande */
+    --space-2xs: .25rem; --space-xs: .5rem; --space-s: .75rem; --space-m: 1rem; --space-l: 1.5rem;
+    --space-xl: 2rem; --space-2xl: 3rem; --space-3xl: 4.5rem;
+    --page-max: 72rem; --measure: 68ch; --gutter: clamp(1rem, 5vw, 3rem);
+    --radius: 4px;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--color-paper); color: var(--color-ink); font-family: var(--font-sans); }
+  body { margin: 0; font-size: var(--text-base); line-height: 1.6; }
+  a { color: var(--color-green); text-underline-offset: .2em; text-decoration-thickness: 1px; }
+  a:hover { text-decoration-thickness: 2px; }
+  :focus-visible { outline: 3px solid var(--color-green); outline-offset: 3px; }
+  h1, h2, h3 { font-family: var(--font-serif); font-weight: 400; line-height: 1.15; text-wrap: balance; color: var(--color-ink); }
+  h1 { font-size: var(--text-h1); margin: 0 0 var(--space-m); max-width: 20ch; }
+  h2 { font-size: var(--text-h2); margin: var(--space-2xl) 0 var(--space-m); }
+  h3 { font-size: var(--text-h3); margin: 0 0 var(--space-xs); }
+  h4 { font-size: var(--text-base); font-weight: 650; margin: var(--space-l) 0 var(--space-xs); }
+  p { max-width: var(--measure); margin: 0 0 var(--space-m); }
+  .wrap { max-width: var(--page-max); margin-inline: auto; padding-inline: var(--gutter); }
+
+  /* Header */
+  .site-header { border-bottom: 1px solid var(--color-line); }
+  .site-header .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-m) var(--space-xl); padding-block: var(--space-l); }
+  .brand { display: flex; align-items: center; gap: var(--space-s); color: var(--color-ink); text-decoration: none; }
+  .brand svg { width: 2.5rem; height: 2.5rem; flex: none; }
+  .brand b { display: block; font: 400 1.5rem/1.1 var(--font-serif); }
+  .brand small { display: block; font-size: var(--text-sm); color: var(--color-muted); letter-spacing: .02em; }
+  .nav { display: flex; flex-wrap: wrap; gap: 0 var(--space-l); font-size: 1rem; }
+  .nav a { display: block; padding-block: var(--space-xs); color: var(--color-ink); text-decoration: none; border-bottom: 3px solid transparent; }
+  .nav a:hover { border-bottom-color: var(--color-line); }
+  .nav a[aria-current] { border-bottom-color: var(--color-tegl); }
+
+  main { padding-block: var(--space-2xl) var(--space-3xl); }
+  .intro { font-size: var(--text-lg); color: var(--color-muted); max-width: 54ch; margin-bottom: var(--space-xl); }
+  .eyebrow { font-size: var(--text-sm); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--color-tegl); margin-bottom: var(--space-xs); }
+
+  /* Genveje */
+  .shortcuts { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: var(--space-s); }
+  .shortcuts a { display: flex; justify-content: space-between; align-items: center; gap: var(--space-m); min-height: 3.5rem; padding: var(--space-m) var(--space-l); background: var(--color-surface); border-radius: var(--radius); color: var(--color-ink); text-decoration: none; font: 400 1.2rem/1.3 var(--font-serif); }
+  .shortcuts a::after { content: "→"; font-family: var(--font-sans); color: var(--color-green); }
+  .shortcuts a:hover { background: #E7DBC1; text-decoration: underline; text-decoration-thickness: 1px; }
+
+  /* Nyhedskort */
+  .news { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: var(--space-l); }
+  .news li { border-top: 3px solid var(--color-tegl); padding-top: var(--space-m); }
+  .news time { display: block; font-size: var(--text-sm); color: var(--color-muted); margin-bottom: var(--space-2xs); }
+  .news h3 a { color: var(--color-ink); text-decoration: none; }
+  .news h3 a:hover { text-decoration: underline; }
+  .news p { color: var(--color-muted); font-size: 1rem; }
+  .more { font-weight: 600; }
+
+  /* Find rundt */
+  .sections { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: 0 var(--space-xl); }
+  .sections li { border-top: 1px solid var(--color-line); padding-block: var(--space-l); }
+  .sections p { color: var(--color-muted); margin: 0; }
+
+  /* Indholdsside */
+  .back { display: inline-block; font-size: 1rem; margin-bottom: var(--space-l); }
+  .back::before { content: "← "; }
+  .prose { max-width: var(--measure); }
+  figure { margin: var(--space-xl) 0; }
+  figure img, .img-placeholder { display: block; max-width: 100%; border-radius: var(--radius); }
+  .img-placeholder { aspect-ratio: 16/9; background: repeating-linear-gradient(135deg, var(--color-surface) 0 12px, #E7DBC1 12px 24px); }
+  .table-scroll { overflow-x: auto; margin: var(--space-xl) 0; border: 1px solid var(--color-line); border-radius: var(--radius); }
+  table { border-collapse: collapse; width: 100%; font-size: 1rem; }
+  th, td { padding: var(--space-s) var(--space-m); text-align: left; vertical-align: top; border-bottom: 1px solid var(--color-line); min-width: 7rem; }
+  thead th { background: var(--color-surface); font-weight: 650; }
+  tbody tr:last-child td { border-bottom: 0; }
+  .meta { font-size: var(--text-sm); color: var(--color-muted); }
+
+  /* Footer */
+  .site-footer { background: var(--color-green); color: var(--color-on-dark); padding-block: var(--space-2xl); font-size: 1rem; }
+  .site-footer a { color: var(--color-on-dark); }
+  .site-footer .wrap { display: grid; grid-template-columns: 1fr auto; gap: var(--space-l) var(--space-2xl); }
+  .site-footer .brand { color: var(--color-on-dark); }
+  .site-footer .brand small { color: var(--color-on-dark); opacity: 1; }
+  .site-footer ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--space-xs) var(--space-l); }
+  .site-footer p { margin: 0; }
+
+  /* Udkastets egne mærkater */
+  .demo-label { font: 600 .75rem/1 var(--font-sans); letter-spacing: .1em; text-transform: uppercase; color: var(--color-muted); border-top: 2px dashed var(--color-line); padding-top: var(--space-m); margin: var(--space-3xl) 0 var(--space-l); }
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); gap: var(--space-s); list-style: none; padding: 0; margin: 0; font-size: var(--text-sm); }
+  .swatches li { border: 1px solid var(--color-line); border-radius: var(--radius); overflow: hidden; background: #fff; }
+  .swatches span { display: block; height: 3.5rem; }
+  .swatches div { padding: var(--space-xs) var(--space-s); }
+
+  @media (max-width: 700px) {
+    .site-footer .wrap { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="#">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M2 15 16 3l14 12z" fill="#A8432A"/><path d="M6 15h20v14H6z" fill="#24513A"/><path d="M14 20h4v9h-4z" fill="#FAF7F0"/></svg>
+      <span><b>Grøndalsvænge</b><small>Andelsboligforeningen</small></span>
+    </a>
+    <nav class="nav" aria-label="Hovednavigation">
+      <a href="#" aria-current="page">Forside</a><a href="#">Om Grøndalsvænge</a><a href="#">Bo her</a><a href="#">Fællesskab</a><a href="#">Foreningen</a><a href="#">Nyheder</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Velkommen til Grøndalsvænge</h1>
+  <p class="intro">Grøndalsvænge er en andelsboligforening med 389 fritliggende huse, bygget 1914–1928 på grænsen mellem Vanløse og København NV.</p>
+
+  <h2>Det vigtigste</h2>
+  <ul class="shortcuts">
+    <li><a href="#">Kontakt</a></li>
+    <li><a href="#">Sådan får du et hus</a></li>
+    <li><a href="#">Sælg dit hus</a></li>
+    <li><a href="#">Planlægger du at bygge?</a></li>
+    <li><a href="#">Forsikringsskader</a></li>
+    <li><a href="#">Affald og renovation</a></li>
+  </ul>
+
+  <h2>Seneste nyt</h2>
+  <ul class="news">
+    <li><time datetime="2026-10-14">14. oktober 2026</time><h3><a href="#">Storskrald hentes den 4. november</a></h3><p>Stil det ud aftenen før, og hold det fri af fortovet.</p></li>
+    <li><time datetime="2026-10-02">2. oktober 2026</time><h3><a href="#">Indkaldelse til ekstraordinær generalforsamling</a></h3><p>Dagsorden og bilag ligger i ProBo.</p></li>
+    <li><time datetime="2026-09-21">21. september 2026</time><h3><a href="#">Skader efter skybrud: Sådan anmelder du</a></h3><p>Tag billeder først, og kontakt så forsikringen.</p></li>
+  </ul>
+  <p><a class="more" href="#">Alle nyheder</a></p>
+
+  <h2>Find rundt</h2>
+  <ul class="sections">
+    <li><h3><a href="#">Om Grøndalsvænge</a></h3><p>Historien, husene og kvarteret, og hvordan man får et hus i Grøndalsvænge.</p></li>
+    <li><h3><a href="#">Bo her</a></h3><p>Praktisk information til andelshavere om byggeri, salg, skader, affald og fællesudstyr.</p></li>
+    <li><h3><a href="#">Fællesskab</a></h3><p>Fester og traditioner, klubber og aktiviteter, legepladser og grupper på Facebook.</p></li>
+    <li><h3><a href="#">Foreningen</a></h3><p>Bestyrelse, udvalg, generalforsamling, regler og kontakt.</p></li>
+  </ul>
+
+  <p class="demo-label">Udkast: indholdsside</p>
+  <a class="back" href="#">Til bo her</a>
+  <article class="prose">
+    <h1>Affald og renovation</h1>
+    <p>Hvert hus har sine egne beholdere. Her kan du se, hvornår de tømmes, og hvad der må komme i dem.</p>
+    <h2>Tømningsdage</h2>
+    <div class="table-scroll" role="region" aria-label="Tømningsdage" tabindex="0">
+      <table><thead><tr><th>Fraktion</th><th>Tømmes</th><th>Bemærkning</th></tr></thead>
+      <tbody><tr><td>Restaffald</td><td>Hver 14. dag</td><td>Mandag i lige uger</td></tr><tr><td>Papir og pap</td><td>Hver 4. uge</td><td>Fladt, ikke i poser</td></tr><tr><td>Haveaffald</td><td>April–november</td><td>Bundtet, højst 1,5 m</td></tr></tbody></table>
+    </div>
+    <figure><div class="img-placeholder" role="img" aria-label="Pladsholder for et billede med alt-tekst"></div></figure>
+    <h3>Storskrald</h3>
+    <p>Storskrald hentes fire gange om året. Skriv til <a href="#">affald@example.invalid</a>, hvis du er i tvivl.</p>
+    <p class="meta">Opdateret 3. oktober 2026</p>
+  </article>
+
+  <p class="demo-label">Udkast: farvepalet</p>
+  <ul class="swatches">
+    <li><span style="background:#17251E"></span><div><b>Mørkegrøn</b><br>#17251E · tekst</div></li>
+    <li><span style="background:#24513A"></span><div><b>Havegrøn</b><br>#24513A · links, footer</div></li>
+    <li><span style="background:#A8432A"></span><div><b>Teglrød</b><br>#A8432A · accent</div></li>
+    <li><span style="background:#56625B"></span><div><b>Grå</b><br>#56625B · metadata</div></li>
+    <li><span style="background:#FAF7F0"></span><div><b>Kalkhvid</b><br>#FAF7F0 · baggrund</div></li>
+    <li><span style="background:#EFE6D2"></span><div><b>Halm</b><br>#EFE6D2 · flader</div></li>
+    <li><span style="background:#D8D0BF"></span><div><b>Linje</b><br>#D8D0BF · skillelinjer</div></li>
+  </ul>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div>
+      <a class="brand" href="#">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M2 15 16 3l14 12z" fill="#FAF7F0"/><path d="M6 15h20v14H6z" fill="#FAF7F0" opacity=".85"/><path d="M14 20h4v9h-4z" fill="#24513A"/></svg>
+        <span><b>Grøndalsvænge</b><small>Andelsboligforeningen</small></span>
+      </a>
+    </div>
+    <nav aria-label="Sidefod"><ul><li><a href="#">Kontakt</a></li><li><a href="#">Regler og dokumenter</a></li></ul></nav>
+    <p>Indholdet vedligeholdes af foreningens frivillige. Dokumenter for andelshavere ligger i ProBo.</p>
+  </div>
+</footer>
+</body>
+</html>
