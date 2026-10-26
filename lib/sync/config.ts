@@ -12,6 +12,8 @@ export const siteConfigSchema = z.strictObject({
   rootFolderId: driveIdSchema,
   sections: z.record(sectionKey, section).refine(s => Object.keys(s).length > 0, 'Mindst én sektion kræves'),
   ignoredFolders: z.array(z.string().min(1)).default([]),
+  // The public address, used in the sitemap. https and no path.
+  siteUrl: z.url().refine(u => { const url = new URL(u); return url.protocol === 'https:' && url.pathname === '/' && !url.search && !url.hash; }, 'siteUrl skal være https uden sti').default('https://example.invalid'),
   // External links shown by the site. ProBo holds the association's documents.
   links: z.strictObject({ probo: z.url().refine(u => new URL(u).protocol === 'https:', 'ProBo-linket skal bruge https').optional() }).default({}),
 }).superRefine((c, ctx) => {

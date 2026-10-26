@@ -29,8 +29,10 @@ async function readJson(path: string): Promise<unknown | undefined> {
 }
 /** Finder's folder metadata; the only name skipped instead of rejected, and it is never published. */
 const finderJunk = '.DS_Store';
+/** Sorted by name, so reports do not depend on the file system's directory order. */
 async function list(dir: string) {
-  try { return (await readdir(dir, { withFileTypes: true })).filter(e => !(e.isFile() && e.name === finderJunk)); } catch (error) { if (isMissing(error)) return []; throw error; }
+  try { return (await readdir(dir, { withFileTypes: true })).filter(e => !(e.isFile() && e.name === finderJunk)).sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0); }
+  catch (error) { if (isMissing(error)) return []; throw error; }
 }
 /** Reads and re-validates what an earlier run wrote. Anything unexpected aborts the run. */
 async function readSection(dir: string, section: string, kind: Kind, into: Map<string, Entry>) {
