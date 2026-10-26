@@ -27,8 +27,10 @@ const utf8 = (s: string) => new Uint8Array(Buffer.from(s, 'utf8'));
 async function readJson(path: string): Promise<unknown | undefined> {
   try { return JSON.parse(await readFile(path, 'utf8')); } catch (error) { if (isMissing(error)) return undefined; throw error; }
 }
+/** Finder's folder metadata; the only name skipped instead of rejected, and it is never published. */
+const finderJunk = '.DS_Store';
 async function list(dir: string) {
-  try { return await readdir(dir, { withFileTypes: true }); } catch (error) { if (isMissing(error)) return []; throw error; }
+  try { return (await readdir(dir, { withFileTypes: true })).filter(e => !(e.isFile() && e.name === finderJunk)); } catch (error) { if (isMissing(error)) return []; throw error; }
 }
 /** Reads and re-validates what an earlier run wrote. Anything unexpected aborts the run. */
 async function readSection(dir: string, section: string, kind: Kind, into: Map<string, Entry>) {
