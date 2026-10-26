@@ -231,6 +231,19 @@ test('updatedAt følger indholdet, ikke modifiedTime; uændret kørsel er byte-i
   expect((await w.page('foreningen/doc-a.md')).meta.updatedAt).toBe('2026-10-21T08:00:00.000Z');
 });
 
+test('.DS_Store fra Finder springes over; andre ukendte filer afvises stadig', async () => {
+  const w = await world();
+  w.drive.gdoc('doc-a', 'A', 'f-foreningen', doc('doc-a'));
+  await w.run();
+  for (const p of ['.DS_Store', 'foreningen/.DS_Store']) await writeFile(join(w.contentDir, p), 'x');
+  expect((await readContent(w.contentDir, config())).entries.size).toBe(1);
+  await writeFile(join(w.contentDir, 'foreningen/noter.txt'), 'x\n');
+  await rejects(readContent(w.contentDir, config()), /content\/foreningen\/noter\.txt: uventet fil/);
+  await rm(join(w.contentDir, 'foreningen/noter.txt'));
+  await writeFile(join(w.contentDir, 'Thumbs.db'), 'x');
+  await rejects(readContent(w.contentDir, config()), /content\/Thumbs\.db: hører ikke til en konfigureret sektion/);
+});
+
 test('en sektion, der fjernes fra konfigurationen, og løse filer ryddes op; _redirects.json bevares', async () => {
   const w = await world({ arkiv: { type: 'guide', accepts: ['gdoc'] } });
   w.drive.gdoc('doc-a', 'A', 'f-foreningen', doc('doc-a')); w.drive.gdoc('doc-b', 'B', 'f-arkiv', doc('doc-b'));
