@@ -15,7 +15,7 @@ export type SiteItem = ItemBase & ({ kind: 'page'; summary: string; html: string
 export interface SiteRedirect { from: string; to: string }
 /** A front-page shortcut or footer link. Internal links always point at a page that exists. */
 export interface SiteLink { id: string; group: 'shortcut' | 'footer'; order: number; label: string; href: string; external: boolean }
-export interface Site { sections: SiteSection[]; items: SiteItem[]; redirects: SiteRedirect[]; links: SiteLink[]; assets: Map<string, Uint8Array>; warnings: string[]; internalIds: string[]; buildDay: string }
+export interface Site { sections: SiteSection[]; items: SiteItem[]; redirects: SiteRedirect[]; links: SiteLink[]; assets: Map<string, Uint8Array>; warnings: string[]; internalIds: string[]; buildDay: string; origin: string }
 
 // Manual redirects, e.g. from old WordPress URLs. Directory-style paths only.
 const redirectPath = z.string().regex(/^\/(?:[a-zA-Z0-9._~-]+\/)+$/).refine(p => !p.split('/').some(s => s === '.' || s === '..'));
@@ -82,5 +82,5 @@ export async function loadSite(root = '.', buildAt = new Date(process.env.BUILD_
   redirects.sort((a, b) => a.from < b.from ? -1 : 1);
   // Drive IDs must never reach the output; news IDs are editor-facing and not secret.
   const internalIds = [...entries.values()].filter(e => e.kind !== 'notice').map(e => e.id);
-  return { sections, items, redirects, links, assets, warnings, internalIds, buildDay };
+  return { sections, items, redirects, links, assets, warnings, internalIds, buildDay, origin: new URL(config.siteUrl).origin };
 }

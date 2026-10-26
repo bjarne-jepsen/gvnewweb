@@ -1,6 +1,7 @@
 import { mkdir, writeFile, rm, rename } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { acquireLock } from '../lib/lock';
+import { htaccess } from '../lib/site/htaccess';
 import { loadSite } from '../lib/site/load';
 import { verifyOutput } from './verify-output';
 
@@ -26,6 +27,7 @@ try {
   const exit = await processResult.exited;
   if (exit !== 0) throw new Error(`Astro fejlede med exit ${exit}; dist er bevaret`);
   if (!dev) {
+    await writeFile('.build/staging/.htaccess', htaccess(site));
     await verifyOutput('.build/staging', site);
     await rm('.build/previous', { recursive: true, force: true });
     let previous = false;

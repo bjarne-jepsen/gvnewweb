@@ -124,6 +124,13 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect(warned.log).toContain('/gammel/ → /findes-ikke/ springes over');
   expect(await html('andelshaveren/byggeprojekter/index.html')).toContain('url=/foreningen/om-os/"');
   expect(await exists('gammel/index.html')).toBe(false);
+  // The same redirects as real 301s for Apache, anchored so they never catch pages below them.
+  const apache = await html('.htaccess');
+  expect(apache).toContain('RedirectMatch 301 "^/andelshaveren/byggeprojekter/?$" "/foreningen/om-os/"');
+  expect(apache).toContain('RedirectMatch 301 "^/foreningen/om-foreningen/?$" "/foreningen/om-os/"');
+  expect(apache).toContain('Header set X-Robots-Tag "noindex, nofollow"');
+  expect(apache).not.toContain('/gammel');
+  expect(await html('sitemap.xml')).toContain('<loc>https://example.invalid/</loc>');
 
   // 5. Errors keep the last valid dist: a redirect over a live page, hand-written HTML in content/.
   const valid = await release();
