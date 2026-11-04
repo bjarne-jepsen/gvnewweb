@@ -124,12 +124,12 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect(warned.log).toContain('/gammel/ → /findes-ikke/ springes over');
   expect(await html('andelshaveren/byggeprojekter/index.html')).toContain('url=/foreningen/om-os/"');
   expect(await exists('gammel/index.html')).toBe(false);
-  // The same redirects as real 301s for Apache, anchored so they never catch pages below them.
-  const apache = await html('.htaccess');
-  expect(apache).toContain('RedirectMatch 301 "^/andelshaveren/byggeprojekter/?$" "/foreningen/om-os/"');
-  expect(apache).toContain('RedirectMatch 301 "^/foreningen/om-foreningen/?$" "/foreningen/om-os/"');
-  expect(apache).toContain('Header set X-Robots-Tag "noindex, nofollow"');
-  expect(apache).not.toContain('/gammel');
+  // The same redirects as real 301s for Cloudflare Pages, with and without the trailing slash.
+  const rules = await html('_redirects');
+  expect(rules).toContain('/andelshaveren/byggeprojekter /foreningen/om-os/ 301\n/andelshaveren/byggeprojekter/ /foreningen/om-os/ 301');
+  expect(rules).toContain('/foreningen/om-foreningen/ /foreningen/om-os/ 301');
+  expect(rules).not.toContain('/gammel');
+  expect(await html('_headers')).toContain('/*\n  X-Robots-Tag: noindex, nofollow');
   expect(await html('sitemap.xml')).toContain('<loc>https://example.invalid/</loc>');
 
   // 5. Errors keep the last valid dist: a redirect over a live page, hand-written HTML in content/.

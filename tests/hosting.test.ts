@@ -1,18 +1,14 @@
 import { expect, test } from 'bun:test';
-import { htaccess } from '../lib/site/htaccess';
+import { hostFiles } from '../lib/site/hosting';
 import { siteConfigSchema } from '../lib/sync/config';
 
-test('.htaccess: 301 for hvert redirect, punktummer escapes, og noindex for hele sitet', () => {
-  const text = htaccess({ redirects: [{ from: '/side.php/', to: '/bo-her/' }, { from: '/a-b/c_d~e/', to: '/foreningen/kontakt/' }] });
-  expect(text.split('\n')).toEqual([
-    '# Skrevet af buildet (lib/site/htaccess.ts). Ret ikke i hånden.',
-    '<IfModule mod_headers.c>',
-    '  Header set X-Robots-Tag "noindex, nofollow"',
-    '</IfModule>',
-    'RedirectMatch 301 "^/side\\.php/?$" "/bo-her/"',
-    'RedirectMatch 301 "^/a-b/c_d~e/?$" "/foreningen/kontakt/"',
-    '',
-  ]);
+test('_redirects har 301 for hvert redirect med og uden skråstreg; _headers giver noindex overalt', () => {
+  const files = hostFiles({ redirects: [{ from: '/side.php/', to: '/bo-her/' }, { from: '/a-b/c/', to: '/foreningen/kontakt/' }] });
+  expect([...files.keys()]).toEqual(['_redirects', '_headers']);
+  expect(files.get('_redirects')!.split('\n').slice(1)).toEqual([
+    '/side.php /bo-her/ 301', '/side.php/ /bo-her/ 301',
+    '/a-b/c /foreningen/kontakt/ 301', '/a-b/c/ /foreningen/kontakt/ 301', '']);
+  expect(files.get('_headers')!.split('\n').slice(1)).toEqual(['/*', '  X-Robots-Tag: noindex, nofollow', '']);
 });
 test('siteUrl skal være https uden sti; standard er example.invalid', () => {
   const base = { rootFolderId: 'root', sections: { nyheder: { type: 'notice', source: 'sheet' } } };

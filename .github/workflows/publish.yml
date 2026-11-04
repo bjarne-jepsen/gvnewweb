@@ -1,4 +1,4 @@
-# Drive → content/ → build → Simply. Only started by hand: "Hjemmeside → Publicér nu" in the
+# Drive → content/ → build → Cloudflare Pages. Only started by hand: "Hjemmeside → Publicér nu" in the
 # admin's sheet (repository_dispatch, scripts/apps-script/publicer.gs) or "Run workflow" here.
 # Setup and secrets: docs/drift.md.
 name: Publicér
@@ -74,13 +74,16 @@ jobs:
           [ "$code" -ne 1 ]
       - name: Push content/
         run: git push origin HEAD
-      - name: Upload til Simply
+      # Cloudflare Pages switches to the new version at once and keeps the old ones for rollback.
+      - name: Upload til Cloudflare Pages
         env:
-          SIMPLY_USER: ${{ vars.SIMPLY_USER }}
-          SIMPLY_PATH: ${{ vars.SIMPLY_PATH }}
-          SIMPLY_SSH_KEY: ${{ secrets.SIMPLY_SSH_KEY }}
-          SIMPLY_KNOWN_HOSTS: ${{ secrets.SIMPLY_KNOWN_HOSTS }}
-        run: scripts/deploy-simply.sh
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          PROJECT: ${{ vars.CLOUDFLARE_PROJECT || 'gvnewweb' }}
+        run: |
+          # The first run creates the project; later runs only report that it exists.
+          bunx wrangler@4 pages project create "$PROJECT" --production-branch=main || true
+          bunx wrangler@4 pages deploy dist --project-name="$PROJECT" --branch=main --commit-dirty=true
       - name: Enkelte filer fejlede
         if: steps.publish.outputs.code == '2'
         run: |
