@@ -11,9 +11,7 @@ import { docJson, FakeDrive, png, sheetJson } from './helpers/fake-drive';
 
 const root = await mkdtemp(join(tmpdir(), 'gv-build-'));
 afterAll(() => rm(root, { recursive: true, force: true }));
-const config = { rootFolderId: 'root', sections: {
-  foreningen: { type: 'guide', accepts: ['gdoc'] }, 'bo-her': { type: 'guide', accepts: ['gdoc'] },
-  nyheder: { type: 'notice', source: 'sheet' } }, ignoredFolders: ['redaktion'] };
+const config = { rootFolderId: 'root' };
 const canary = (id: string, label: string) => docJson(id, [{ text: label }]);
 const drive = new FakeDrive();
 const sync = () => syncContent({ config: siteConfigSchema.parse(config), drive, contentDir: join(root, 'content') });
@@ -35,7 +33,8 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   for (const path of ['src', 'lib', 'scripts', 'astro.config.mjs', 'tsconfig.json', 'package.json']) await cp(path, join(root, path), { recursive: true });
   await symlink(resolve('node_modules'), join(root, 'node_modules'), 'dir');
   await mkdir(join(root, 'config')); await writeFile(join(root, 'config/site.json'), JSON.stringify(config));
-  for (const name of ['foreningen', 'bo-her', 'nyheder', 'redaktion']) drive.folder(`f-${name}`, name, 'root');
+  for (const [key, name] of [['foreningen', '10 Foreningen'], ['bo-her', '20 Bo her'], ['nyheder', '90 Nyheder'], ['redaktion', 'redaktion']]) drive.folder(`f-${key}`, name!, 'root');
+  drive.gdoc('intro', '_intro', 'f-foreningen', docJson('intro', [{ text: 'Bestyrelse og regler.' }, { text: 'Skriv til os.' }]));
   drive.folder('internt', 'Internt', 'elsewhere');
   drive.gdoc('target-doc', 'Lokaleleje_intern_v3', 'internt', docJson('target-doc', [{ text: 'Sådan lejer du lokalerne.' }]));
   drive.shortcut('sc-doc', 'Leje af lokaler', 'f-bo-her', 'target-doc');
@@ -93,6 +92,9 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect(page).toContain('<a class="back" href="/foreningen/">Til foreningen</a>');
   expect(page).toMatch(/<p class="meta updated">Opdateret \d+\. \w+ \d{4}<\/p>/);
   expect(await html('foreningen/index.html')).toContain('<ul class="entries"><li>');
+  // The intro comes from the folder's _intro document: every paragraph on the section page, the first on the front page.
+  expect(await html('foreningen/index.html')).toContain('<p class="intro">Bestyrelse og regler.</p><p class="intro">Skriv til os.</p>');
+  expect(home).toContain('<h3><a href="/foreningen/">Foreningen</a></h3> <p>Bestyrelse og regler.</p>');
   expect(await html('nyheder/index.html')).toContain('<ul class="entries cards"><li>');
   expect(await readFile(dist(`foreningen/om-foreningen/${image}`))).toEqual(png);
   for (const path of await walk(join(root, 'dist'))) expect((await readFile(path)).toString()).not.toMatch(/CANARY|target-doc|doc-1/);
@@ -144,9 +146,15 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect(await release()).toEqual(valid);
   await writeFile(mdPath, original);
 
-  // 6. Removing the shortcut removes the page from dist.
+  // 6. Removing the shortcut removes the page; a page section without pages leaves the menu.
   drive.files.delete('sc-doc');
   await sync(); await expectGreen();
   expect(await exists('bo-her/leje-af-lokaler/index.html')).toBe(false);
-  expect(await html('bo-her/index.html')).toContain('Der er ingen offentliggjorte elementer her endnu.');
+  expect(await exists('bo-her/index.html')).toBe(false);
+  expect(await html('index.html')).not.toContain('href="/bo-her/"');
+  // 7. A renamed and renumbered folder changes the menu, not the address.
+  drive.update('f-foreningen', { name: '95 Om foreningen' });
+  await sync(); await expectGreen();
+  expect([...(await html('index.html')).matchAll(/<nav aria-label="Hovednavigation">([\s\S]*?)<\/nav>/g)][0]![1]!.match(/<a href="[^"]+"[^>]*>[^<]+/g)!.map(a => a.replace(/<a href="([^"]+)"[^>]*>/, '$1 ')))
+    .toEqual(['/ Forside', '/nyheder/ Nyheder', '/foreningen/ Om foreningen']);
 }, 90000);

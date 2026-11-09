@@ -1,15 +1,16 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { z } from 'zod';
 import { siteConfigSchema } from '../sync/config';
 import { guideMetaSchema, localImage, newsMetaSchema } from '../sync/content';
 import { splitFrontmatter } from '../sync/markdown';
+import { manualRedirectsSchema } from '../sync/sections';
 import { pathOf } from '../sync/slugs';
-import { readContent, syncedSections } from '../sync/sync';
+import { readContent } from '../sync/sync';
 import { renderBody } from './render';
-import { copenhagenDay, frontpage, sectionTexts } from './sections';
+import { copenhagenDay, frontpage } from './sections';
 
-export interface SiteSection { key: string; order: number; label: string; intro: string; path: string }
+/** intro: plain paragraphs separated by a blank line, from the folder's _intro document. */
+export interface SiteSection { key: string; order: number; label: string; intro: string; path: string; news: boolean }
 interface ItemBase { id: string; section: string; slug: string; path: string; title: string; updatedAt: string }
 export type SiteItem = ItemBase & ({ kind: 'page'; summary: string; html: string } | { kind: 'notice'; summary: string; html: string; date: string; expires?: string });
 export interface SiteRedirect { from: string; to: string }
@@ -17,9 +18,7 @@ export interface SiteRedirect { from: string; to: string }
 export interface SiteLink { id: string; group: 'shortcut' | 'footer'; order: number; label: string; href: string; external: boolean }
 export interface Site { sections: SiteSection[]; items: SiteItem[]; redirects: SiteRedirect[]; links: SiteLink[]; assets: Map<string, Uint8Array>; warnings: string[]; internalIds: string[]; buildDay: string; origin: string }
 
-// Manual redirects, e.g. from old WordPress URLs. Directory-style paths only.
-const redirectPath = z.string().regex(/^\/(?:[a-zA-Z0-9._~-]+\/)+$/).refine(p => !p.split('/').some(s => s === '.' || s === '..'));
-export const manualRedirectsSchema = z.record(redirectPath, redirectPath);
+export { manualRedirectsSchema };
 const collator = new Intl.Collator('da-DK');
 
 /** The one public dataset: pages, files, sitemap and search index are all derived from it.
@@ -29,12 +28,13 @@ export async function loadSite(root = '.', buildAt = new Date(process.env.BUILD_
   const buildDay = copenhagenDay(buildAt);
   const config = siteConfigSchema.parse(JSON.parse(await readFile(join(root, 'config/site.json'), 'utf8')));
   const contentDir = join(root, 'content');
-  const { entries, slugs } = await readContent(contentDir, config);
-  const sections = [...syncedSections(config).keys()].map((key, order) => {
-    const text = sectionTexts[key];
-    if (!text) throw new Error(`Sektionen ${key} mangler tekst og navigation i lib/site/sections.ts`);
-    return { key, order, ...text, path: `/${key}/` };
-  });
+  const { entries, slugs, sections: known } = await readContent(contentDir);
+  // Menu order is the number in front of the folder name. A page section without pages is not shown;
+  // a news section is, also when no news is current.
+  const used = new Set([...entries.values()].map(e => e.section));
+  const sections: SiteSection[] = known.filter(s => s.kind === 'notice' || used.has(s.key))
+    .sort((a, b) => a.order - b.order || collator.compare(a.label, b.label) || (a.key < b.key ? -1 : 1))
+    .map((s, order) => ({ key: s.key, order, label: s.label, intro: s.intro, path: `/${s.key}/`, news: s.kind === 'notice' }));
   const items: SiteItem[] = [], assets = new Map<string, Uint8Array>();
   for (const entry of entries.values()) {
     const slug = slugs[entry.id];

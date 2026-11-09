@@ -22,12 +22,13 @@ test('renderer escaper tekst og attributter og kender kun dialekten', () => {
 
 const roots: string[] = [];
 afterEach(async () => { await Promise.all(roots.splice(0).map(p => rm(p, { recursive: true, force: true }))); });
-async function site(sections: Record<string, unknown> = { foreningen: { type: 'guide', accepts: ['gdoc'] } }) {
+async function site(folders: Record<string, string> = { foreningen: '40 Foreningen' }) {
   const root = await mkdtemp(join(tmpdir(), 'gv-site-')); roots.push(root);
-  const config = { rootFolderId: 'root', sections };
+  const config = { rootFolderId: 'root' };
   await mkdir(join(root, 'config')); await writeFile(join(root, 'config/site.json'), JSON.stringify(config));
   const drive = new FakeDrive();
-  for (const name of Object.keys(sections)) drive.folder(`f-${name}`, name, 'root');
+  for (const [key, name] of Object.entries(folders)) drive.folder(`f-${key}`, name, 'root');
+  drive.gdoc('intro', '_intro', 'f-foreningen', docJson('intro', [{ text: 'Bestyrelse og regler.' }, { text: 'Kontakt os.' }]));
   drive.gdoc('doc-a', 'Om foreningen', 'f-foreningen', docJson('doc-a', [{ text: 'Tekst.' }]));
   drive.gdoc('doc-b', 'Bestyrelsen', 'f-foreningen', docJson('doc-b', [{ text: 'Mere.' }]));
   await syncContent({ config: siteConfigSchema.parse(config), drive, contentDir: join(root, 'content') });
@@ -36,10 +37,10 @@ async function site(sections: Record<string, unknown> = { foreningen: { type: 'g
 test('loadSite giver sorterede sider, stier og interne ID\'er kun til kontrol', async () => {
   const s = await loadSite(await site());
   expect(s.items.map(i => [i.title, i.path])).toEqual([['Bestyrelsen', '/foreningen/bestyrelsen/'], ['Om foreningen', '/foreningen/om-foreningen/']]);
-  expect(s.sections).toEqual([{ key: 'foreningen', order: 0, label: 'Foreningen', intro: 'Bestyrelse, udvalg, generalforsamling, regler og kontakt.', path: '/foreningen/' }]);
+  expect(s.sections).toEqual([{ key: 'foreningen', order: 0, label: 'Foreningen', intro: 'Bestyrelse og regler.\n\nKontakt os.', path: '/foreningen/', news: false }]);
   expect(s.internalIds.sort()).toEqual(['doc-a', 'doc-b']);
 });
-test('loadSite afviser manglende slug, redirect over en side og sektion uden navigation', async () => {
+test('loadSite afviser manglende slug og redirect over en side', async () => {
   const root = await site();
   const slugsPath = join(root, 'content/_slugs.json'), slugs = JSON.parse(await readFile(slugsPath, 'utf8'));
   await writeFile(slugsPath, JSON.stringify({ ...slugs, 'doc-a': { ...slugs['doc-a'], previousPaths: ['/foreningen/bestyrelsen/'] } }));
@@ -47,15 +48,14 @@ test('loadSite afviser manglende slug, redirect over en side og sektion uden nav
   const { ['doc-a']: _gone, ...rest } = slugs;
   await writeFile(slugsPath, JSON.stringify(rest));
   await rejects(loadSite(root), /doc-a mangler/);
-  await rejects(loadSite(await site({ foreningen: { type: 'guide', accepts: ['gdoc'] }, arkiv: { type: 'guide', accepts: ['gdoc'] } })), /arkiv mangler tekst/);
 });
 
 test('nyheder filtreres ved build: fra datoen, til og med udløbsdagen i dansk tid, nyeste først', async () => {
   const root = await mkdtemp(join(tmpdir(), 'gv-site-')); roots.push(root);
-  const config = { rootFolderId: 'root', sections: { nyheder: { type: 'notice', source: 'sheet' } } };
+  const config = { rootFolderId: 'root' };
   await mkdir(join(root, 'config')); await writeFile(join(root, 'config/site.json'), JSON.stringify(config));
   const drive = new FakeDrive();
-  drive.folder('f-nyheder', 'nyheder', 'root');
+  drive.folder('f-nyheder', '90 Nyheder', 'root');
   drive.sheet('sheet', 'Nyheder', 'f-nyheder', sheetJson([['ID', 'Dato', 'Titel', 'Tekst', 'Udløber', 'Status'],
     ['n-old', '2026-09-01', 'Gammel', 'Tekst', '', 'offentlig'], ['n-exp', '2026-10-01', 'Udløber', 'Tekst', '2026-10-31', 'offentlig'],
     ['n-future', '2099-01-01', 'Fremtid', 'Tekst', '', 'offentlig']]));
@@ -68,6 +68,21 @@ test('nyheder filtreres ved build: fra datoen, til og med udløbsdagen i dansk t
   expect(s.internalIds).toEqual([]); expect(s.buildDay).toBe('2026-10-21');
   expect(s.items[0]).toMatchObject({ kind: 'notice', path: '/nyheder/2026-10-01-udloeber/', date: '2026-10-01', expires: '2026-10-31', html: '<p>Tekst</p>' });
   await rejects(loadSite(root, new Date('ugyldig')), /BUILD_AT/);
+});
+
+test('menuen følger tallene; en sektion uden sider vises ikke, en nyhedssektion altid', async () => {
+  const root = await site({ foreningen: '40 Foreningen', bo: '20 Bo her', tom: '30 Tom', nyheder: '90 Nyheder', privat: 'Kladder' });
+  // No sheet yet, so "Nyheder" is an empty page section; with a sheet it is a news section and shown.
+  expect((await loadSite(root)).sections.map(s => s.label)).toEqual(['Foreningen']);
+  const drive = new FakeDrive();
+  for (const [id, name] of [['f-foreningen', '40 Foreningen'], ['f-bo', '20 Bo her'], ['f-tom', '30 Tom'], ['f-nyheder', '90 Nyheder']]) drive.folder(id!, name!, 'root');
+  drive.gdoc('doc-a', 'Om foreningen', 'f-foreningen', docJson('doc-a', [{ text: 'Tekst.' }]));
+  drive.gdoc('doc-b', 'Bestyrelsen', 'f-foreningen', docJson('doc-b', [{ text: 'Mere.' }]));
+  drive.gdoc('doc-c', 'Affald', 'f-bo', docJson('doc-c', [{ text: 'Tirsdag.' }]));
+  drive.sheet('ark', 'Nyheder', 'f-nyheder', sheetJson([['ID', 'Dato', 'Titel', 'Tekst', 'Udløber', 'Status']]));
+  await syncContent({ config: siteConfigSchema.parse({ rootFolderId: 'root' }), drive, contentDir: join(root, 'content') });
+  expect((await loadSite(root)).sections.map(s => [s.order, s.label, s.path, s.news])).toEqual([
+    [0, 'Bo her', '/bo-her/', false], [1, 'Foreningen', '/foreningen/', false], [2, 'Nyheder', '/nyheder/', true]]);
 });
 
 test('genveje og sidefod peger kun på sider, der findes; ProBo kun med https', async () => {

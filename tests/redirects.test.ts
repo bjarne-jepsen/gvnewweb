@@ -1,21 +1,21 @@
 import { expect, test } from 'bun:test';
 import { readFile } from 'node:fs/promises';
 import { loadSite, manualRedirectsSchema } from '../lib/site/load';
-import { siteConfigSchema } from '../lib/sync/config';
 import { slugSchema } from '../lib/sync/slugs';
+import { readContent } from '../lib/sync/sync';
 
 // The WordPress redirect list shipped in content/_redirects.json (phase 5c).
-const config = siteConfigSchema.parse(JSON.parse(await readFile('config/site.json', 'utf8')));
+const sections = new Set((await readContent('content')).sections.map(s => s.key));
 const redirects = manualRedirectsSchema.parse(JSON.parse(await readFile('content/_redirects.json', 'utf8')));
 
-test('alle mål er en sektion eller en side i en konfigureret sektion', () => {
+test('alle mål er en sektion eller en side i en sektion', () => {
   expect(Object.keys(redirects).length).toBe(48);
   for (const [from, to] of Object.entries(redirects)) {
     const [section, slug, ...rest] = to.split('/').filter(Boolean);
-    expect(section! in config.sections).toBe(true);
+    expect(sections.has(section!)).toBe(true);
     if (slug) expect(slugSchema.safeParse(slug).success).toBe(true);
     expect(rest).toEqual([]);
-    expect(from.split('/')[1]! in config.sections).toBe(false); // an old path never shadows a section
+    expect(sections.has(from.split('/')[1]!)).toBe(false); // an old path never shadows a section
   }
   expect(Object.keys(redirects)).toEqual(Object.keys(redirects).sort()); // kept sorted for review
 });

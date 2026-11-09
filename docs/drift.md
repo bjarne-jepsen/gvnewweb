@@ -104,7 +104,21 @@ Under *Settings → Secrets and variables → Actions*:
    - `GITHUB_REPO` = `bjarne-jepsen/gvnewweb`
    - `GITHUB_TOKEN` = tokenet fra punkt 1
    - `ALLOWED_EMAILS` = de adresser, der må publicere
-4. Genindlæs arket. Menuen *Hjemmeside → Publicér nu* dukker op. Første gang beder Google om tilladelse til at "oprette forbindelse til en ekstern tjeneste". Det er kaldet til GitHub.
+4. Genindlæs arket. Menuen *Hjemmeside* dukker op med *Publicér nu* og *Publicér og tillad sletning*. Første gang beder Google om tilladelse til at "oprette forbindelse til en ekstern tjeneste". Det er kaldet til GitHub.
+
+## Sektioner i Drive
+
+En mappe i roden, hvis navn starter med et tal, er en sektion på sitet. Se reglerne i README under "Mappemodellen".
+
+| I Drive | På sitet |
+|---|---|
+| Opret "35 Udlejning" | Ny sektion `/udlejning/`, nr. 35 i menuen, når den har en side |
+| Omdøb "20 Bo her" til "20 Bo i Grøndalsvænge" | Nyt menunavn. Adressen er stadig `/bo-her/` |
+| Skift 20 til 15 | Kun rækkefølgen i menuen ændres |
+| Slet mappen, flyt den ud af roden eller fjern tallet | Sektionen og dens sider forsvinder. Kræver *Publicér og tillad sletning* |
+| Læg et Google-dokument med navnet `_intro` i mappen | Dokumentets afsnit bliver sektionens intro |
+
+En sektion, der hentes tilbage fra papirkurven, får sine gamle adresser igen. En ny mappe med samme navn som en eksisterende sektion får `-2` i adressen. En sektions adresse kan i dag ikke ændres uden at flytte siderne til en ny mappe.
 
 ## Kendte begrænsninger
 

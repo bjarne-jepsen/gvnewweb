@@ -32,12 +32,12 @@ afterEach(async () => { await Promise.all(roots.splice(0).map(p => rm(p, { recur
 async function world(rows: Row[] = baseRows) {
   const dir = await mkdtemp(join(tmpdir(), 'gv-news-')); roots.push(dir);
   const drive = new FakeDrive();
-  drive.folder('f-nyheder', 'nyheder', 'root');
+  drive.folder('f-nyheder', '90 Nyheder', 'root');
   drive.sheet('sheet', 'Nyheder', 'f-nyheder', sheetJson([header, ...rows]));
-  const config = siteConfigSchema.parse({ rootFolderId: 'root', sections: { nyheder: { type: 'notice', source: 'sheet' } } });
+  const config = siteConfigSchema.parse({ rootFolderId: 'root' });
   const contentDir = join(dir, 'content');
   const run = (allowMassRemoval = false) => syncContent({ config, drive, contentDir, allowMassRemoval, now: new Date('2026-10-21T20:00:00Z') });
-  const tree = async () => Object.fromEntries(await Promise.all((await walk(contentDir).catch(() => [])).sort().map(async p => [relative(contentDir, p), digest(await readFile(p))])));
+  const tree = async () => Object.fromEntries(await Promise.all((await walk(contentDir).catch(() => [])).filter(p => !p.endsWith('_sections.json')).sort().map(async p => [relative(contentDir, p), digest(await readFile(p))])));
   const news = async (id: string) => JSON.parse(await readFile(join(contentDir, `nyheder/${id}.json`), 'utf8'));
   const setRows = (next: Row[]) => drive.update('sheet', { sheet: sheetJson([header, ...next]) });
   return { drive, contentDir, run, tree, news, setRows };

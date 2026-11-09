@@ -3,15 +3,17 @@ import { readFile } from 'node:fs/promises';
 
 // Runs the real Apps Script source with fake Google services.
 const source = await readFile('scripts/apps-script/publicer.gs', 'utf8');
-function run(o: { email: string; props: Record<string, string>; status?: number }) {
+function run(o: { email: string; props: Record<string, string>; status?: number; call?: string; answer?: 'YES' | 'NO' }) {
   const alerts: string[] = [], calls: { url: string; options: { headers: Record<string, string>; payload: string } }[] = [];
   const services = {
-    SpreadsheetApp: { getUi: () => ({ alert: (m: string) => alerts.push(m) }) },
+    SpreadsheetApp: { getUi: () => ({
+      ButtonSet: { YES_NO: 'YES_NO' }, Button: { YES: 'YES', NO: 'NO' },
+      alert: (title: string, message?: string) => { alerts.push(message ?? title); return message ? o.answer ?? 'NO' : 'OK'; } }) },
     PropertiesService: { getScriptProperties: () => ({ getProperty: (k: string) => o.props[k] ?? null }) },
     Session: { getActiveUser: () => ({ getEmail: () => o.email }) },
     UrlFetchApp: { fetch: (url: string, options: (typeof calls)[number]['options']) => { calls.push({ url, options }); return { getResponseCode: () => o.status ?? 204 }; } },
   };
-  new Function(...Object.keys(services), `${source}\npublish();`)(...Object.values(services));
+  new Function(...Object.keys(services), `${source}\n${o.call ?? 'publish'}();`)(...Object.values(services));
   return { alerts, calls };
 }
 const props = { GITHUB_REPO: 'bjarne-jepsen/gvnewweb', GITHUB_TOKEN: 'github_pat_x', ALLOWED_EMAILS: 'admin@groendalsvaenge.dk, Redaktor@Groendalsvaenge.dk' };
@@ -21,7 +23,7 @@ test('kun tilladte adresser kan starte en opdatering; kaldet går til repository
   expect(ok.calls).toHaveLength(1);
   expect(ok.calls[0]!.url).toBe('https://api.github.com/repos/bjarne-jepsen/gvnewweb/dispatches');
   expect(ok.calls[0]!.options.headers.Authorization).toBe('Bearer github_pat_x');
-  expect(JSON.parse(ok.calls[0]!.options.payload)).toEqual({ event_type: 'publish', client_payload: { requested_by: 'redaktor@groendalsvaenge.dk' } });
+  expect(JSON.parse(ok.calls[0]!.options.payload)).toEqual({ event_type: 'publish', client_payload: { requested_by: 'redaktor@groendalsvaenge.dk', allow_mass_removal: false } });
   expect(ok.alerts[0]).toContain('startet');
   for (const email of ['anden@groendalsvaenge.dk', '']) {
     const denied = run({ email, props });
@@ -35,4 +37,13 @@ test('manglende opsætning og afvist token giver en forklaring', () => {
   expect(run({ email, props: { ...props, GITHUB_REPO: 'x/y/../z' } }).calls).toHaveLength(0);
   expect(run({ email, props, status: 401 }).alerts[0]).toContain('udløbet');
   expect(run({ email, props, status: 500 }).alerts[0]).toContain('kunne ikke startes');
+});
+test('"Publicér og tillad sletning" spørger først og sender tilladelsen med', () => {
+  const email = 'admin@groendalsvaenge.dk';
+  const no = run({ email, props, call: 'publishAllowingRemoval', answer: 'NO' });
+  expect(no.calls).toHaveLength(0);
+  expect(no.alerts[0]).toContain('fjernes fra hjemmesiden');
+  const yes = run({ email, props, call: 'publishAllowingRemoval', answer: 'YES' });
+  expect(JSON.parse(yes.calls[0]!.options.payload).client_payload).toEqual({ requested_by: email, allow_mass_removal: true });
+  expect(run({ email: 'anden@groendalsvaenge.dk', props, call: 'publishAllowingRemoval', answer: 'YES' }).calls).toHaveLength(0);
 });
