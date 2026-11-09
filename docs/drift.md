@@ -1,6 +1,6 @@
 # Drift: "Publicér nu" fra Drive til newweb.groendalsvaenge.dk
 
-Status 26. oktober 2026: bygget, men ikke sat op. Trinene markeret **(admin/Bjarne)** kræver adgang til konti.
+Status 4. november 2026: bygget, og opsætningen er i gang. Hosting er Cloudflare Pages. Trinene markeret **(admin/Bjarne)** kræver adgang til konti.
 
 ## Sådan virker det
 
@@ -12,15 +12,15 @@ Admin vælger "Hjemmeside → Publicér nu" i et låst ark i Drive
         2. henter et kortlivet token som servicekontoen (kun læseadgang til Drive)
         3. bun run publish: sync → rapport → commit af content/ → build → outputkontrol
         4. pusher commit'et
-        5. scripts/deploy-simply.sh: pakker dist/ ud ved siden af den nuværende mappe og bytter
+        5. wrangler pages deploy: uploader dist/ til Cloudflare Pages
   → newweb.groendalsvaenge.dk er opdateret efter 2–3 minutter
 ```
 
 - **Drive er den eneste kilde.** Hver kørsel bygger sektionerne i `content/` forfra ud fra Drive. Jobbet `content-source` i `checks.yml` fejler, hvis andre end workflowet ændrer sider i `content/`. Kun `_slugs.json` og `_redirects.json` må rettes af en udvikler. Lokalt bruges `bun run publish -- --no-commit`.
 - **Ingen tidsplan.** Sitet ændrer sig kun, når nogen trykker. En nyhed med en fremtidig dato vises først ved den første kørsel på eller efter datoen.
-- **Fejl i enkelte filer:** Sitet opdateres, kørslen markeres som fejlet, og rapporten står i kørslens oversigt på GitHub. **Afbrudt sync:** intet ændres, hverken i Git eller på Simply.
-- **Tilbagerulning:** Den forrige version ligger på Simply som `<mappe>.gammel` indtil næste kørsel. Omdøb den tilbage over SSH. Indholdet kan også rulles tilbage i Git, men næste kørsel henter alligevel fra Drive.
-- **`.htaccess`** dannes af buildet. Den giver rigtige 301-redirects for alle redirects (WordPress og omdøbte sider) og `X-Robots-Tag: noindex` for hele sitet. Redirect-siderne med meta-refresh bliver liggende som reserve.
+- **Fejl i enkelte filer:** Sitet opdateres, kørslen markeres som fejlet, og rapporten står i kørslens oversigt på GitHub. **Afbrudt sync:** intet ændres, hverken i Git eller på Cloudflare.
+- **Tilbagerulning:** Cloudflare skifter til den nye version på én gang og gemmer de tidligere. I Cloudflare under *Workers & Pages → gvnewweb → Deployments* vælger du en ældre version og trykker *Rollback*. Næste kørsel henter dog igen fra Drive.
+- **`_redirects` og `_headers`** dannes af buildet. De giver rigtige 301-redirects for alle gamle adresser (WordPress og omdøbte sider), med og uden skråstreg til sidst, og `X-Robots-Tag: noindex` for hele sitet. Redirect-siderne med meta-refresh bliver liggende som reserve.
 
 ## Opsætning
 
@@ -29,13 +29,13 @@ Admin vælger "Hjemmeside → Publicér nu" i et låst ark i Drive
 Log ind på console.cloud.google.com som admin@groendalsvaenge.dk.
 
 1. Opret projektet, fx `gv-hjemmeside`.
-2. Slå disse API'er til: Google Drive API, Google Docs API, Google Sheets API, IAM Service Account Credentials API og Security Token Service API.
-3. Kør i Cloud Shell (ikonet `>_` øverst). Erstat `PROJECT_ID`, hvis projektet hedder noget andet:
+2. Kør i Cloud Shell (ikonet `>_` øverst). Sæt `PROJECT_ID` til projektets ID, som det står i projektvælgeren:
 
 ```sh
 PROJECT_ID=gv-hjemmeside
 REPO=bjarne-jepsen/gvnewweb
 gcloud config set project $PROJECT_ID
+gcloud services enable drive.googleapis.com docs.googleapis.com sheets.googleapis.com iamcredentials.googleapis.com sts.googleapis.com
 gcloud iam service-accounts create gv-sync --display-name="Hjemmeside: læser Drive"
 gcloud iam workload-identity-pools create github --location=global --display-name=GitHub
 gcloud iam workload-identity-pools providers create-oidc gvnewweb --location=global \
@@ -53,24 +53,19 @@ echo "GCP_SERVICE_ACCOUNT=gv-sync@$PROJECT_ID.iam.gserviceaccount.com"
 
 Der oprettes ingen nøgle. Kun workflows i dette repository kan låne servicekontoen.
 
-4. Del fællesdrevet "Grøndalsvænge hjemmeside" med `gv-sync@…iam.gserviceaccount.com` som **Læser**. Afviser Drive adressen, så tillad deling uden for organisationen for netop dette fællesdrev (Workspace Admin → Apps → Drive → Delingsindstillinger).
+3. Del fællesdrevet "Grøndalsvænge hjemmeside" med `gv-sync@…iam.gserviceaccount.com` som **Læser**. Afviser Drive adressen, så tillad deling uden for organisationen for netop dette fællesdrev (Workspace Admin → Apps → Drive → Delingsindstillinger).
 
 *Alternativ:* En JSON-nøgle til servicekontoen, gemt som secret `GCP_SA_KEY`. Den bruges kun, hvis `GCP_WORKLOAD_PROVIDER` ikke er sat. Den er ofte blokeret i nye organisationer og bør undgås.
 
-### 2. Simply **(Bjarne)**
+### 2. Cloudflare **(Bjarne)**
 
-1. Lav en nøgle, der kun bruges til upload:
-   ```sh
-   ssh-keygen -t ed25519 -f gv-deploy -N "" -C gv-publicer
-   ssh-keyscan ssh.simply.com > gv-known-hosts
-   ```
-2. Indsæt indholdet af `gv-deploy.pub` i Simplys kontrolpanel under *Website → SSH-adgang*.
-3. Find subdomænets mappe, og tjek, at `tar` findes:
-   ```sh
-   ssh -i gv-deploy BRUGER@ssh.simply.com 'pwd; ls; tar --version | head -1'
-   ```
-   Mappen er stien til newweb set fra hjemmemappen, fx `public_html/newweb` eller `newweb.groendalsvaenge.dk`.
-4. **Alt i mappen bliver erstattet** ved første kørsel. Det, der ligger der nu, flyttes til `<mappe>.gammel`.
+1. Opret en gratis konto på dash.cloudflare.com.
+2. Find dit **Account ID**. Det står i højre side på kontoens forside og under *Workers & Pages*.
+3. Lav et API-token under *Profil → API Tokens → Create Token → Create Custom Token*:
+   - Permissions: *Account → Cloudflare Pages → Edit*
+   - Account Resources: kun din konto
+   - Kopiér tokenet, når det vises. Det vises kun én gang.
+4. Pages-projektet `gvnewweb` oprettes automatisk ved første kørsel. Vil du hellere kalde det noget andet, så sæt variablen `CLOUDFLARE_PROJECT`.
 
 ### 3. GitHub **(Bjarne)**
 
@@ -78,19 +73,25 @@ Under *Settings → Secrets and variables → Actions*:
 
 | Type | Navn | Værdi |
 |---|---|---|
-| Variable | `GCP_WORKLOAD_PROVIDER` | Fra trin 1.3 |
-| Variable | `GCP_SERVICE_ACCOUNT` | Fra trin 1.3 |
-| Variable | `SIMPLY_USER` | Dit SSH-/FTP-brugernavn hos Simply |
-| Variable | `SIMPLY_PATH` | Mappen fra trin 2.3 |
+| Variable | `GCP_WORKLOAD_PROVIDER` | Fra trin 1.2 |
+| Variable | `GCP_SERVICE_ACCOUNT` | Fra trin 1.2 |
 | Variable | `PUBLISH_ACTORS` | Valgfri. GitHub-brugere, der må starte kørslen, adskilt af komma. Standard er repo'ets ejer |
-| Secret | `SIMPLY_SSH_KEY` | Hele indholdet af `gv-deploy` (den private nøgle) |
-| Secret | `SIMPLY_KNOWN_HOSTS` | Indholdet af `gv-known-hosts` |
+| Variable | `CLOUDFLARE_PROJECT` | Valgfri. Standard er `gvnewweb` |
+| Secret | `CLOUDFLARE_API_TOKEN` | Tokenet fra trin 2.3 |
+| Secret | `CLOUDFLARE_ACCOUNT_ID` | Account ID fra trin 2.2 |
 
-Slet derefter `gv-deploy` fra din computer, eller gem den i en adgangskodeboks.
+**Første test:** Gå til *Actions → Publicér → Run workflow*. Når kørslen er grøn, ligger sitet på `https://gvnewweb.pages.dev`. Prøv en gammel adresse, fx `/andelshaveren/`. Den skal give 301 til `/bo-her/`.
 
-**Første test:** *Actions → Publicér → Run workflow.* Åbn derefter newweb.groendalsvaenge.dk og en gammel adresse, fx `/andelshaveren/`. Den skal give 301 til `/bo-her/`. Giver sitet fejl 500, tillader Simply ikke `.htaccess`-direktiverne. Så slet `.htaccess` på serveren, og sig til.
+### 4. Domænet newweb.groendalsvaenge.dk **(Bjarne)**
 
-### 4. Knappen i Drive **(Bjarne + admin)**
+1. I Cloudflare: *Workers & Pages → gvnewweb → Custom domains → Set up a custom domain*. Skriv `newweb.groendalsvaenge.dk`. Cloudflare viser derefter en CNAME, der skal oprettes.
+2. Hos Simply: Åbn domænet `groendalsvaenge.dk` og vælg **DNS**.
+   - Slet de A- og AAAA-poster, der hedder `newweb`. Det er dem, der i dag peger på webhotellet.
+   - Opret en ny post: type **CNAME**, navn `newweb`, værdi `gvnewweb.pages.dev`.
+3. Cloudflare tjekker posten og udsteder et certifikat. Det tager typisk få minutter, men kan tage op til et døgn, mens DNS opdateres.
+4. Subdomænet på Simplys webhotel kan derefter fjernes, og den mappe, du FTP'ede op, bruges ikke længere.
+
+### 5. Knappen i Drive **(Bjarne + admin)**
 
 1. **(Bjarne)** Lav et fine-grained token på github.com → *Settings → Developer settings → Fine-grained tokens*:
    - Repository access: kun `gvnewweb`
@@ -107,7 +108,6 @@ Slet derefter `gv-deploy` fra din computer, eller gem den i en adgangskodeboks.
 
 ## Kendte begrænsninger
 
-- **Ikke afprøvet mod Simply og Google.** Både `.htaccess` og byttet af mapper er kun testet lokalt. Det er uvist, om Simply tillader `RedirectMatch`/`Header` i `.htaccess`, og om SSH-adgangen giver en almindelig shell med `tar`. Første kørsel viser det.
-- **Mens mapperne byttes,** kan en besøgende få en fejl i et øjeblik. Det sker mellem de to omdøbninger, og vinduet er på millisekunder.
-- **Tokenet i arket er bundet til Bjarnes GitHub-konto.** Når foreningen overtager repo'et, skal der laves et nyt token.
+- **Ikke afprøvet mod Cloudflare og Google.** `_redirects`, `_headers` og uploaden er kun testet lokalt og med `wrangler --help`. Første kørsel viser, om opsætningen er rigtig.
+- **Tokenet i arket er bundet til Bjarnes GitHub-konto.** Når foreningen overtager repo'et, skal der laves et nyt token. Det samme gælder Cloudflare-kontoen.
 - **Admin får ingen besked, hvis kørslen fejler.** GitHub sender en e-mail til repo-ejeren. Rapporten står i kørslens oversigt.

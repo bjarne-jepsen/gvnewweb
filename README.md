@@ -60,7 +60,7 @@ Kørslen synkroniserer, skriver rapporten og committer `content/`, hvis noget ha
 - **Exit-koder:** 0 betyder ingen fejl. 2 betyder, at enkelte filer fejlede, men `content/` og `dist` er opdateret. 1 betyder, at sync blev afbrudt, eller at buildet fejlede.
 - **Valg:** `--no-commit` synkroniserer og bygger uden at committe. `--allow-mass-removal` virker som ved `sync`.
 
-På GitHub kører det samme i workflowet **Publicér** (`.github/workflows/publish.yml`), som også pusher og uploader til newweb.groendalsvaenge.dk. Det startes kun manuelt, fra menuen *Hjemmeside → Publicér nu* i et låst ark i Drive eller fra *Run workflow*. Opsætningen står i [docs/drift.md](docs/drift.md). Sider i `content/` må kun committes af workflowet. Lokalt bruges `--no-commit`, og jobbet `content-source` i `checks.yml` fejler ellers.
+På GitHub kører det samme i workflowet **Publicér** (`.github/workflows/publish.yml`), som også pusher og uploader til Cloudflare Pages (newweb.groendalsvaenge.dk). Det startes kun manuelt, fra menuen *Hjemmeside → Publicér nu* i et låst ark i Drive eller fra *Run workflow*. Opsætningen står i [docs/drift.md](docs/drift.md). Sider i `content/` må kun committes af workflowet. Lokalt bruges `--no-commit`, og jobbet `content-source` i `checks.yml` fejler ellers.
 
 ### `content/`
 
@@ -100,8 +100,8 @@ Serializeren skriver en lille dialekt: overskrift 2–6, afsnit, fed, kursiv, ht
 
 - Sider ligger på `/<sektion>/<slug>/` og billeder ved siden af deres side.
 - Outputkontrollen ([scripts/verify-output.ts](scripts/verify-output.ts)) tillader kun de forventede filer. Bytes skal være identiske med `content/`. Der må ikke være Drive-ID'er og ingen `<script>`. Sitemap og søgeindeks skal være præcis de offentlige sider.
-- Sitemap bruger `siteUrl` fra `config/site.json` (nu `https://newweb.groendalsvaenge.dk`). Prototypen har `noindex` i siderne og som header i `.htaccess`. Indeksering besluttes, når sitet skal på det rigtige domæne.
-- Redirects er meta-refresh-sider. Buildet skriver desuden `.htaccess` med rigtige 301'ere til Apache (Simply). Outputkontrollen kræver, at den svarer præcis til redirects.
+- Sitemap bruger `siteUrl` fra `config/site.json` (nu `https://newweb.groendalsvaenge.dk`). Prototypen har `noindex` i siderne og som header i `_headers`. Indeksering besluttes, når sitet skal på det rigtige domæne.
+- Redirects er meta-refresh-sider. Buildet skriver desuden `_redirects` med rigtige 301'ere og `_headers` til Cloudflare Pages. Outputkontrollen kræver, at de svarer præcis til redirects.
 
 ## Dokumentation
 
