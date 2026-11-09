@@ -7,7 +7,7 @@ const sections = (await getCollection('sections')).map(s => s.data).sort((a, b) 
 const shortcuts = (await getCollection('links')).map(l => l.data).filter(l => l.group === 'shortcut').sort((a, b) => a.order - b.order);
 // Items are sorted newest news first, so the first three notices are the latest visible ones.
 const news = (await getCollection('items')).map(i => i.data).filter(i => i.kind === 'notice').slice(0, 3);
-const newsSection = sections.find(s => s.key === 'nyheder');
+const newsSection = sections.find(s => s.news);
 ---
 <Base title="Forside">
   <p class="prototype">Lokal prototype med indhold fra foreningens Google Drive</p>
@@ -24,9 +24,9 @@ const newsSection = sections.find(s => s.key === 'nyheder');
   </section>}
   <section aria-labelledby="sektioner">
     <h2 id="sektioner">Find rundt</h2>
-    <ul class="sections">{sections.filter(s => s.key !== 'nyheder').map(s => <li>
+    <ul class="sections">{sections.filter(s => !s.news).map(s => <li>
       <h3><a href={s.path}>{s.label}</a></h3>
-      <p>{s.intro}</p>
+      {s.intro && <p>{s.intro.split('\n\n')[0]}</p>}
     </li>)}</ul>
   </section>
 </Base>

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { driveIdSchema } from './drive';
-import { sectionKey } from './config';
+import { sectionKey } from './sections';
 
 const segment = '[a-z0-9]+(?:-[a-z0-9]+)*';
 export const slugSchema = z.string().regex(new RegExp(`^${segment}$`)).max(80);

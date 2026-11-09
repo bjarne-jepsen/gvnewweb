@@ -11,7 +11,7 @@ test('_redirects har 301 for hvert redirect med og uden skråstreg; _headers giv
   expect(files.get('_headers')!.split('\n').slice(1)).toEqual(['/*', '  X-Robots-Tag: noindex, nofollow', '']);
 });
 test('siteUrl skal være https uden sti; standard er example.invalid', () => {
-  const base = { rootFolderId: 'root', sections: { nyheder: { type: 'notice', source: 'sheet' } } };
+  const base = { rootFolderId: 'root' };
   expect(siteConfigSchema.parse(base).siteUrl).toBe('https://example.invalid');
   expect(siteConfigSchema.parse({ ...base, siteUrl: 'https://newweb.groendalsvaenge.dk' }).siteUrl).toBe('https://newweb.groendalsvaenge.dk');
   for (const siteUrl of ['http://newweb.groendalsvaenge.dk', 'https://example.com/sti/', 'https://example.com/?q=1'])

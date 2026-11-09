@@ -4,19 +4,24 @@ Statisk Astro + TypeScript-site for Andelsboligforeningen Grøndalsvænge. Indho
 
 ## Mappemodellen
 
-**En fil er offentlig, hvis og kun hvis den, eller en genvej til den, ligger direkte i en af hjemmesidens sektionsmapper.** Hvem der må publicere, styres af delingen af mapperne i Drive. Koden kender ingen roller.
+**En fil er offentlig, hvis og kun hvis den, eller en genvej til den, ligger direkte i en sektionsmappe.** En sektionsmappe er en mappe i roden af fællesdrevet, hvis navn starter med et tal. Hvem der må publicere, styres af delingen af mapperne i Drive. Koden kender ingen roller.
 
 ```text
 Grøndalsvænge hjemmeside (fællesdrev)
-├── om-groendalsvaenge/  Google Docs → historie, kvarteret, sådan får du et hus
-├── bo-her/              Google Docs → praktisk information til andelshavere
-├── faellesskab/         Google Docs → fester, klubber, legepladser
-├── foreningen/          Google Docs → bestyrelse, udvalg, generalforsamling, kontakt
-├── nyheder/             Ét Google Sheets-ark med nyheder
-└── dokumenter/, vejledninger/, kalender/, redaktion/   Læses ikke
+├── 10 Om Grøndalsvænge   Google Docs → /om-groendalsvaenge/
+├── 20 Bo her             Google Docs → /bo-her/
+├── 30 Fællesskab         Google Docs → /faellesskab/
+├── 40 Foreningen         Google Docs → /foreningen/
+├── 50 Nyheder            Ét Google Sheets-ark → /nyheder/
+└── dokumenter, vejledninger, kalender, redaktion   Intet tal: læses ikke
 ```
 
-Sammenhængen mellem mappe og indholdstype ligger i [config/site.json](config/site.json). Navigation, sektionstekster, forsidens genveje og sidefodens links ligger i [lib/site/sections.ts](lib/site/sections.ts). En genvej til en side, der ikke findes endnu, udelades med en advarsel ved build. ProBo-linket i sidefoden sættes i `links.probo` i konfigurationen (kun https).
+- **Sektioner:** Tallet (1-3 cifre og et mellemrum) bestemmer rækkefølgen i menuen. Resten af navnet er menunavnet. Adressen dannes af navnet, første gang mappen ses, og følger derefter mappens ID. En omdøbt mappe beholder altså sin adresse. Sync gemmer sektionerne i `content/_sections.json`.
+- **Ny, slettet eller privat:** En ny nummereret mappe bliver en sektion, så snart den indeholder en side. En mappe, der slettes eller mister sit tal, fjernes fra sitet. Havde den sider, stopper kørslen, indtil man vælger "Publicér og tillad sletning". En mappe uden tal er privat. Et navn som "2024 Generalforsamling" (fire cifre) bliver aldrig en sektion.
+- **Nyheder:** En sektionsmappe med et Google-ark er en nyhedssektion. Den vises også, når der ingen aktuelle nyheder er.
+- **Intro:** Et Google-dokument med navnet `_intro` i sektionsmappen bliver sektionens introtekst. Kun almindelige afsnit bruges. Uden `_intro` er der ingen intro.
+
+Forsidens tekst, genveje og sidefodens links ligger i [lib/site/sections.ts](lib/site/sections.ts). En genvej til en side, der ikke findes endnu, udelades med en advarsel ved build. ProBo-linket i sidefoden sættes i `links.probo` i [config/site.json](config/site.json) (kun https).
 
 - **Genveje:** En genvej publicerer målfilens indhold. Genvejens navn bliver titlen, og målets ID bliver indholdets ID.
 - **Titel:** Filens navn (eller genvejens).
@@ -47,7 +52,7 @@ GOOGLE_ACCESS_TOKEN_FILE=~/.gv-google-token bun run sync
 - **Tokens:** Tokenet skal kunne læse fællesdrevet (`drive.readonly`). Ligger Docs-adgangen (`documents.readonly`) i et separat token, angives det med `GOOGLE_DOCS_ACCESS_TOKEN_FILE`. Tokens må aldrig ligge i Git eller indsættes i chat.
 - **Hvad der skrives:** Sync skriver kun til `content/` og en rapport i `.sync/report.md`. Den committer ikke.
 - **Exit-koder:** 0 betyder ingen fejl. 2 betyder, at enkelte filer fejlede, men `content/` er opdateret. 1 betyder, at kørslen blev afbrudt, og intet er ændret.
-- **Masseudtagning:** Vil en kørsel fjerne mere end halvdelen af en sektion (og mindst to filer), stopper den. Kør igen med `-- --allow-mass-removal`, hvis det er meningen.
+- **Masseudtagning:** Vil en kørsel fjerne mere end halvdelen af en sektion (og mindst to filer) eller en hel sektion med sider, stopper den. Kør igen med `-- --allow-mass-removal`, hvis det er meningen. I Drive hedder det "Publicér og tillad sletning".
 
 **Samlet kørsel:**
 

@@ -56,7 +56,8 @@ function renderRuns(runs: Inline[]) {
   return out.replace(/^\s+|\s+$/g, '').replace(/\n[ \t]+/g, '\n').replace(/\n/g, '\\\n');
 }
 const oneLine = (runs: Inline[]) => renderRuns(runs.map(r => ({ ...r, text: r.text.replace(/\n/g, ' ') })));
-const plain = (runs: Inline[]) => runs.map(r => r.text).join('');
+export const plainText = (runs: Inline[]) => runs.map(r => r.text).join('');
+const plain = plainText;
 
 function cellText(blocks: TextBlock[]) {
   return blocks.map(b => b.type === 'list' ? b.items.map(item => `• ${oneLine(item)}`).join(' · ') : oneLine(b.content)).filter(Boolean).join(' · ');

@@ -1,13 +1,5 @@
 {
   "rootFolderId": "0AIbhvNO3KPGaUk9PVA",
-  "sections": {
-    "om-groendalsvaenge": { "type": "guide", "accepts": ["gdoc"] },
-    "bo-her": { "type": "guide", "accepts": ["gdoc"] },
-    "faellesskab": { "type": "guide", "accepts": ["gdoc"] },
-    "foreningen": { "type": "guide", "accepts": ["gdoc"] },
-    "nyheder": { "type": "notice", "source": "sheet" }
-  },
   "siteUrl": "https://newweb.groendalsvaenge.dk",
-  "ignoredFolders": ["dokumenter", "vejledninger", "kalender", "redaktion"],
   "links": {}
 }

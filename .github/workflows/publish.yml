@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       allow_mass_removal:
-        description: Tillad at mere end halvdelen af en sektion fjernes
+        description: Tillad at hele sektioner eller mere end halvdelen af en sektion fjernes
         type: boolean
         default: false
 permissions:
@@ -59,8 +59,10 @@ jobs:
         id: publish
         env:
           TOKEN: ${{ steps.google.outputs.access_token }}
-          MASS: ${{ inputs.allow_mass_removal && '--allow-mass-removal' || '' }}
+          # From "Run workflow" or from "Publicér og tillad sletning" in the admin's sheet.
+          MASS: ${{ (inputs.allow_mass_removal || github.event.client_payload.allow_mass_removal == true) && '--allow-mass-removal' || '' }}
         run: |
+          if [ -n "$MASS" ]; then echo "Sletning tilladt for denne kørsel." >> "$GITHUB_STEP_SUMMARY"; fi
           umask 077; printf '%s' "$TOKEN" > "$RUNNER_TEMP/google-token"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'

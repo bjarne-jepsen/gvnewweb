@@ -20,8 +20,8 @@ async function repo() {
   await git(root, 'init', '--quiet'); await git(root, 'config', 'user.name', 'Test'); await git(root, 'config', 'user.email', 'test@example.invalid');
   await writeFile(join(root, 'README.md'), 'start\n'); await writeFile(join(root, '.gitignore'), '.sync/\n'); await git(root, 'add', 'README.md', '.gitignore'); await git(root, 'commit', '--quiet', '-m', 'start');
   const drive = new FakeDrive();
-  drive.folder('f-foreningen', 'foreningen', 'root');
-  const config = siteConfigSchema.parse({ rootFolderId: 'root', sections: { foreningen: { type: 'guide', accepts: ['gdoc'] } } });
+  drive.folder('f-foreningen', '10 Foreningen', 'root');
+  const config = siteConfigSchema.parse({ rootFolderId: 'root' });
   const run = (commit = true) => runOnce({ root, config, drive, commit, now: new Date('2026-10-21T20:00:00Z') });
   const log = async () => (await git(root, 'log', '--format=%s')).trim().split('\n');
   return { root, drive, run, log };
@@ -34,7 +34,7 @@ test('ændringer giver ét commit med kun content/ og en beskrivende besked; uæ
   await writeFile(join(r.root, 'README.md'), 'lokal ændring\n'); await writeFile(join(r.root, 'noter.txt'), 'staged\n'); await git(r.root, 'add', 'noter.txt');
   expect((await r.run()).committed).toBe(true);
   expect(await r.log()).toEqual(['content: synkronisering 2026-10-21 (2 nye, 0 ændrede, 0 fjernede)', 'start']);
-  expect((await git(r.root, 'show', '--name-only', '--format=', 'HEAD')).trim().split('\n').sort()).toEqual(['content/_slugs.json', 'content/foreningen/doc-a.md', 'content/foreningen/doc-b.md']);
+  expect((await git(r.root, 'show', '--name-only', '--format=', 'HEAD')).trim().split('\n').sort()).toEqual(['content/_sections.json', 'content/_slugs.json', 'content/foreningen/doc-a.md', 'content/foreningen/doc-b.md']);
   expect(await git(r.root, 'show', '--format=%B', '--no-patch', 'HEAD')).toContain('Nye:\n- foreningen: Vedtægter\n- foreningen: Husorden'); // stable order: by ID
   expect((await git(r.root, 'status', '--porcelain')).split('\n').filter(Boolean).sort()).toEqual([' M README.md', 'A  noter.txt']);
   expect((await r.run()).committed).toBe(false);
@@ -43,6 +43,10 @@ test('ændringer giver ét commit med kun content/ og en beskrivende besked; uæ
   r.drive.files.delete('doc-b');
   expect((await r.run()).committed).toBe(true);
   expect((await r.log())[0]).toBe('content: synkronisering 2026-10-21 (0 nye, 0 ændrede, 1 fjernede)');
+  // A renamed section folder changes only _sections.json, and that is committed too.
+  r.drive.update('f-foreningen', { name: '10 Om foreningen' });
+  expect((await r.run()).committed).toBe(true);
+  expect(await git(r.root, 'show', '--format=%B', '--no-patch', 'HEAD')).toContain('Sektioner:\n- foreningen: Om foreningen — Navn, nummer, type eller intro er ændret');
 });
 
 test('afbrudt sync giver hverken commit eller ændringer; rapporten forklarer hvorfor', async () => {
