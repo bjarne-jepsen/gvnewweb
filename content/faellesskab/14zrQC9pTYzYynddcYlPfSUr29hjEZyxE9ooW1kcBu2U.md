@@ -1,7 +1,7 @@
 ---
 id: "14zrQC9pTYzYynddcYlPfSUr29hjEZyxE9ooW1kcBu2U"
 title: "Grøndalsvænge på Facebook"
-updatedAt: "2026-10-22T17:15:22.744Z"
+updatedAt: "2026-11-09T19:49:33.287Z"
 summary: "Mange beboere bruger Facebook til at holde kontakten, dele tips og arrangere lokale aktiviteter."
 ---
 
@@ -9,7 +9,7 @@ Mange beboere bruger Facebook til at holde kontakten, dele tips og arrangere lok
 
 ## Grupperne er ikke officielle
 
-**Foreningen har ingen officiel Facebook-side.** Grupperne er oprettet og drevet af beboere for beboere. Bestyrelsen administrerer dem ikke, og du kan ikke regne med, at bestyrelsesmedlemmer ser eller svarer på henvendelser der.
+**Andelboligforeningen har ingen officiel Facebook-side.** Grupperne er oprettet og drevet af beboere for beboere. Bestyrelsen administrerer dem ikke, og du kan ikke regne med, at bestyrelsesmedlemmer ser eller svarer på henvendelser der.
 
 Officiel kommunikation fra bestyrelsen sker via Grøndalsvænge Nyt. Skal du have fat i bestyrelsen, så send altid en mail.
 
