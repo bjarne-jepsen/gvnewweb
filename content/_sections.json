@@ -1,0 +1,37 @@
+{
+  "10XLmxj-7QE1Yp16e_BaUesQUxEnV94Id": {
+    "key": "nyheder",
+    "label": "Nyheder",
+    "order": 50,
+    "kind": "notice",
+    "intro": "10 Om Grøndalsvænge: Historien, husene og kvarteret, og hvordan man får et hus i Grøndalsvænge.\n\n20 Bo her: Praktisk information til andelshavere om byggeri, salg, skader, affald og fællesudstyr.\n\n30 Fællesskab: Fester og traditioner, klubber og aktiviteter, legepladser og grupper på Facebook.\n\n40 Foreningen: Bestyrelse, udvalg, generalforsamling, regler og kontakt.\n\n50 Nyheder: Nyt fra foreningen."
+  },
+  "1Z7KDNh0x0Jxmh2Ixnea7zxjtFKndVNIb": {
+    "key": "faellesskab",
+    "label": "Fællesskab",
+    "order": 30,
+    "kind": "gdoc",
+    "intro": "10 Om Grøndalsvænge: Historien, husene og kvarteret, og hvordan man får et hus i Grøndalsvænge.\n\n20 Bo her: Praktisk information til andelshavere om byggeri, salg, skader, affald og fællesudstyr.\n\n30 Fællesskab: Fester og traditioner, klubber og aktiviteter, legepladser og grupper på Facebook.\n\n40 Foreningen: Bestyrelse, udvalg, generalforsamling, regler og kontakt.\n\n50 Nyheder: Nyt fra foreningen."
+  },
+  "1d4cJjVW13OQAFF8eLktPCX1SWyI-wUEx": {
+    "key": "bo-her",
+    "label": "Bo her",
+    "order": 20,
+    "kind": "gdoc",
+    "intro": "10 Om Grøndalsvænge: Historien, husene og kvarteret, og hvordan man får et hus i Grøndalsvænge.\n\n20 Bo her: Praktisk information til andelshavere om byggeri, salg, skader, affald og fællesudstyr.\n\n30 Fællesskab: Fester og traditioner, klubber og aktiviteter, legepladser og grupper på Facebook.\n\n40 Foreningen: Bestyrelse, udvalg, generalforsamling, regler og kontakt.\n\n50 Nyheder: Nyt fra foreningen."
+  },
+  "1glUX6NnjvzF4JY17wyKcKYrXcAuvzDN6": {
+    "key": "foreningen",
+    "label": "Foreningen",
+    "order": 40,
+    "kind": "gdoc",
+    "intro": "10 Om Grøndalsvænge: Historien, husene og kvarteret, og hvordan man får et hus i Grøndalsvænge.\n\n20 Bo her: Praktisk information til andelshavere om byggeri, salg, skader, affald og fællesudstyr.\n\n30 Fællesskab: Fester og traditioner, klubber og aktiviteter, legepladser og grupper på Facebook.\n\n40 Foreningen: Bestyrelse, udvalg, generalforsamling, regler og kontakt.\n\n50 Nyheder: Nyt fra foreningen."
+  },
+  "1ohEjrJQ_A5-XpdC7MzccdeWQuqM0b16W": {
+    "key": "om-groendalsvaenge",
+    "label": "Om Grøndalsvænge",
+    "order": 10,
+    "kind": "gdoc",
+    "intro": "10 Om Grøndalsvænge: Historien, husene og kvarteret, og hvordan man får et hus i Grøndalsvænge.\n\n20 Bo her: Praktisk information til andelshavere om byggeri, salg, skader, affald og fællesudstyr.\n\n30 Fællesskab: Fester og traditioner, klubber og aktiviteter, legepladser og grupper på Facebook.\n\n40 Foreningen: Bestyrelse, udvalg, generalforsamling, regler og kontakt.\n\n50 Nyheder: Nyt fra foreningen."
+  }
+}

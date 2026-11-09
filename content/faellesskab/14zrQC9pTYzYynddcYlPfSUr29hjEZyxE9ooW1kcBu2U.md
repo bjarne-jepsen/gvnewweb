@@ -1,19 +1,19 @@
 ---
 id: "14zrQC9pTYzYynddcYlPfSUr29hjEZyxE9ooW1kcBu2U"
 title: "Grøndalsvænge på Facebook"
-updatedAt: "2026-11-09T19:49:33.287Z"
-summary: "Mange beboere bruger Facebook til at holde kontakten, dele tips og arrangere lokale aktiviteter."
+updatedAt: "2026-11-09T19:56:57.196Z"
+summary: "Facebook-grupperne i Grøndalsvænge er oprettet og drevet af beboerne selv. Foreningen har ingen officiel Facebook-side, og bestyrelsen modererer ikke grupperne. Du kan derfor ikke regne med, at bestyrelsen ser eller besvarer henvendelser derinde."
 ---
 
-Mange beboere bruger Facebook til at holde kontakten, dele tips og arrangere lokale aktiviteter.
+## Grøndalsvænge på Facebook
 
-## Grupperne er ikke officielle
+Facebook-grupperne i Grøndalsvænge er oprettet og drevet af beboerne selv. Foreningen har ingen officiel Facebook-side, og bestyrelsen modererer ikke grupperne. Du kan derfor ikke regne med, at bestyrelsen ser eller besvarer henvendelser derinde.
 
-**Andelboligforeningen har ingen officiel Facebook-side.** Grupperne er oprettet og drevet af beboere for beboere. Bestyrelsen administrerer dem ikke, og du kan ikke regne med, at bestyrelsesmedlemmer ser eller svarer på henvendelser der.
+Skal du i kontakt med bestyrelsen, skal du altid sende en mail. Det sikrer, at din henvendelse bliver registreret og behandlet. Officiel information fra foreningen udkommer i Grøndalsvænge Nyt. Undtagelsesvis kan bestyrelsen dele en vigtig servicemeddelelse i den lukkede gruppe for at nå bredt ud, men det erstatter ikke de officielle kanaler.
 
-Officiel kommunikation fra bestyrelsen sker via Grøndalsvænge Nyt. Skal du have fat i bestyrelsen, så send altid en mail.
+### De to grupper
 
-## De to grupper
-
-- [**Grøndalsvænge beboere**](https://www.facebook.com/groups/groendalsvaenge) **(åben gruppe):** for alle med interesse for Grøndalsvænge og nærområdet. Bruges til gode råd, køb og salg, ting der gives væk, efterlysning af kæledyr og lokale arrangementer.
-- [**Andelshavere i Grøndalsvænge**](https://www.facebook.com/groups/361202764035812) **(lukket gruppe):** kun for nuværende andelshavere. Du bliver nemmest medlem ved at skrive et opslag i den åbne gruppe og bede om at blive tilføjet.
+- **Grøndalsvænge beboere (åben gruppe)**\
+  Offentlig gruppe for alle, der bor i eller følger kvarteret. Bruges til nabohjælp, køb og salg, bortgivelser, efterlysning af kæledyr og lokale arrangementer.
+- **Andelshavere i Grøndalsvænge (lukket gruppe)**\
+  Privat gruppe forbeholdt nuværende andelshavere. Bruges til interne drøftelser, projekter og arrangementer for andelshavere. Du melder dig ind ved at skrive i den åbne gruppe og bede en nabo om at tilføje dig.
