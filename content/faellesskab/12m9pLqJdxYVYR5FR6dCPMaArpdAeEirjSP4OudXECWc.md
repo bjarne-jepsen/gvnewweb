@@ -1,31 +1,31 @@
 ---
 id: "12m9pLqJdxYVYR5FR6dCPMaArpdAeEirjSP4OudXECWc"
 title: "Legepladser"
-updatedAt: "2026-10-22T17:15:18.399Z"
-summary: "Grøndalsvænge har to legepladser. De er offentligt tilgængelige, men ejes og vedligeholdes af foreningen."
+updatedAt: "2026-11-10T14:46:54.216Z"
+summary: "Foreningens to legepladser er offentligt tilgængelige, men ejes og vedligeholdes af andelsboligforeningen."
 ---
 
-Grøndalsvænge har to legepladser. De er offentligt tilgængelige, men ejes og vedligeholdes af foreningen.
+## Legepladser
+
+Foreningens to legepladser er offentligt tilgængelige, men ejes og vedligeholdes af andelsboligforeningen.
 
 ## Mirabellelegepladsen
 
-**Hvor:** på hjørnet af Mirabellevej og Morbærvej.
+*Hjørnet af Mirabellevej og Morbærvej*
 
-Foreningens største legeplads bruges ofte til sociale arrangementer. Den er renoveret og udvidet med bl.a.:
+Foreningens største legeplads danner ofte ramme om sociale arrangementer i kvarteret. Pladsen rummer blandt andet:
 
-- en balancesti, et kravlerør og en stor ståvippe
-- fodboldmål på græsplænen
-- fuglekasser, som spejderne har hjulpet med at sætte op
-- "Mariehønestien" og "Sommerfuglestien", hvor børn fra kvarteret har dekoreret stenene.
+- Balancesti, kravlerør og en stor ståvippe
+- Fodboldmål på græsplænen
+- Fuglekasser opsat i samarbejde med de lokale spejdere
+- "Mariehønestien" og "Sommerfuglestien" med sten malet af kvarterets børn
 
 ## Æblelegepladsen
 
-**Hvor:** mellem Æblevej, Hyldebærvej og Hindbærvej.
+*Mellem Æblevej, Hyldebærvej og Hindbærvej*
 
-Æblelegepladsen er **fuldt indhegnet** og derfor særligt velegnet til mindre børn.
+Pladsen er fuldt indhegnet og indrettet med legeredskaber, der henvender sig særligt til mindre børn.
 
-## Forslag og fejl
+Forslag og fejlmeldinger
 
-Parkudvalget vedligeholder legepladserne og tager gerne imod forslag til forbedringer, nye legeredskaber eller arrangementer. Opdager du defekt udstyr, så kontakt Parkudvalget, så det kan blive udbedret. Kontaktoplysningerne står på siden Kontakt.
-
-Legepladserne er til glæde for alle, så hjælp gerne med at holde dem pæne og ryd op efter dig.
+Parkudvalget står for den løbende vedligeholdelse. Skriv til udvalget via \[Kontakt\], hvis du opdager defekt udstyr, eller hvis du har forslag til nye redskaber og fælles arrangementer.
