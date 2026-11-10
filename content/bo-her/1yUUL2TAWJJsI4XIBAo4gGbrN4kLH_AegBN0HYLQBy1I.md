@@ -1,41 +1,46 @@
 ---
 id: "1yUUL2TAWJJsI4XIBAo4gGbrN4kLH_AegBN0HYLQBy1I"
 title: "Udlån af fællesudstyr"
-updatedAt: "2026-10-22T17:14:03.938Z"
-summary: "Som beboer kan du låne en række redskaber og udstyr, som foreningen stiller til rådighed."
+updatedAt: "2026-11-10T15:02:52.811Z"
+summary: "Som andelshaver kan du låne foreningens fælles materiel og redskaber til havearbejde, renovering og arrangementer."
 ---
 
-Som beboer kan du låne en række redskaber og udstyr, som foreningen stiller til rådighed.
+Som andelshaver kan du låne foreningens fælles materiel og redskaber til havearbejde, renovering og arrangementer.
 
-## Sådan låner du
+### Sådan reserverer du
 
-Send en mail til Teknikudvalget (kontaktoplysninger på siden Kontakt). Kom i god tid, især hvis du skal bruge tingene på en bestemt dato, da udstyret kan være reserveret.
+Send en anmodning til Teknikudvalget via tek@groendalsvaenge.dk.
 
-## Til fest og sammenkomst
+- Bestil i god tid: Skal du bruge udstyret til en specifik dato eller weekend, så reserver tidligt, da flere ting er efterspurgte.
+- Afhentning og aflevering: Aftales direkte med udvalget i forbindelse med din reservation.
 
-- Borde (ca. 15–20 stk.)
-- Stole (ca. 30–50 stk.)
+### Udstyrsoversigt
 
-## Til haven
+#### Fest og arrangementer
+
+- Borde: ca. 15-20 stk.
+- Stole: ca. 30-50 stk.
+
+#### Havearbejde
 
 - Havefræser
 - Havetromle
 - Elektrisk pælebor
 
-## Til byggeri, renovering og kloak
+#### Byggeri, renovering og kloak
 
-- Lang skydestige
+- Skydestige (lang)
 - Tagstige
 - Affugter
 - Palleløfter
 - Rensesplit (lille og stor model)
-- Grab/kloakrenser (lille og stor model)
+- Grab / kloakrenser (lille og stor model)
 
-## Specialudstyr
+#### Specialudstyr
 
-- Radonmålere (4 stk., man låner 2 ad gangen)
+- Radonmålere: 4 stk. (udlånes parvis, dvs. 2 ad gangen for retvisende måling)
 - Metaldetektor
 
-## Har du et forslag?
+### Forslag til nye indkøb
 
-Mangler der noget, som kunne være en god investering for fællesskabet, så send dit forslag til Teknikudvalget.
+Mangler der et redskab, som vil give værdi for mange i foreningen? Send dit forslag til Teknikudvalget.
