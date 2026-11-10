@@ -2,17 +2,27 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Entries from '../../components/Entries.astro';
+import Tiles from '../../components/Tiles.astro';
 export async function getStaticPaths() {
   const items = (await getCollection('items')).map(i => i.data);
   return (await getCollection('sections')).map(({ data: section }) => ({ params: { section: section.key }, props: { section, entries: items.filter(i => i.section === section.key) } }));
 }
 const { section, entries } = Astro.props;
-// A news section shows its notices as cards (docs/cvi.md), other sections as a plain list.
-const cards = entries.length > 0 && entries.every(e => e.kind === 'notice');
+// A news section shows its notices as cards, other sections as a landing page with tiles (docs/cvi.md).
+const news = entries.length > 0 && entries.every(e => e.kind === 'notice');
+const intro = section.intro ? section.intro.split('\n\n') : [];
 ---
 <Base title={section.label}>
-  <a class="back" href="/">Til forsiden</a>
-  <h1>{section.label}</h1>
-  {section.intro && section.intro.split('\n\n').map(p => <p class="intro">{p}</p>)}
-  <Entries heading="h2" cards={cards} entries={entries} />
+  {news ? <>
+    <a class="back" href="/">Til forsiden</a>
+    <h1>{section.label}</h1>
+    {intro.map(p => <p class="intro">{p}</p>)}
+    <Entries heading="h2" cards entries={entries} />
+  </> : <>
+    <div class="landing-head">
+      <h1>{section.label}</h1>
+      {intro.length > 0 && <div>{intro.map(p => <p class="intro">{p}</p>)}</div>}
+    </div>
+    <Tiles label={section.label} entries={entries} />
+  </>}
 </Base>

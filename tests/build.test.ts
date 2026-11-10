@@ -94,7 +94,9 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect(page).toMatch(/<p class="meta updated">Opdateret \d+\. \w+ \d{4}<\/p>/);
   expect(page).toContain('<a class="button" href="/foreningen/kontakt/">Kontakt foreningen');
   expect(await html('foreningen/kontakt/index.html')).not.toContain('class="button"');
-  expect(await html('foreningen/index.html')).toContain('<ul class="entries"><li>');
+  // CVI 2: other sections are landing pages with a tile per page.
+  expect(await html('foreningen/index.html')).toContain('<ul class="tiles" aria-label="Sider under Foreningen"><li>');
+  expect(await html('foreningen/index.html')).toContain('<h2><a href="/foreningen/om-foreningen/">Om foreningen</a></h2>');
   // The intro comes from the folder's _intro document: every paragraph on the section page, the first on the front page.
   expect(await html('foreningen/index.html')).toContain('<p class="intro">Bestyrelse og regler.</p><p class="intro">Skriv til os.</p>');
   expect(home).toContain('<h3><a href="/foreningen/">Foreningen</a></h3> <p>Bestyrelse og regler.</p>');

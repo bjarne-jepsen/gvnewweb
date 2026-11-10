@@ -68,7 +68,11 @@ Der bruges kun systemfonte: `--font-sans: "Helvetica Neue", Helvetica, Arial, sa
 
 **Billeder.** I fuld tekstbredde, uden radius, ramme eller skygge.
 
-**Forside og sektionssider.** Uændret layout fra version 1, men med de nye fonte og farver. Genvejene er lysegrå fliser med fed tekst og grøn pil. Nyhedskort har en streg i blæk foroven.
+**Forside.** Uændret layout fra version 1, men med de nye fonte og farver. Genvejene er lysegrå fliser med fed tekst og grøn pil. Nyhedskort har en streg i blæk foroven.
+
+**Landingssider (sektioner).** Bygger på Bjarnes mockup "Landingsside Fællesskab" (november 2026). Øverst står sektionens navn meget stort (`--text-display`, op til 7,5rem, 400 / 0,95) med ingressen fra `_intro` til højre og en streg i blæk under. Derunder har hver side et kort med billede, titel (H2) og første afsnit. Hele kortet er klikbart, men kun titlen er linket. På brede skærme (fra 50rem) står kortene i grupper af fire: et stort, to små og et bredt. Ender sidste gruppe med ét kort, vises det som det brede. Ender den med to, står de side om side. På smalle skærme står kortene under hinanden. Kortene har ingen numre. Rækkefølgen er stadig alfabetisk. Nyhedssektionen beholder sine nyhedskort.
+
+**Pladsholderbillede.** Indtil siderne får egne fotos, viser alle kort det samme billede: tre huse i streg på lys grågrøn bund, i formatet 3:2. Det er en inline SVG i `src/components/Tiles.astro`, så det giver ingen fil i outputtet. Det er pynt og har `aria-hidden`. Ved print skjules det.
 
 **Footer.** Mørk baggrund med navnet sat stort, derefter en linje og to kolonner: "Genveje" (footerlinks) og "For andelshavere" (ProBo og prototype-teksten).
 
