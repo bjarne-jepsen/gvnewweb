@@ -70,6 +70,37 @@ main { min-height: 60vh; padding-block: clamp(2.5rem, 6vw, 5.5rem) 7.5rem; overf
 .more { font-weight: 700; margin-top: var(--space-l); }
 .more a::after { content: "→"; }
 
+/* Section landing pages: a large title with the intro beside it, then tiles in a repeating group of four
+   (one large, two small, one wide). Groups that end with one or two tiles get their own layout. */
+.landing-head { display: grid; gap: 1.75rem; align-items: end; padding-bottom: var(--space-xl); border-bottom: 1px solid var(--color-ink); margin-bottom: clamp(3rem, 6vw, 5.5rem); }
+.landing-head h1 { font-size: var(--text-display); line-height: .95; letter-spacing: -.045em; max-width: none; margin: 0; hyphens: auto; }
+.landing-head .intro { font-size: 1.25rem; line-height: 1.5; max-width: 40ch; margin: 0; }
+.landing-head .intro + .intro { margin-top: var(--space-m); }
+.tiles { list-style: none; padding: 0; margin: 0; display: grid; gap: 3.5rem; }
+.tiles > li { position: relative; }
+.tile-picture { margin-bottom: 1.25rem; transition: filter .2s; }
+.tile-picture svg { display: block; width: 100%; height: auto; }
+.tiles h2 { margin: 0 0 .625rem; font-size: 1.75rem; line-height: 1.12; }
+.tiles h2 a { text-decoration: underline 2px transparent; text-underline-offset: .18em; transition: text-decoration-color .2s; }
+.tiles h2 a::after { content: ""; position: absolute; inset: 0; }
+.tiles h2 a:hover, .tiles h2 a:focus-visible { color: var(--color-ink); text-decoration-color: currentColor; }
+.tiles h2 a:focus-visible { outline: 0; }
+.tiles > li:has(a:focus-visible) { outline: var(--focus-ring); outline-offset: 6px; }
+.tiles > li:hover .tile-picture { filter: brightness(.95); }
+.tiles p { margin: 0; max-width: 46ch; }
+@media (min-width: 50rem) {
+  .landing-head { grid-template-columns: 7fr 5fr; gap: var(--space-xl); }
+  .tiles { grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 5rem var(--space-xl); }
+  .tiles > li:nth-child(4n+1) { grid-column: 1 / span 7; grid-row: span 2; }
+  .tiles > li:nth-child(4n+2), .tiles > li:nth-child(4n+3) { grid-column: 9 / span 4; }
+  .tiles > li:nth-child(4n+3) { align-self: end; }
+  .tiles > li:is(:nth-child(4n+4), :nth-child(4n+1):last-child) { grid-column: 1 / -1; grid-row: auto; display: grid; grid-template-columns: 7fr 5fr; gap: var(--space-xl); align-items: end; }
+  .tiles > li:is(:nth-child(4n+4), :nth-child(4n+1):last-child) .tile-picture { margin: 0; }
+  .tiles > li:nth-child(4n+1):nth-last-child(2) { grid-column: 1 / span 6; grid-row: auto; }
+  .tiles > li:nth-child(4n+1):nth-last-child(2) + li { grid-column: 7 / span 6; }
+  .tiles > li:nth-child(4n+4) h2, .tiles > li:nth-child(4n+1):not(:nth-last-child(2)) h2 { font-size: clamp(2rem, 1.2rem + 2vw, 3rem); }
+}
+
 /* Content pages: breadcrumb, article and the body text from lib/site/render.ts. */
 .crumbs { margin: 0 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-muted); }
 .crumbs ol { list-style: none; display: flex; flex-wrap: wrap; align-items: center; margin: 0; padding: 0; }
@@ -130,7 +161,7 @@ main { min-height: 60vh; padding-block: clamp(2.5rem, 6vw, 5.5rem) 7.5rem; overf
 @media print {
   html { background: #fff; }
   body { font-size: 11pt; }
-  .skip, .site-header nav, .site-footer, .back, .more, .crumbs, .button { display: none; }
+  .skip, .site-header nav, .site-footer, .back, .more, .crumbs, .button, .tile-picture { display: none; }
   .site-header { border-bottom: 0; margin-bottom: var(--space-l); }
   .wrap { max-width: none; padding-inline: 0; }
   .site-header .wrap, main { padding-block: 0; }
