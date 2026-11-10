@@ -16,7 +16,7 @@ export const collections = {
   items: defineCollection({
     loader: async () => (await load()).items,
     schema: z.discriminatedUnion('kind', [
-      z.object({ ...base, kind: z.literal('page'), html: z.string() }),
+      z.object({ ...base, kind: z.literal('page'), html: z.string(), image: z.object({ src: z.string().regex(/^\/(?:[a-z0-9-]+\/)+[a-f0-9]{16}\.(?:png|jpg|webp)$/), alt: z.string().min(1) }).optional() }),
       z.object({ ...base, kind: z.literal('notice'), html: z.string(), date: z.iso.date(), expires: z.iso.date().optional() }),
     ]),
   }),

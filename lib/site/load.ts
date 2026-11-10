@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { siteConfigSchema } from '../sync/config';
 import { guideMetaSchema, localImage, newsMetaSchema } from '../sync/content';
-import { splitFrontmatter } from '../sync/markdown';
+import { parseMarkdown, splitFrontmatter } from '../sync/markdown';
 import { manualRedirectsSchema } from '../sync/sections';
 import { pathOf } from '../sync/slugs';
 import { readContent } from '../sync/sync';
@@ -12,7 +12,9 @@ import { copenhagenDay, frontpage } from './sections';
 /** intro: plain paragraphs separated by a blank line, from the folder's _intro document. */
 export interface SiteSection { key: string; order: number; label: string; intro: string; path: string; news: boolean }
 interface ItemBase { id: string; section: string; slug: string; path: string; title: string; updatedAt: string }
-export type SiteItem = ItemBase & ({ kind: 'page'; summary: string; html: string } | { kind: 'notice'; summary: string; html: string; date: string; expires?: string });
+export type SiteItem = ItemBase & ({ kind: 'page'; summary: string; html: string; image?: SiteImage } | { kind: 'notice'; summary: string; html: string; date: string; expires?: string });
+/** The picture on a page's tile on the section's landing page: the first image in the document. */
+export interface SiteImage { src: string; alt: string }
 export interface SiteRedirect { from: string; to: string }
 /** A front-page shortcut or footer link. Internal links always point at a page that exists. */
 export interface SiteLink { id: string; group: 'shortcut' | 'footer'; order: number; label: string; href: string; external: boolean }
@@ -49,8 +51,10 @@ export async function loadSite(root = '.', buildAt = new Date(process.env.BUILD_
       const { meta, body } = splitFrontmatter(Buffer.from(entry.files.get(`${entry.id}.md`)!).toString('utf8'));
       const front = guideMetaSchema.parse(meta);
       for (const [name, bytes] of entry.files) if (name.startsWith(`${entry.id}/`)) assets.set(`${path}${name.slice(entry.id.length + 1)}`, bytes);
-      const html = renderBody(body, localImage(entry.id), url => `${path}${url.slice(entry.id.length + 3)}`);
-      items.push({ ...base, kind: 'page', summary: front.summary, html });
+      const isLocal = localImage(entry.id), imageUrl = (url: string) => `${path}${url.slice(entry.id.length + 3)}`;
+      const html = renderBody(body, isLocal, imageUrl);
+      const image = firstImage(body, isLocal);
+      items.push({ ...base, kind: 'page', summary: front.summary, html, ...(image ? { image: { src: imageUrl(image.url), alt: image.alt } } : {}) });
     }
   }
   // News newest first, everything else alphabetically; a total order, so builds are deterministic.
@@ -83,4 +87,15 @@ export async function loadSite(root = '.', buildAt = new Date(process.env.BUILD_
   // Drive IDs must never reach the output; news IDs are editor-facing and not secret.
   const internalIds = [...entries.values()].filter(e => e.kind !== 'notice').map(e => e.id);
   return { sections, items, redirects, links, assets, warnings, internalIds, buildDay, origin: new URL(config.siteUrl).origin };
+}
+
+/** The first local image with alt text in a page's Markdown, in document order. */
+function firstImage(body: string, isLocal: (url: string) => boolean): { url: string; alt: string } | undefined {
+  type Node = { type: string; url?: string; alt?: string | null; children?: Node[] };
+  const find = (n: Node): { url: string; alt: string } | undefined => {
+    if (n.type === 'image' && n.url && isLocal(n.url) && n.alt?.trim()) return { url: n.url, alt: n.alt.trim() };
+    for (const c of n.children ?? []) { const hit = find(c); if (hit) return hit; }
+    return undefined;
+  };
+  return find(parseMarkdown(body) as Node);
 }
