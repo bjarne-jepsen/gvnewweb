@@ -10,10 +10,10 @@ const contrast = (a: string, b: string) => { const [hi, lo] = [luminance(a), lum
 
 // The combinations docs/cvi.md allows. Text needs 4.5:1 (WCAG AA), focus rings 3:1.
 const text = [
-  ...['ink', 'green', 'tegl', 'muted'].flatMap(fg => ['paper', 'surface'].map(bg => [fg, bg])),
-  ['ink', 'surface-hover'], ['on-dark', 'green'],
+  ...['ink', 'green', 'muted'].flatMap(fg => ['paper', 'surface'].map(bg => [fg, bg])),
+  ['ink', 'surface-hover'], ['paper', 'green'], ['paper', 'ink'], ['on-dark', 'dark'], ['on-dark-muted', 'dark'],
 ];
-const focus = [['green', 'paper'], ['green', 'surface'], ['on-dark', 'green']];
+const focus = [['green', 'paper'], ['green', 'surface'], ['on-dark', 'dark']];
 
 test.each(text)('CVI: tekst i %s på %s har mindst 4,5:1', (fg, bg) => {
   expect(contrast(tokens[`color-${fg}`]!, tokens[`color-${bg}`]!)).toBeGreaterThanOrEqual(4.5);
