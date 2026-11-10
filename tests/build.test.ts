@@ -97,6 +97,9 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   // CVI 2: other sections are landing pages with a tile per page.
   expect(await html('foreningen/index.html')).toContain('<ul class="tiles" aria-label="Sider under Foreningen"><li>');
   expect(await html('foreningen/index.html')).toContain('<h2><a href="/foreningen/om-foreningen/">Om foreningen</a></h2>');
+  // The tile shows the document's first image; a page without images gets the placeholder.
+  expect(await html('foreningen/index.html')).toContain(`<img src="/foreningen/om-foreningen/${image}" alt="Kort over området" loading="lazy"`);
+  expect(await html('bo-her/index.html')).toContain('<svg viewBox="0 0 300 200" aria-hidden="true"');
   // The intro comes from the folder's _intro document: every paragraph on the section page, the first on the front page.
   expect(await html('foreningen/index.html')).toContain('<p class="intro">Bestyrelse og regler.</p><p class="intro">Skriv til os.</p>');
   expect(home).toContain('<h3><a href="/foreningen/">Foreningen</a></h3> <p>Bestyrelse og regler.</p>');
