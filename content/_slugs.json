@@ -50,9 +50,11 @@
     "previousPaths": []
   },
   "1LnIFKv5gTclgUUi64Sq7NUIGsMqdJ8zoyFc4qdJHGF4": {
-    "section": "bo-her",
+    "section": "faellesskab",
     "slug": "hjertestarter",
-    "previousPaths": []
+    "previousPaths": [
+      "/bo-her/hjertestarter/"
+    ]
   },
   "1NJ6Nv63017Q0cE8In_EomUlElpt9NlhD8meSo4I0Z1E": {
     "section": "bo-her",
@@ -75,9 +77,11 @@
     "previousPaths": []
   },
   "1VWK1J8H0FCAcE6mHK4rEjHBRZ022S6Hug7iMTFJakv0": {
-    "section": "bo-her",
+    "section": "faellesskab",
     "slug": "leje-af-lokaler",
-    "previousPaths": []
+    "previousPaths": [
+      "/bo-her/leje-af-lokaler/"
+    ]
   },
   "1Yp0g1njb9u7A_oXXHDmVNjZ4A8_JZzUdn2Y5mgn7pls": {
     "section": "faellesskab",
@@ -130,9 +134,11 @@
     "previousPaths": []
   },
   "1yUUL2TAWJJsI4XIBAo4gGbrN4kLH_AegBN0HYLQBy1I": {
-    "section": "bo-her",
+    "section": "faellesskab",
     "slug": "udlaan-af-faellesudstyr",
-    "previousPaths": []
+    "previousPaths": [
+      "/bo-her/udlaan-af-faellesudstyr/"
+    ]
   },
   "n-test00001": {
     "section": "nyheder",
