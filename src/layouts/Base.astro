@@ -1,6 +1,5 @@
 ---
 import { getCollection } from 'astro:content';
-import Mark from '../components/Mark.astro';
 import '../styles/tokens.css';
 import '../styles/site.css';
 interface Props { title: string; }
@@ -9,8 +8,8 @@ const path = Astro.url.pathname;
 const sections = (await getCollection('sections')).map(s => s.data).sort((a, b) => a.order - b.order);
 const navigation = [['/', 'Forside'], ...sections.map(s => [s.path, s.label])];
 const footerLinks = (await getCollection('links')).map(l => l.data).filter(l => l.group === 'footer').sort((a, b) => a.order - b.order);
-// The mark as a data URI, so the favicon adds no file to the output. Colours are the tegl, green and paper tokens.
-const favicon = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M2 15 16 3l14 12z" fill="#A8432A"/><path d="M6 15h20v14H6z" fill="#24513A"/><path d="M14 20h4v9h-4z" fill="#FAF7F0"/></svg>')}`;
+// The favicon is a house as a data URI, so it adds no file to the output. Colours are the ink, green and paper tokens.
+const favicon = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M2 15 16 3l14 12z" fill="#141414"/><path d="M6 15h20v14H6z" fill="#1E4636"/><path d="M14 20h4v9h-4z" fill="#FFFFFF"/></svg>')}`;
 ---
 <!doctype html>
 <html lang="da">
@@ -26,7 +25,7 @@ const favicon = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www
     <a class="skip" href="#indhold">Spring til indhold</a>
     <header class="site-header">
       <div class="wrap">
-        <a class="brand" href="/"><Mark /><span><span class="brand-name">Grøndalsvænge</span><span class="brand-sub">Andelsboligforeningen</span></span></a>
+        <a class="brand" href="/"><span class="brand-name">Grøndalsvænge</span><span class="brand-sub">Andelsboligforeningen</span></a>
         <nav aria-label="Hovednavigation">
           {navigation.map(([href, label]) => <a href={href} aria-current={(href === '/' ? path === '/' : path.startsWith(href!)) ? 'page' : undefined}>{label}</a>)}
         </nav>
@@ -35,9 +34,11 @@ const favicon = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www
     <main id="indhold" class="wrap"><slot /></main>
     <footer class="site-footer">
       <div class="wrap">
-        <p class="brand"><Mark /><span><span class="brand-name">Grøndalsvænge</span><span class="brand-sub">Andelsboligforeningen</span></span></p>
-        {footerLinks.length > 0 && <nav aria-label="Sidefod"><ul class="footer-links">{footerLinks.map(l => <li><a href={l.href} rel={l.external ? 'noreferrer' : undefined}>{l.label}</a></li>)}</ul></nav>}
-        <p class="colophon">Dokumenter for andelshavere ligger i ProBo hos administrator. Lokal prototype: indholdet hentes fra hjemmesidens mapper i foreningens Google Drive.</p>
+        <p class="footer-name">Grøndalsvænge</p>
+        <div class="footer-grid">
+          {footerLinks.length > 0 && <nav aria-labelledby="sidefod-genveje"><p class="footer-label" id="sidefod-genveje">Genveje</p><ul class="footer-links">{footerLinks.map(l => <li><a href={l.href} rel={l.external ? 'noreferrer' : undefined}>{l.label}</a></li>)}</ul></nav>}
+          <div class="wide"><p class="footer-label">For andelshavere</p><p>Dokumenter for andelshavere ligger i ProBo hos administrator.</p><p class="colophon">Lokal prototype: indholdet hentes fra hjemmesidens mapper i foreningens Google Drive.</p></div>
+        </div>
       </div>
     </footer>
   </body>

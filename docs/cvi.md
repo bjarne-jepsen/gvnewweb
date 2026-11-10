@@ -1,6 +1,6 @@
 # CVI for Grøndalsvænge 2.0
 
-Status: **godkendt og gennemført 22. oktober 2026**. Visuelt udkast: [`cvi-udkast.html`](cvi-udkast.html). Åbn det direkte i en browser. Det er ikke en del af buildet.
+Status: **version 2, november 2026.** Bygger på Bjarnes mockup "Sådan får du et hus". Den afløser version 1 (godkendt 22. oktober 2026, visuelt udkast i [`cvi-udkast.html`](cvi-udkast.html), som nu er historisk). Afsnittet "Gennemførelse" længere nede beskriver version 1.
 
 ## Udgangspunkt
 
@@ -8,92 +8,71 @@ Status: **godkendt og gennemført 22. oktober 2026**. Visuelt udkast: [`cvi-udka
 - Valgt retning (oktober 2026): et enkelt bomærke, paletten "Tegl og have", en rolig og lokalhistorisk stemning og en forside uden stort foto.
 - Sitet er et oplysningssite for andelshavere og folk udefra. Det skal være let at læse for alle aldre, også på mobilen. Det må ikke ligne en kampagne.
 
-## 1. Bomærke og navn
+## 1. Navn
 
-- **Bomærket** er en hussilhuet med saddeltag i teglrød og en krop i havegrøn med en kalkhvid dør. Det tegnes i et 32×32-gitter med tre flader og ingen streger. Det skal kunne læses ned til 16 px.
-- **Navnet** er "Grøndalsvænge" sat i serif med "Andelsboligforeningen" som undertitel i sans-serif. Header og footer bruger samme navn og undertitel.
-- På mørk baggrund (footer) står mærket i kalkhvid med en havegrøn dør.
-- **Teknik:** mærket ligger som inline SVG i HTML med `aria-hidden="true"`, fordi navnet altid står som tekst ved siden af. Favicon er samme SVG som `data:`-URI i `<link rel="icon">`. Derfor kommer der ingen nye filer i output, og outputkontrollen skal ikke ændres for at tillade dem.
-- Mærket må ikke strækkes, roteres, have skygge eller ændre farver ud over de to varianter.
+- **Navnet** "Grøndalsvænge" står i fed sans-serif med "Andelsboligforeningen" som lille mærkat med versaler og spatiering ved siden af.
+- Footeren har navnet sat meget stort (op til 8rem) i normal vægt.
+- Version 2 har **intet bomærke** i header og footer, ligesom mockuppen. Favicon er stadig en lille hussilhuet som `data:`-URI, nu i blæk, grøn og hvid.
 
 ## 2. Farver
 
 | Token | Navn | Hex | Brug |
 |---|---|---|---|
-| `--color-ink` | Mørkegrøn | `#17251E` | Brødtekst og overskrifter |
-| `--color-green` | Havegrøn | `#24513A` | Links, fokusring, footer-baggrund |
-| `--color-tegl` | Teglrød | `#A8432A` | Accent: aktiv menu, nyhedsstreg, bomærkets tag |
-| `--color-muted` | Grå | `#56625B` | Datoer, ingresser og metadata |
-| `--color-paper` | Kalkhvid | `#FAF7F0` | Sidebaggrund |
-| `--color-surface` | Halm | `#EFE6D2` | Flader: genveje, tabelhoved |
-| `--color-surface-hover` | Mørk halm | `#E7DBC1` | Flader ved hover |
-| `--color-line` | Linje | `#D8D0BF` | Dekorative skillelinjer |
+| `--color-ink` | Blæk | `#141414` | Brødtekst, overskrifter, links, streg over H2 |
+| `--color-green` | Grøn | `#1E4636` | Links ved hover, knap, fokusring, pile |
+| `--color-muted` | Grå | `#5C5C5C` | Datoer, brødkrumme og metadata |
+| `--color-paper` | Hvid | `#FFFFFF` | Sidebaggrund, tekst på knap |
+| `--color-surface` | Lys grå | `#F2F2EE` | Flader: genveje |
+| `--color-surface-hover` | Grå flade | `#E6E6E0` | Flader ved hover |
+| `--color-line` | Linje | `#DADAD4` | Dekorative skillelinjer |
+| `--color-dark` | Mørk | `#141414` | Footer-baggrund |
+| `--color-on-dark` | Lys | `#F2F2EE` | Tekst og links i footeren |
+| `--color-on-dark-muted` | Lys grå | `#A8A8A2` | Mærkater og sekundær tekst i footeren |
+| `--color-dark-line` | Mørk linje | `#4A4A4A` | Skillelinje i footeren |
 
-**Kontrast (WCAG 2.2 AA):** Al tekst skal have mindst 4,5:1, og fokusringe og andre nødvendige grafiske elementer mindst 3:1. De tilladte kombinationer er målt:
+Teglrød er udgået. `tests/cvi.test.ts` måler, at al tekst har mindst 4,5:1 og fokusringe mindst 3:1 (WCAG 2.2 AA) for de tilladte kombinationer: blæk, grøn og grå på hvid og lys grå; blæk på grå flade; hvid på grøn og blæk; lys og lys grå på mørk.
 
-| Forgrund på baggrund | Kalkhvid | Halm | Havegrøn |
-|---|---|---|---|
-| Mørkegrøn | 14,9 | 12,8 | – |
-| Havegrøn | 8,5 | 7,3 | – |
-| Teglrød | 5,6 | 4,8 | – |
-| Grå | 6,0 | 5,1 | – |
-| Kalkhvid | – | – | 8,5 |
-
-- Teglrød bruges sparsomt som streger og markeringer, ikke til store flader eller brødtekst.
-- Linjefarven (1,4:1) er kun til pynt. Den må aldrig være det eneste, der viser, at noget kan klikkes, eller hvor en grænse går.
 - Links i brødtekst er altid understregede. Farve alene må ikke bære betydning.
-- Sitet har kun lyst tema (`color-scheme: light`). Mørkt tema kan komme senere, når tokens er på plads.
+- Linjefarven er kun til pynt.
+- Sitet har kun lyst tema (`color-scheme: light`).
 
 ## 3. Typografi
 
-Der bruges kun systemfonte. Der er ingen fontfiler og ingen eksterne kald.
-
-| Token | Stak | Brug |
-|---|---|---|
-| `--font-serif` | `"Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", P052, Georgia, serif` | H1–H3, navnet, genveje |
-| `--font-sans` | `system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif` | Brødtekst, navigation, H4–H6, tabeller, metadata |
-
-Palatino og Iowan giver et klassisk præg, der passer til en haveby fra 1920'erne. Georgia er reserven, hvis de mangler.
+Der bruges kun systemfonte: `--font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif`. Der er ingen serif, ingen fontfiler og ingen eksterne kald. På Windows og Linux uden Helvetica bliver det Arial eller systemets sans-serif.
 
 | Element | Størrelse | Snit og linjehøjde |
 |---|---|---|
-| H1 | `clamp(2.25rem, 5vw, 3.5rem)` | Serif 400 / 1,15, højst 20 tegn bredt |
-| H2 | `clamp(1.5rem, 3vw, 2rem)` | Serif 400 / 1,15 |
-| H3 | 1,35rem | Serif 400 |
-| H4–H6 | 1,125rem / 1rem | Sans 650 |
-| Brødtekst | 1,125rem (18 px) | Sans 400 / 1,6, højst 68 tegn per linje |
-| Ingres | 1,3rem | Sans, grå |
-| Metadata | 0,875rem | Sans, grå |
-
-Tekst må ikke stå med versaler, undtagen korte mærkater med spatiering. Kursiv bruges kun til titler på værker.
+| H1 | `clamp(2.5rem, 1.4rem + 4vw, 4.75rem)` | 400 / 1,02, spatiering −0,035em |
+| H2 | 1,875rem | 700 / 1,15, −0,02em. I brødtekst med en streg i blæk over |
+| H3 | 1,25rem | 700 / 1,3 |
+| H4–H6 | 1,125rem / 1rem | 700 |
+| Brødtekst | 1,125rem (18 px) | 400 / 1,6 |
+| Ingres | 1,375rem | 400 / 1,45, blæk |
+| Metadata | 0,875rem | Grå |
 
 ## 4. Afstande og grid
 
 - Skala: `--space-2xs` .25 · `xs` .5 · `s` .75 · `m` 1 · `l` 1,5 · `xl` 2 · `2xl` 3 · `3xl` 4,5 (rem).
-- Sidebredde `--page-max: 72rem`, sidemargin `--gutter: clamp(1rem, 5vw, 3rem)` og tekstbredde `--measure: 68ch`.
-- Hjørneradius er `--radius: 4px` på flader, tabeller og billeder. Der er ingen skygger.
-- Alle selvstændige links og knapper er mindst 44 px høje på alle skærmstørrelser. Links i løbende tekst er undtaget.
-- Ingen vandret rulning af siden ved 320 px bredde. Kun tabeller må rulle vandret, og det sker inden i `.table-scroll`.
+- Sidebredde `--page-max: 82.5rem` (1320 px), sidemargin `--gutter: clamp(1.25rem, 4vw, 3.75rem)`. Indholdssider er højst `--content-max: 45rem` (720 px) brede.
+- Hjørneradius er 0 (`--radius`). Eneste undtagelse er knappen, som er helt rund i enderne. Der er ingen skygger.
+- Alle selvstændige links og knapper er mindst 44 px høje. Links i løbende tekst er undtaget.
+- Ingen vandret rulning af siden ved 320 px bredde. Kun tabeller må rulle vandret inden i `.table-scroll`.
 
 ## 5. Komponenter
 
-**Header.** Bomærke og navn står til venstre og hovednavigationen til højre. På mobilen brydes menuen over to linjer. Der er ingen hamburgermenu, fordi der er seks punkter og intet JavaScript. Den aktive side markeres med `aria-current="page"` og en teglrød streg på 3 px under punktet. Ved hover vises en linje i linjefarve. Under headeren er der en tynd skillelinje.
+**Header.** Navnet til venstre, hovednavigationen til højre. Ingen hamburgermenu og intet JavaScript. Den aktive side og hover vises med en understregning på 2 px.
 
-**Forside-genveje ("Det vigtigste").** Genvejene står i et grid af halmfarvede fliser, `minmax(15rem, 1fr)`, med tre per række på desktop og én per række på mobilen. Teksten er serif med en havegrøn pil (→) i højre side. Hele flisen er linket. Ved hover bliver fladen lidt mørkere og teksten understreget.
+**Indholdsside.** Øverst en brødkrumme: sektion / sidens titel. Så H1 og ingressen (dokumentets første afsnit) i stor skrift. Hver H2 har en streg i blæk over sig. Eksterne links får en ↗ efter sig, og links til PDF får "(PDF)". Siden slutter med en linje, "Opdateret …" og en grøn knap "Kontakt foreningen" til siden med adressen `…/kontakt/`. Knappen vises ikke på selve kontaktsiden, eller hvis siden ikke findes.
 
-**Nyhedskort ("Seneste nyt" og nyhedslisten).** Hvert kort har en teglrød streg på 3 px foroven. Derefter følger datoen i lille grå skrift, titlen i serif som link og et resumé i grå. På forsiden står tre kort side om side på desktop og under hinanden på mobilen. Linket "Alle nyheder" står under kortene.
+**Tabeller.** Ingen ramme og ingen flade. Tabelhovedet er fedt med en streg i blæk under, rækkerne adskilles af tynde linjer.
 
-**Find rundt og sektionslister.** Sektionerne står i et to-spaltet grid med en tynd linje over hvert punkt. Titlen er serif og et link, og introen står i grå. Sektionssiderne bruger samme mønster i én spalte.
+**Billeder.** I fuld tekstbredde, uden radius, ramme eller skygge.
 
-**Indholdsside.** Tilbagelinket "← Til …" står over H1. Brødteksten er højst 68 tegn bred. Til sidst kommer "Opdateret …" som metadata.
+**Forside og sektionssider.** Uændret layout fra version 1, men med de nye fonte og farver. Genvejene er lysegrå fliser med fed tekst og grøn pil. Nyhedskort har en streg i blæk foroven.
 
-**Tabeller.** `.table-scroll` får en tynd ramme og radius. Tabelhovedet har halmfarvet baggrund og fede overskrifter. Rækkerne adskilles af vandrette linjer, og der er ingen lodrette. Containeren kan få fokus (`tabindex="0"`), viser fokusring og ruller vandret på smalle skærme.
+**Footer.** Mørk baggrund med navnet sat stort, derefter en linje og to kolonner: "Genveje" (footerlinks) og "For andelshavere" (ProBo og prototype-teksten).
 
-**Billeder.** Billeder står i `figure` i fuld tekstbredde med radius. De får aldrig ramme eller skygge.
-
-**Footer.** Footeren har havegrøn baggrund og kalkhvid tekst og links. Den indeholder bomærket i lys variant, footerlinks (Kontakt, Regler og dokumenter) og en kort linje om, at dokumenter ligger i ProBo. Så længe sitet er en prototype, står det også i footeren.
-
-**Fokus.** Fokus vises overalt som `outline: 3px solid var(--color-green)` med 3 px afstand. På footerens grønne baggrund er ringen kalkhvid. "Spring til indhold" er det første element på siden.
+**Fokus.** `outline: 3px solid var(--color-green)` med 3 px afstand. I footeren er ringen lys.
 
 ## 6. Ikoner
 

@@ -73,11 +73,12 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect(home).toContain('<p class="more"><a href="/nyheder/">Alle nyheder</a></p>');
   expect([...home.matchAll(/<ul class="sections">([\s\S]*?)<\/ul>/g)][0]![1]!.match(/href="([^"]+)"/g)).toEqual(['href="/foreningen/"', 'href="/bo-her/"']);
   expect(await html('nyheder/index.html')).toContain('OLDEST_NEWS');
-  expect(home).toMatch(/<nav aria-label="Sidefod"><ul class="footer-links"><li><a href="\/foreningen\/kontakt\/">Kontakt<\/a><\/li><\/ul><\/nav>/);
+  expect(home).toMatch(/<nav aria-labelledby="sidefod-genveje"><p class="footer-label" id="sidefod-genveje">Genveje<\/p><ul class="footer-links"><li><a href="\/foreningen\/kontakt\/">Kontakt<\/a><\/li><\/ul><\/nav>/);
   expect([...home.matchAll(/<nav aria-label="Hovednavigation">([\s\S]*?)<\/nav>/g)][0]![1]!.match(/href="([^"]+)"/g)).toEqual(['href="/"', 'href="/foreningen/"', 'href="/bo-her/"', 'href="/nyheder/"']);
-  // CVI (docs/cvi.md): the mark is inline and the favicon a data URI, so neither adds an output file.
+  // CVI (docs/cvi.md): the favicon is a data URI, so it adds no output file; header and footer carry the name as text.
   expect(home).toContain('<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,');
-  expect(home.match(/<svg class="mark"/g)).toHaveLength(2);
+  expect(home).toContain('<a class="brand" href="/"><span class="brand-name">Grøndalsvænge</span>');
+  expect(home).toContain('<p class="footer-name">Grøndalsvænge</p>');
   expect(home).toMatch(/<link rel="stylesheet" href="\/_astro\/[^"]+\.css">/);
 
   // 1. Pages, unchanged image bytes, nothing from outside the section folders, no PDFs.
@@ -88,9 +89,11 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   const page = await html('foreningen/om-foreningen/index.html');
   expect(page).toContain('<h1>Om foreningen</h1>'); expect(page).toContain('<h2>Velkommen</h2>');
   expect(page).toContain(`<img src="/foreningen/om-foreningen/${image}" alt="Kort over området"`);
-  // CVI L3: guide sections are plain lists, the news section shows cards; pages end with the update date.
-  expect(page).toContain('<a class="back" href="/foreningen/">Til foreningen</a>');
+  // CVI 2: content pages have a breadcrumb and end with the update date and a button to the contact page.
+  expect(page).toContain('<nav class="crumbs" aria-label="Brødkrumme"> <ol><li><a href="/foreningen/">Foreningen</a></li><li aria-current="page">Om foreningen</li></ol> </nav>');
   expect(page).toMatch(/<p class="meta updated">Opdateret \d+\. \w+ \d{4}<\/p>/);
+  expect(page).toContain('<a class="button" href="/foreningen/kontakt/">Kontakt foreningen');
+  expect(await html('foreningen/kontakt/index.html')).not.toContain('class="button"');
   expect(await html('foreningen/index.html')).toContain('<ul class="entries"><li>');
   // The intro comes from the folder's _intro document: every paragraph on the section page, the first on the front page.
   expect(await html('foreningen/index.html')).toContain('<p class="intro">Bestyrelse og regler.</p><p class="intro">Skriv til os.</p>');

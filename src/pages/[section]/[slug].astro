@@ -4,18 +4,25 @@ import Base from '../../layouts/Base.astro';
 import { date } from '../../../lib/site/sections';
 export async function getStaticPaths() {
   const sections = new Map((await getCollection('sections')).map(s => [s.data.key, s.data]));
-  return (await getCollection('items')).map(({ data: item }) => ({ params: { section: item.section, slug: item.slug }, props: { item, section: sections.get(item.section)! } }));
+  const items = (await getCollection('items')).map(i => i.data);
+  // The button at the end of a page goes to the page with the address /…/kontakt/, if the site has one.
+  const contact = items.find(i => i.kind === 'page' && i.slug === 'kontakt')?.path;
+  return items.map(item => ({ params: { section: item.section, slug: item.slug }, props: { item, section: sections.get(item.section)!, contact } }));
 }
-const { item, section } = Astro.props;
-// "Til om Grøndalsvænge": only the first letter is lowered, so proper nouns keep their capital.
-const back = section.label.charAt(0).toLocaleLowerCase('da-DK') + section.label.slice(1);
+const { item, section, contact } = Astro.props;
+const showContact = contact && contact !== item.path;
 ---
 <Base title={item.title}>
-  <a class="back" href={section.path}>Til {back}</a>
-  <article>
+  <nav class="crumbs" aria-label="Brødkrumme">
+    <ol><li><a href={section.path}>{section.label}</a></li><li aria-current="page">{item.title}</li></ol>
+  </nav>
+  <article class="page">
     <h1>{item.title}</h1>
     {item.kind === 'notice' && <p class="meta"><time datetime={item.date}>{date(item.date)}</time></p>}
     <div class="prose" set:html={item.html} />
-    {item.kind !== 'notice' && <p class="meta updated">Opdateret {date(item.updatedAt)}</p>}
   </article>
+  {(item.kind !== 'notice' || showContact) && <div class="page-end">
+    {item.kind !== 'notice' ? <p class="meta updated">Opdateret {date(item.updatedAt)}</p> : <span />}
+    {showContact && <a class="button" href={contact}>Kontakt foreningen<svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>}
+  </div>}
 </Base>

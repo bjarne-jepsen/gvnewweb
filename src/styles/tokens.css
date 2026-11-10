@@ -1,26 +1,28 @@
-/* CVI tokens (docs/cvi.md). tests/cvi.test.ts checks the colour contrasts. */
+/* Design tokens (docs/cvi.md, version 2 from November 2026). tests/cvi.test.ts checks the colour contrasts. */
 :root {
   color-scheme: light;
 
-  --color-ink: #17251E;
-  --color-green: #24513A;
-  --color-tegl: #A8432A;
-  --color-muted: #56625B;
-  --color-paper: #FAF7F0;
-  --color-surface: #EFE6D2;
-  --color-surface-hover: #E7DBC1;
-  --color-line: #D8D0BF;
-  --color-on-dark: #FAF7F0;
+  --color-ink: #141414;
+  --color-green: #1E4636;
+  --color-muted: #5C5C5C;
+  --color-paper: #FFFFFF;
+  --color-surface: #F2F2EE;
+  --color-surface-hover: #E6E6E0;
+  --color-line: #DADAD4;
+  --color-dark: #141414;
+  --color-on-dark: #F2F2EE;
+  --color-on-dark-muted: #A8A8A2;
+  --color-dark-line: #4A4A4A;
 
-  --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", P052, Georgia, serif;
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
 
+  --text-xs: .75rem;
   --text-sm: .875rem;
   --text-base: 1.125rem;
-  --text-lg: 1.3rem;
-  --text-h1: clamp(2.25rem, 5vw, 3.5rem);
-  --text-h2: clamp(1.5rem, 3vw, 2rem);
-  --text-h3: 1.35rem;
+  --text-lg: 1.375rem;
+  --text-h1: clamp(2.5rem, 1.4rem + 4vw, 4.75rem);
+  --text-h2: 1.875rem;
+  --text-h3: 1.25rem;
 
   --space-2xs: .25rem;
   --space-xs: .5rem;
@@ -31,9 +33,10 @@
   --space-2xl: 3rem;
   --space-3xl: 4.5rem;
 
-  --page-max: 72rem;
+  --page-max: 82.5rem;
+  --content-max: 45rem;
   --measure: 68ch;
-  --gutter: clamp(1rem, 5vw, 3rem);
-  --radius: 4px;
+  --gutter: clamp(1.25rem, 4vw, 3.75rem);
+  --radius: 0;
   --focus-ring: 3px solid var(--color-green);
 }
