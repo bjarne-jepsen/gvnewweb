@@ -1,11 +1,9 @@
 ---
 id: "14zrQC9pTYzYynddcYlPfSUr29hjEZyxE9ooW1kcBu2U"
 title: "Grøndalsvænge på Facebook"
-updatedAt: "2026-11-09T19:56:57.196Z"
+updatedAt: "2026-11-10T14:51:04.930Z"
 summary: "Facebook-grupperne i Grøndalsvænge er oprettet og drevet af beboerne selv. Foreningen har ingen officiel Facebook-side, og bestyrelsen modererer ikke grupperne. Du kan derfor ikke regne med, at bestyrelsen ser eller besvarer henvendelser derinde."
 ---
-
-## Grøndalsvænge på Facebook
 
 Facebook-grupperne i Grøndalsvænge er oprettet og drevet af beboerne selv. Foreningen har ingen officiel Facebook-side, og bestyrelsen modererer ikke grupperne. Du kan derfor ikke regne med, at bestyrelsen ser eller besvarer henvendelser derinde.
 
