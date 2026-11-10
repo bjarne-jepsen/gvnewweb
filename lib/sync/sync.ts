@@ -5,9 +5,9 @@ import { googleDocsBlocks } from '../google/docs';
 import { sheetRows } from '../google/sheets';
 import { acquireLock } from '../lock';
 import type { SiteConfig } from './config';
-import { digest, guideMetaSchema, imageFormat, localImage, MAX_IMAGE_BYTES, MAX_IMAGES, newsFingerprint, newsMetaSchema, serializeNews } from './content';
+import { digest, guideFingerprint, guideMetaSchema, imageFormat, localImage, MAX_IMAGE_BYTES, MAX_IMAGES, newsFingerprint, newsMetaSchema, serializeNews } from './content';
 import { DriveAccessError, FOLDER, GDOC, SHEET, SHORTCUT, type DriveItem, type DriveSource } from './drive';
-import { assertRoundTrip, blocksToMarkdown, flattenBlocks, plainText, splitFrontmatter, summaryOf, validateMarkdown, withFrontmatter, type SerializableBlock } from './markdown';
+import { assertRoundTrip, blocksToMarkdown, extractKeywords, flattenBlocks, plainText, splitFrontmatter, summaryOf, validateMarkdown, withFrontmatter, type SerializableBlock } from './markdown';
 import { parseNews, type NewsRow } from './news';
 import { emptyReport, type ReportEntry, type SyncReport } from './report';
 import { manualRedirectsSchema, parseSectionName, sectionKey, sectionsSchema, serializeSections, type Kind, type SectionEntry, type Sections } from './sections';
@@ -54,7 +54,7 @@ async function readSection(dir: string, section: string, kind: Kind, into: Map<s
         files.set(`${meta.id}/${img.name}`, await readFile(join(dir, meta.id, img.name)));
       }
       for (const name of used) if (!files.has(`${meta.id}/${name}`)) throw new Error(`${where(meta.id)}: billedet ${name} mangler`);
-      add({ section, kind, id: meta.id, title: meta.title, updatedAt: meta.updatedAt, fingerprint: digest(body), files });
+      add({ section, kind, id: meta.id, title: meta.title, updatedAt: meta.updatedAt, fingerprint: guideFingerprint(body, meta.keywords), files });
     } else if (kind === 'notice' && e.isFile() && e.name.endsWith('.json')) {
       const raw = await readFile(join(dir, e.name)), meta = newsMetaSchema.parse(JSON.parse(raw.toString('utf8')));
       if (e.name !== `${meta.id}.json`) throw new Error(`${where(e.name)}: ID passer ikke til filnavnet`);
@@ -109,12 +109,12 @@ async function fetchGuide(drive: DriveSource, c: Candidate): Promise<Fetched> {
     if (images.size > MAX_IMAGES || [...images.values()].reduce((n, b) => n + b.length, 0) > MAX_IMAGE_BYTES) throw new Error('For mange eller for store billeder');
     return { type: 'image', alt, file: { assetPath: `${c.id}/${name}`, assetHash: digest(bytes), sizeBytes: bytes.length, mimeType: format.mimeType, originalFilename: name } };
   });
-  const blocks: SerializableBlock[] = bodyBlocks.map(b => b.type === 'image' ? { type: 'image', alt: b.alt, name: b.file.originalFilename } : b);
+  const { blocks, keywords } = extractKeywords(bodyBlocks.map(b => b.type === 'image' ? { type: 'image', alt: b.alt, name: b.file.originalFilename } : b));
   const body = blocksToMarkdown(blocks, name => `./${c.id}/${name}`);
   assertRoundTrip(blocks, validateMarkdown(body, localImage(c.id)));
   const summary = summaryOf(blocks);
-  return { fingerprint: digest(body), build: updatedAt => new Map([
-    [`${c.id}.md`, utf8(withFrontmatter({ id: c.id, title: c.title, updatedAt, summary }, body))],
+  return { fingerprint: guideFingerprint(body, keywords), build: updatedAt => new Map([
+    [`${c.id}.md`, utf8(withFrontmatter({ id: c.id, title: c.title, updatedAt, summary, ...(keywords.length ? { keywords } : {}) }, body))],
     ...[...images].map(([name, bytes]) => [`${c.id}/${name}`, bytes] as [string, Uint8Array])]) };
 }
 /** One sheet row → the same validated Markdown dialect; no images in news. */

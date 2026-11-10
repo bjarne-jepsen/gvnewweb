@@ -1,4 +1,4 @@
-/* Site styles built on tokens.css. Plain CSS only: the output check forbids scripts. */
+/* Site styles built on tokens.css. Scripts only enhance (menu panels, search); everything works without them. */
 * { box-sizing: border-box; }
 html { background: var(--color-paper); color: var(--color-ink); font-family: var(--font-sans); }
 body { margin: 0; font-size: var(--text-base); line-height: 1.6; }
@@ -164,3 +164,47 @@ main { min-height: 60vh; padding-block: clamp(2.5rem, 6vw, 5.5rem) 7.5rem; overf
   h2, h3, h4 { break-after: avoid; }
   figure, tr { break-inside: avoid; }
 }
+
+/* Menu panels (<details>): each page section opens a list of its pages. Desktop: a panel under the
+   menu item. Phone: a full-width panel under the menu. */
+.visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.site-nav { position: relative; align-items: baseline; }
+.nav-group { position: relative; }
+.nav-group summary { display: flex; align-items: center; gap: .4em; padding-block: .625rem; cursor: pointer; list-style: none; }
+.nav-group summary::-webkit-details-marker { display: none; }
+.nav-group summary::after { content: ""; width: .4em; height: .4em; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: translateY(-.15em) rotate(45deg); transition: transform .15s; }
+.nav-group[open] summary::after { transform: translateY(.1em) rotate(-135deg); }
+.nav-group summary:hover, .nav-group summary.is-current { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
+.nav-panel { position: absolute; z-index: 10; top: 100%; left: -1rem; min-width: 17rem; max-width: 22rem; padding: var(--space-s) 1rem var(--space-m); background: var(--color-paper); border: 1px solid var(--color-line); border-top: 2px solid var(--color-ink); box-shadow: 0 .75rem 2rem rgb(20 20 20 / .08); }
+.nav-group:last-of-type .nav-panel { left: auto; right: -1rem; }
+.nav-panel ul { list-style: none; margin: 0; padding: 0; }
+.site-header .nav-panel a { padding-block: .5rem; min-height: 44px; display: flex; align-items: center; line-height: 1.3; }
+.site-header .nav-panel .nav-landing { font-weight: 700; border-bottom: 1px solid var(--color-line); margin-bottom: var(--space-2xs); }
+@media (max-width: 700px) {
+  .nav-group { position: static; }
+  .nav-panel, .nav-group:last-of-type .nav-panel { left: 0; right: 0; max-width: none; box-shadow: none; }
+}
+
+/* Search in the header. Results open in a panel under the box while typing. */
+.search { position: relative; flex: 0 1 20rem; margin-left: auto; }
+.search input { width: 100%; min-height: 44px; padding: .5rem .75rem; font: inherit; font-size: 1rem; color: var(--color-ink); background: var(--color-paper); border: 1px solid var(--color-ink); border-radius: var(--radius); }
+.search input::placeholder { color: var(--color-muted); }
+.search input:focus-visible { outline-offset: 0; }
+.search-panel { position: absolute; z-index: 20; top: calc(100% + .25rem); right: 0; width: min(32rem, calc(100vw - 2 * var(--gutter))); max-height: min(70vh, 40rem); overflow-y: auto; background: var(--color-paper); border: 1px solid var(--color-line); border-top: 2px solid var(--color-ink); box-shadow: 0 .75rem 2rem rgb(20 20 20 / .08); }
+.search-status { margin: 0; padding: var(--space-s) var(--space-m); font-size: var(--text-sm); color: var(--color-muted); }
+.search-results { list-style: none; margin: 0; padding: 0; }
+.search-results li { border-top: 1px solid var(--color-line); }
+.search-results a { display: grid; gap: .15rem; padding: var(--space-s) var(--space-m); text-decoration: none; }
+.search-results a:hover, .search-results a:focus-visible { background: var(--color-surface); color: var(--color-ink); }
+.search-results a:focus-visible { outline-offset: -3px; }
+.search-title { font-weight: 700; line-height: 1.3; }
+.search-results a:hover .search-title { text-decoration: underline; }
+.search-section { order: -1; font-size: var(--text-xs); letter-spacing: .08em; text-transform: uppercase; color: var(--color-muted); }
+.search-excerpt { font-size: var(--text-sm); line-height: 1.45; color: var(--color-muted); }
+.search-excerpt mark { background: var(--color-surface-hover); color: var(--color-ink); font-weight: 700; }
+@media (max-width: 700px) {
+  .search { flex-basis: 100%; order: 3; margin-block: var(--space-xs) var(--space-m); position: static; }
+  .site-header .wrap { position: relative; }
+  .search-panel { left: var(--gutter); right: var(--gutter); width: auto; top: auto; }
+}
+@media print { .search { display: none; } }

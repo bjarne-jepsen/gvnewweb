@@ -20,6 +20,7 @@ Grøndalsvænge hjemmeside (fællesdrev)
 - **Ny, slettet eller privat:** En ny nummereret mappe bliver en sektion, så snart den indeholder en side. En mappe, der slettes eller mister sit tal, fjernes fra sitet. Havde den sider, stopper kørslen, indtil man vælger "Publicér og tillad sletning". En mappe uden tal er privat. Et navn som "2024 Generalforsamling" (fire cifre) bliver aldrig en sektion.
 - **Nyheder:** En sektionsmappe med et Google-ark er en nyhedssektion. Den vises også, når der ingen aktuelle nyheder er.
 - **Intro:** Et Google-dokument med navnet `_intro` i sektionsmappen bliver sektionens introtekst. Kun almindelige afsnit bruges. Uden `_intro` er der ingen intro.
+- **Søgeord:** Et afsnit, der begynder med `Søgeord:`, fx `Søgeord: trailer, boremaskine, telt`, vises ikke på siden. Ordene hjælper kun søgningen med at finde siden, også når folk bruger andre ord end dem i teksten. Adskil ordene med komma. Højst 40 ord pr. side.
 
 Forsidens tekst, genveje og sidefodens links ligger i [lib/site/sections.ts](lib/site/sections.ts). En genvej til en side, der ikke findes endnu, udelades med en advarsel ved build. ProBo-linket i sidefoden sættes i `links.probo` i [config/site.json](config/site.json) (kun https).
 

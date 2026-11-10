@@ -42,7 +42,7 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   drive.images.set('https://lh3.googleusercontent.com/kort', png);
   const doc = (title: string) => docJson('doc-1', [{ text: title, style: 'HEADING_1' }, { text: 'Første afsnit.' }, { text: '', image: 'i1' }], { i1: { uri: 'https://lh3.googleusercontent.com/kort', alt: 'Kort over området' } });
   drive.gdoc('doc-1', 'Om foreningen', 'f-foreningen', doc('Velkommen'));
-  drive.gdoc('1Kontakt9xQz', 'Kontakt', 'f-foreningen', docJson('1Kontakt9xQz', [{ text: 'Skriv til foreningen.' }]));
+  drive.gdoc('1Kontakt9xQz', 'Kontakt', 'f-foreningen', docJson('1Kontakt9xQz', [{ text: 'Søgeord: mail, telefon, Mail' }, { text: 'Skriv til foreningen.' }, { text: 'Bestyrelsen', style: 'HEADING_2' }, { text: 'Vi svarer hurtigt.' }]));
   drive.gdoc('private', 'PRIVATE_CANARY', 'internt', canary('private', 'PRIVATE_CANARY'));
   drive.gdoc('red', 'REDAKTION_CANARY', 'f-redaktion', canary('red', 'REDAKTION_CANARY'));
   drive.gdoc('rootfile', 'ROOT_CANARY', 'root', canary('rootfile', 'ROOT_CANARY'));
@@ -74,7 +74,15 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect([...home.matchAll(/<ul class="sections">([\s\S]*?)<\/ul>/g)][0]![1]!.match(/href="([^"]+)"/g)).toEqual(['href="/foreningen/"', 'href="/bo-her/"']);
   expect(await html('nyheder/index.html')).toContain('OLDEST_NEWS');
   expect(home).toMatch(/<nav aria-labelledby="sidefod-genveje"><p class="footer-label" id="sidefod-genveje">Genveje<\/p><ul class="footer-links"><li><a href="\/foreningen\/kontakt\/">Kontakt<\/a><\/li><\/ul><\/nav>/);
-  expect([...home.matchAll(/<nav aria-label="Hovednavigation">([\s\S]*?)<\/nav>/g)][0]![1]!.match(/href="([^"]+)"/g)).toEqual(['href="/"', 'href="/foreningen/"', 'href="/bo-her/"', 'href="/nyheder/"']);
+  // The menu: each page section is a panel with its landing page first and its pages alphabetically; news is a plain link.
+  const nav = [...home.matchAll(/<nav aria-label="Hovednavigation" class="site-nav">([\s\S]*?)<\/nav>/g)][0]![1]!;
+  expect(nav.match(/href="([^"]+)"/g)).toEqual(['href="/"', 'href="/foreningen/"', 'href="/foreningen/kontakt/"', 'href="/foreningen/om-foreningen/"', 'href="/bo-her/"', 'href="/bo-her/leje-af-lokaler/"', 'href="/nyheder/"']);
+  expect(nav).toContain('<details class="nav-group" data-nav-group> <summary>Foreningen</summary>');
+  expect(nav).toContain('<a class="nav-landing" href="/foreningen/">Gå til Foreningen</a>');
+  expect(nav).not.toContain('2026-10-20-vandet-lukkes');
+  // Scripts only as external modules from /_astro/; the search box is hidden until its script runs.
+  expect([...home.matchAll(/<script\b[^>]*>/g)].map(m => m[0])).toEqual(expect.arrayContaining([expect.stringMatching(/^<script type="module" src="\/_astro\/[^"]+\.js">$/)]));
+  expect(home).toContain('<div class="search" data-search hidden>');
   // CVI (docs/cvi.md): the favicon is a data URI, so it adds no output file; header and footer carry the name as text.
   expect(home).toContain('<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,');
   expect(home).toContain('<a class="brand" href="/"><span class="brand-name">Grøndalsvænge</span>');
@@ -106,7 +114,13 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect(await html('nyheder/index.html')).toContain('<ul class="entries cards"><li>');
   expect(await readFile(dist(`foreningen/om-foreningen/${image}`))).toEqual(png);
   for (const path of await walk(join(root, 'dist'))) expect((await readFile(path)).toString()).not.toMatch(/CANARY|target-doc|doc-1/);
-  expect(JSON.parse(await html('search.json')).map((x: { url: string }) => x.url).sort()).toEqual(['/bo-her/leje-af-lokaler/', '/foreningen/kontakt/', '/foreningen/om-foreningen/',
+  // The search index: section name, headings, running text and the editor's keywords; the keyword line is not on the page.
+  const index = JSON.parse(await html('search.json')) as { title: string; url: string; section: string; headings: string[]; keywords: string[]; text: string; summary: string }[];
+  expect(index.find(x => x.url === '/foreningen/kontakt/')).toEqual({ title: 'Kontakt', summary: 'Skriv til foreningen.', url: '/foreningen/kontakt/', section: 'Foreningen',
+    headings: ['Bestyrelsen'], keywords: ['mail', 'telefon'], text: 'Skriv til foreningen. Vi svarer hurtigt.' });
+  expect(await html('foreningen/kontakt/index.html')).not.toContain('Søgeord');
+  expect(index.find(x => x.url === '/nyheder/2026-10-20-vandet-lukkes/')!.section).toBe('Nyheder');
+  expect(index.map(x => x.url).sort()).toEqual(['/bo-her/leje-af-lokaler/', '/foreningen/kontakt/', '/foreningen/om-foreningen/',
     '/nyheder/2026-07-01-oldest-news/', '/nyheder/2026-08-01-aeldre-nyhed-b/', '/nyheder/2026-09-01-aeldre-nyhed-a/', '/nyheder/2026-10-20-vandet-lukkes/']);
   // News: expired and future rows are in content/ but not built; drafts never reach content/.
   expect(await html('nyheder/2026-10-20-vandet-lukkes/index.html')).toContain('<time datetime="2026-10-20">20. oktober 2026</time>');
@@ -163,6 +177,8 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   // 7. A renamed and renumbered folder changes the menu, not the address.
   drive.update('f-foreningen', { name: '95 Om foreningen' });
   await sync(); await expectGreen();
-  expect([...(await html('index.html')).matchAll(/<nav aria-label="Hovednavigation">([\s\S]*?)<\/nav>/g)][0]![1]!.match(/<a href="[^"]+"[^>]*>[^<]+/g)!.map(a => a.replace(/<a href="([^"]+)"[^>]*>/, '$1 ')))
-    .toEqual(['/ Forside', '/nyheder/ Nyheder', '/foreningen/ Om foreningen']);
+  const menu = [...(await html('index.html')).matchAll(/<nav aria-label="Hovednavigation" class="site-nav">([\s\S]*?)<\/nav>/g)][0]![1]!.replace(/<div class="nav-panel">[\s\S]*?<\/div>/g, '');
+  expect([...menu.matchAll(/<a href="([^"]+)"[^>]*>([^<]+)|<summary[^>]*>([^<]+)/g)].map(m => m[3] ? `panel ${m[3]}` : `${m[1]} ${m[2]}`))
+    .toEqual(['/ Forside', '/nyheder/ Nyheder', 'panel Om foreningen']);
+  expect(await html('index.html')).toContain('<a class="nav-landing" href="/foreningen/">Gå til Om foreningen</a>');
 }, 90000);

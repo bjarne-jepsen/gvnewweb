@@ -6,7 +6,8 @@ import { loadSite } from '../lib/site/load';
 let site: ReturnType<typeof loadSite> | undefined;
 const load = () => (site ??= loadSite());
 const path = z.string().regex(/^\/(?:[a-z0-9-]+\/)*$/);
-const base = { section: z.string(), slug: z.string(), path, title: z.string(), updatedAt: z.string(), summary: z.string() };
+const base = { section: z.string(), slug: z.string(), path, title: z.string(), updatedAt: z.string(), summary: z.string(),
+  search: z.object({ headings: z.array(z.string()), text: z.string(), keywords: z.array(z.string()) }) };
 
 export const collections = {
   sections: defineCollection({

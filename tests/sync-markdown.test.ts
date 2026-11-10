@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { assertRoundTrip, blocksToMarkdown, splitFrontmatter, summaryOf, validateMarkdown, withFrontmatter, type SerializableBlock } from '../lib/sync/markdown';
+import { assertRoundTrip, blocksToMarkdown, extractKeywords, splitFrontmatter, summaryOf, validateMarkdown, withFrontmatter, type SerializableBlock } from '../lib/sync/markdown';
 
 const p = (text: string, extra: object = {}) => ({ type: 'paragraph' as const, content: [{ text, ...extra }] });
 const md = (blocks: SerializableBlock[]) => blocksToMarkdown(blocks, name => `./doc1/${name}`);
@@ -50,6 +50,29 @@ describe('Markdown-serializer', () => {
     const source = withFrontmatter(meta, 'Brødtekst\n');
     expect(splitFrontmatter(source)).toEqual({ meta, body: 'Brødtekst\n' });
     expect(() => splitFrontmatter('Ingen frontmatter')).toThrow('Frontmatter mangler');
+  });
+});
+
+describe('Søgeord', () => {
+  test('linjen fjernes fra siden og bliver til en liste uden dubletter', () => {
+    const { blocks, keywords } = extractKeywords([p('Søgeord: trailer, boremaskine; Telt , trailer.'), p('Første afsnit.')]);
+    expect(keywords).toEqual(['trailer', 'boremaskine', 'Telt']);
+    expect(blocks).toEqual([p('Første afsnit.')]);
+    expect(summaryOf(blocks)).toBe('Første afsnit.');
+  });
+  test('virker med fed skrift, små bogstaver og i en layouttabel, men ikke i en liste eller midt i et afsnit', () => {
+    expect(extractKeywords([{ type: 'paragraph', content: [{ text: 'SØGEORD:', bold: true }, { text: ' hegn' }] }]).keywords).toEqual(['hegn']);
+    expect(extractKeywords([{ type: 'table', rows: [[[p('søgeord: stakit')]]] }]).keywords).toEqual(['stakit']);
+    expect(extractKeywords([{ type: 'list', items: [[{ text: 'Søgeord: x' }]] }, p('Se søgeord: y')]).keywords).toEqual([]);
+  });
+  test('for lange ord springes over, for mange stopper dokumentet', () => {
+    expect(extractKeywords([p(`Søgeord: ${'x'.repeat(61)}, kort`)]).keywords).toEqual(['kort']);
+    expect(() => extractKeywords([p(`Søgeord: ${Array.from({ length: 41 }, (_, i) => `ord${i}`).join(', ')}`)])).toThrow('For mange søgeord');
+  });
+  test('frontmatter: søgeord skrives kun, når der er nogen, og kan læses tilbage', () => {
+    const meta = { id: 'abc', title: 'T', updatedAt: '2026-10-21T08:00:00.000Z', summary: 'S' };
+    expect(withFrontmatter(meta, 'x\n')).not.toContain('keywords');
+    expect(splitFrontmatter(withFrontmatter({ ...meta, keywords: ['a', 'b"c'] }, 'x\n')).meta).toEqual({ ...meta, keywords: ['a', 'b"c'] });
   });
 });
 

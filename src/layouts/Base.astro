@@ -2,11 +2,17 @@
 import { getCollection } from 'astro:content';
 import '../styles/tokens.css';
 import '../styles/site.css';
+import Search from '../components/Search.astro';
 interface Props { title: string; }
 const { title } = Astro.props;
 const path = Astro.url.pathname;
 const sections = (await getCollection('sections')).map(s => s.data).sort((a, b) => a.order - b.order);
-const navigation = [['/', 'Forside'], ...sections.map(s => [s.path, s.label])];
+// Each page section opens a panel with its pages; the landing page is the first link in the panel.
+// The news section has no panel: its items come and go, and its landing page is the list.
+const collator = new Intl.Collator('da-DK');
+const pages = (await getCollection('items')).map(i => i.data).filter(i => i.kind === 'page').sort((a, b) => collator.compare(a.title, b.title));
+const navigation = sections.map(s => ({ ...s, pages: s.news ? [] : pages.filter(p => p.section === s.key) }));
+const current = (href: string) => href === '/' ? path === '/' : path.startsWith(href);
 const footerLinks = (await getCollection('links')).map(l => l.data).filter(l => l.group === 'footer').sort((a, b) => a.order - b.order);
 // The favicon is a house as a data URI, so it adds no file to the output. Colours are the ink, green and paper tokens.
 const favicon = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M2 15 16 3l14 12z" fill="#141414"/><path d="M6 15h20v14H6z" fill="#1E4636"/><path d="M14 20h4v9h-4z" fill="#FFFFFF"/></svg>')}`;
@@ -26,9 +32,19 @@ const favicon = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www
     <header class="site-header">
       <div class="wrap">
         <a class="brand" href="/"><span class="brand-name">Grøndalsvænge</span><span class="brand-sub">Andelsboligforeningen</span></a>
-        <nav aria-label="Hovednavigation">
-          {navigation.map(([href, label]) => <a href={href} aria-current={(href === '/' ? path === '/' : path.startsWith(href!)) ? 'page' : undefined}>{label}</a>)}
+        <nav aria-label="Hovednavigation" class="site-nav">
+          <a href="/" aria-current={current('/') ? 'page' : undefined}>Forside</a>
+          {navigation.map(s => s.pages.length === 0
+            ? <a href={s.path} aria-current={current(s.path) ? 'page' : undefined}>{s.label}</a>
+            : <details class="nav-group" data-nav-group>
+                <summary class:list={{ 'is-current': current(s.path) }}>{s.label}</summary>
+                <div class="nav-panel">
+                  <a class="nav-landing" href={s.path} aria-current={path === s.path ? 'page' : undefined}>Gå til {s.label}</a>
+                  <ul>{s.pages.map(p => <li><a href={p.path} aria-current={path === p.path ? 'page' : undefined}>{p.title}</a></li>)}</ul>
+                </div>
+              </details>)}
         </nav>
+        <Search />
       </div>
     </header>
     <main id="indhold" class="wrap"><slot /></main>
@@ -41,5 +57,17 @@ const favicon = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www
         </div>
       </div>
     </footer>
+    <script>
+      // Menu panels: one open at a time; Escape and a click outside close them. Without the script the
+      // panels still open and close (they are <details>), they just stay open until clicked again.
+      const groups = [...document.querySelectorAll<HTMLDetailsElement>('[data-nav-group]')];
+      for (const g of groups) g.addEventListener('toggle', () => { if (g.open) for (const o of groups) if (o !== g) o.open = false; });
+      document.addEventListener('click', e => { for (const g of groups) if (g.open && !g.contains(e.target as Node)) g.open = false; });
+      document.addEventListener('keydown', e => {
+        if (e.key !== 'Escape') return;
+        const open = groups.find(g => g.open);
+        if (open) { open.open = false; open.querySelector('summary')!.focus(); }
+      });
+    </script>
   </body>
 </html>
