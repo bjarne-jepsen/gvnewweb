@@ -11,7 +11,9 @@ import { copenhagenDay, frontpage } from './sections';
 
 /** intro: plain paragraphs separated by a blank line, from the folder's _intro document. */
 export interface SiteSection { key: string; order: number; label: string; intro: string; path: string; news: boolean }
-interface ItemBase { id: string; section: string; slug: string; path: string; title: string; updatedAt: string }
+/** search: what the search index gets beyond title and summary. Plain text only, from the same public body. */
+export interface SearchText { headings: string[]; text: string; keywords: string[] }
+interface ItemBase { id: string; section: string; slug: string; path: string; title: string; updatedAt: string; search: SearchText }
 export type SiteItem = ItemBase & ({ kind: 'page'; summary: string; html: string; image?: SiteImage } | { kind: 'notice'; summary: string; html: string; date: string; expires?: string });
 /** The picture on a page's tile on the section's landing page: the first image in the document. */
 export interface SiteImage { src: string; alt: string }
@@ -41,15 +43,17 @@ export async function loadSite(root = '.', buildAt = new Date(process.env.BUILD_
   for (const entry of entries.values()) {
     const slug = slugs[entry.id];
     if (!slug || slug.section !== entry.section) throw new Error(`content/_slugs.json: ${entry.id} mangler eller peger på en anden sektion`);
-    const path = pathOf(slug), base = { id: entry.id, section: entry.section, slug: slug.slug, path, title: entry.title, updatedAt: entry.updatedAt };
+    const path = pathOf(slug), common = { id: entry.id, section: entry.section, slug: slug.slug, path, title: entry.title, updatedAt: entry.updatedAt };
     if (entry.kind === 'notice') {
       const meta = newsMetaSchema.parse(JSON.parse(Buffer.from(entry.files.get(`${entry.id}.json`)!).toString('utf8')));
       if (meta.date > buildDay || (meta.expires && meta.expires < buildDay)) continue;
+      const base = { ...common, search: searchText(meta.body, []) };
       const html = renderBody(meta.body, () => false, () => { throw new Error('Nyheder kan ikke have billeder'); });
       items.push({ ...base, kind: 'notice', summary: meta.summary, html, date: meta.date, ...(meta.expires ? { expires: meta.expires } : {}) });
     } else {
       const { meta, body } = splitFrontmatter(Buffer.from(entry.files.get(`${entry.id}.md`)!).toString('utf8'));
       const front = guideMetaSchema.parse(meta);
+      const base = { ...common, search: searchText(body, front.keywords ?? []) };
       for (const [name, bytes] of entry.files) if (name.startsWith(`${entry.id}/`)) assets.set(`${path}${name.slice(entry.id.length + 1)}`, bytes);
       const isLocal = localImage(entry.id), imageUrl = (url: string) => `${path}${url.slice(entry.id.length + 3)}`;
       const html = renderBody(body, isLocal, imageUrl);
@@ -87,6 +91,16 @@ export async function loadSite(root = '.', buildAt = new Date(process.env.BUILD_
   // Drive IDs must never reach the output; news IDs are editor-facing and not secret.
   const internalIds = [...entries.values()].filter(e => e.kind !== 'notice').map(e => e.id);
   return { sections, items, redirects, links, assets, warnings, internalIds, buildDay, origin: new URL(config.siteUrl).origin };
+}
+
+/** Headings and running text of a Markdown body, for the search index. Image alt text is left out. */
+function searchText(body: string, keywords: string[]): SearchText {
+  type Node = { type: string; value?: string; children?: Node[] };
+  const inline = new Set(['paragraph', 'heading', 'tableCell', 'strong', 'emphasis', 'link']);
+  const text = (n: Node): string => n.type === 'text' ? n.value! : n.type === 'break' ? ' ' : (n.children ?? []).map(text).join(inline.has(n.type) ? '' : ' ');
+  const root = parseMarkdown(body) as Node, headings: string[] = [], parts: string[] = [];
+  for (const block of root.children ?? []) (block.type === 'heading' ? headings : parts).push(text(block).replace(/\s+/g, ' ').trim());
+  return { headings: headings.filter(Boolean), text: parts.filter(Boolean).join(' '), keywords };
 }
 
 /** The first local image with alt text in a page's Markdown, in document order. */

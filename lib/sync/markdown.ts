@@ -131,10 +131,33 @@ export function assertRoundTrip(blocks: SerializableBlock[], tree: Root) {
   if (expected !== actual) throw new Error('Markdown-konverteringen ændrede teksten; dokumentet publiceres ikke');
 }
 
+/** A paragraph "Søgeord: trailer, telt, boremaskine" anywhere at the top level of a page. It is not shown on
+ * the page; the words only help the search find it. Several such paragraphs are merged. */
+const keywordLine = /^\s*søgeord\s*:\s*/i;
+export const MAX_KEYWORDS = 40, MAX_KEYWORD_LENGTH = 60;
+export function extractKeywords(input: SerializableBlock[]): { blocks: SerializableBlock[]; keywords: string[] } {
+  const blocks: SerializableBlock[] = [], keywords: string[] = [], seen = new Set<string>();
+  for (const b of flattenBlocks(input)) {
+    const text = b.type === 'paragraph' ? plain(b.content) : '';
+    if (!keywordLine.test(text)) { blocks.push(b); continue; }
+    for (const raw of text.replace(keywordLine, '').split(/[,;\n]/)) {
+      const word = raw.replace(/\s+/g, ' ').trim().replace(/[.]+$/, '');
+      if (!word || word.length > MAX_KEYWORD_LENGTH || seen.has(word.toLocaleLowerCase('da-DK'))) continue;
+      if (keywords.length === MAX_KEYWORDS) throw new Error(`For mange søgeord (højst ${MAX_KEYWORDS})`);
+      seen.add(word.toLocaleLowerCase('da-DK')); keywords.push(word);
+    }
+  }
+  return { blocks, keywords };
+}
+
 const frontKeys = ['id', 'title', 'updatedAt', 'summary'] as const;
-/** JSON values are valid YAML scalars, so Astro's frontmatter parser reads the same data. */
-export function withFrontmatter(meta: Record<(typeof frontKeys)[number], string>, body: string) {
-  return `---\n${frontKeys.map(k => `${k}: ${JSON.stringify(meta[k])}`).join('\n')}\n---\n\n${body}`;
+export type FrontMeta = Record<(typeof frontKeys)[number], string> & { keywords?: string[] };
+/** JSON values are valid YAML scalars, so Astro's frontmatter parser reads the same data.
+ * keywords is only written when there are any, so pages without them keep their exact bytes. */
+export function withFrontmatter(meta: FrontMeta, body: string) {
+  const lines = frontKeys.map(k => `${k}: ${JSON.stringify(meta[k])}`);
+  if (meta.keywords?.length) lines.push(`keywords: ${JSON.stringify(meta.keywords)}`);
+  return `---\n${lines.join('\n')}\n---\n\n${body}`;
 }
 export function splitFrontmatter(source: string) {
   const match = /^---\n([\s\S]*?)\n---\n\n/.exec(source);

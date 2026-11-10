@@ -117,6 +117,7 @@ En mappe i roden, hvis navn starter med et tal, er en sektion på sitet. Se regl
 | Skift 20 til 15 | Kun rækkefølgen i menuen ændres |
 | Slet mappen, flyt den ud af roden eller fjern tallet | Sektionen og dens sider forsvinder. Kræver *Publicér og tillad sletning* |
 | Læg et Google-dokument med navnet `_intro` i mappen | Dokumentets afsnit bliver sektionens intro |
+| Skriv et afsnit `Søgeord: trailer, telt` i et dokument | Afsnittet vises ikke. Søgningen finder siden på de ord |
 
 En sektion, der hentes tilbage fra papirkurven, får sine gamle adresser igen. En ny mappe med samme navn som en eksisterende sektion får `-2` i adressen. En sektions adresse kan i dag ikke ændres uden at flytte siderne til en ny mappe.
 

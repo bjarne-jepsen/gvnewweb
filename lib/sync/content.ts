@@ -15,7 +15,10 @@ export function imageFormat(bytes: Uint8Array): { mimeType: 'image/png' | 'image
 /** Frontmatter of content/<section>/<driveId>.md; images live in content/<section>/<driveId>/. */
 export const guideMetaSchema = z.strictObject({
   id: driveIdSchema, title: z.string().min(1).max(300), updatedAt: z.iso.datetime(), summary: z.string().max(400),
+  keywords: z.array(z.string().min(1).max(60)).min(1).max(40).optional(),
 });
+/** What decides whether a page changed. Without keywords it is the body's digest, as before keywords existed. */
+export const guideFingerprint = (body: string, keywords?: string[]) => digest(keywords?.length ? `${JSON.stringify(keywords)}\n${body}` : body);
 export type GuideMeta = z.infer<typeof guideMetaSchema>;
 /** content/<section>/<newsId>.json, one file per published row of the news sheet. */
 export const newsIdPattern = /^[a-zA-Z0-9_-]{3,64}$/;

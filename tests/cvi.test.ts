@@ -1,6 +1,7 @@
 import { expect, test } from 'bun:test';
 import { readFile } from 'node:fs/promises';
-import { externalReference } from '../scripts/verify-output';
+import { externalReference, scriptProblem } from '../scripts/verify-output';
+import { digest, guideFingerprint } from '../lib/sync/content';
 
 const tokens = Object.fromEntries([...(await readFile('src/styles/tokens.css', 'utf8')).matchAll(/--(color-[a-z-]+):\s*(#[0-9a-f]{6})\s*;/gi)].map(m => [m[1]!, m[2]!]));
 const luminance = (hex: string) => [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255)
@@ -40,4 +41,18 @@ test('outputkontrol: eksterne ressourcer afvises, links og data-URI\'er tillades
     ['_astro/a.css', '.a{background:url(data:image/svg+xml,x)}.b{color:red}'],
     ['sitemap.xml', '<loc>https://example.invalid/</loc>'],
   ]) expect(externalReference(rel!, text!)).toBeUndefined();
+});
+
+test('outputkontrol: kun eksterne moduler fra /_astro/, ingen inline-scripts eller event-attributter', () => {
+  expect(scriptProblem('<p>Ingen scripts</p>')).toBeUndefined();
+  expect(scriptProblem('<script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.CE37oxSV.js"></script>')).toBeUndefined();
+  for (const bad of ['<script>alert(1)</script>', '<script type="module">x()</script>', '<script src="https://cdn.test/x.js"></script>',
+    '<script type="module" src="/andet/x.js"></script>', '<script type="module" src="/_astro/x.js">y()</script>', '<img src="x.png" onerror="alert(1)">', '<SCRIPT>x</SCRIPT>', '<script'])
+    expect(scriptProblem(bad)).toBeDefined();
+});
+
+test('fingeraftryk: sider uden søgeord har samme aftryk som før, søgeord tæller med', () => {
+  expect(guideFingerprint('Brødtekst\n')).toBe(digest('Brødtekst\n'));
+  expect(guideFingerprint('Brødtekst\n', [])).toBe(digest('Brødtekst\n'));
+  expect(guideFingerprint('Brødtekst\n', ['a'])).not.toBe(guideFingerprint('Brødtekst\n', ['b']));
 });

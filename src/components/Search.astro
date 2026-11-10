@@ -1,0 +1,119 @@
+---
+// Search box in the header. Results appear while typing, from /search.json (the same public dataset
+// as the pages). The box is hidden until the script runs, so without JavaScript nothing is shown.
+---
+<div class="search" data-search hidden>
+  <label class="visually-hidden" for="soeg">Søg på sitet</label>
+  <input id="soeg" type="search" placeholder="Søg, fx parkering" autocomplete="off" spellcheck="false" aria-describedby="soeg-status" aria-controls="soeg-resultater" />
+  <div class="search-panel" data-search-panel hidden>
+    <p id="soeg-status" class="search-status" role="status" aria-live="polite"></p>
+    <ol id="soeg-resultater" class="search-results"></ol>
+  </div>
+</div>
+
+<script>
+  import MiniSearch from 'minisearch';
+
+  interface Doc { id: number; title: string; summary: string; url: string; section: string; headings: string[]; keywords: string[]; text: string }
+  type Hit = Doc & { terms: string[] };
+
+  const root = document.querySelector<HTMLElement>('[data-search]')!;
+  const input = root.querySelector('input')!;
+  const panel = root.querySelector<HTMLElement>('[data-search-panel]')!;
+  const status = root.querySelector('.search-status')!;
+  const list = root.querySelector('ol')!;
+  const MAX = 8;
+  root.hidden = false;
+
+  // Same length as the input, so positions found in the folded text also hold in the original.
+  const fold = (s: string) => s.toLocaleLowerCase('da-DK');
+  let index: Promise<MiniSearch<Doc>> | undefined;
+  const load = () => index ??= fetch('/search.json').then(r => {
+    if (!r.ok) throw new Error(`search.json: ${r.status}`);
+    return r.json() as Promise<Omit<Doc, 'id'>[]>;
+  }).then(docs => {
+    const ms = new MiniSearch<Doc>({
+      fields: ['title', 'keywords', 'headings', 'summary', 'text'],
+      storeFields: ['title', 'summary', 'url', 'section', 'text'],
+      extractField: (doc, field) => { const v = doc[field as keyof Doc]; return Array.isArray(v) ? v.join(' ') : String(v ?? ''); },
+      processTerm: term => term.length > 1 ? fold(term) : null,
+      searchOptions: {
+        boost: { title: 4, keywords: 3, headings: 2, summary: 1.5, text: 1 },
+        prefix: true,
+        fuzzy: term => term.length > 4 ? 0.2 : false,
+        combineWith: 'AND',
+      },
+    });
+    ms.addAll(docs.map((d, id) => ({ ...d, id })));
+    return ms;
+  });
+
+  // A short piece of the text around the first word that matched, or the summary.
+  function excerpt(hit: Hit): { text: string; mark?: [number, number] } {
+    // When the title already matches, the summary says best what the page is about.
+    const title = fold(hit.title);
+    const sources = hit.terms.some(t => title.includes(t)) ? [hit.summary] : [hit.summary, hit.text];
+    for (const source of sources) {
+      const folded = fold(source);
+      for (const term of hit.terms) {
+        const at = folded.indexOf(term);
+        if (at < 0) continue;
+        if (source === hit.summary && source.length <= 160) return { text: source, mark: [at, at + term.length] };
+        const start = Math.max(0, source.lastIndexOf(' ', Math.max(0, at - 60)) + 1);
+        const end = Math.min(source.length, at + 100);
+        const cut = source.slice(start, end).replace(/\s+\S*$/, end < source.length ? '' : '$&');
+        return { text: `${start > 0 ? '…' : ''}${cut}${end < source.length ? ' …' : ''}`, mark: [at - start + (start > 0 ? 1 : 0), at - start + (start > 0 ? 1 : 0) + term.length] };
+      }
+    }
+    return { text: hit.summary.length > 160 ? `${hit.summary.slice(0, hit.summary.lastIndexOf(' ', 157))} …` : hit.summary };
+  }
+
+  function render(query: string, hits: Hit[]) {
+    list.replaceChildren();
+    for (const hit of hits.slice(0, MAX)) {
+      const li = document.createElement('li'), a = document.createElement('a'), title = document.createElement('span'), where = document.createElement('span'), p = document.createElement('span');
+      a.href = hit.url; title.className = 'search-title'; title.textContent = hit.title;
+      where.className = 'search-section'; where.textContent = hit.section;
+      p.className = 'search-excerpt';
+      const { text, mark } = excerpt(hit);
+      if (mark && mark[0] >= 0 && mark[1] <= text.length) {
+        const m = document.createElement('mark'); m.textContent = text.slice(mark[0], mark[1]);
+        p.append(text.slice(0, mark[0]), m, text.slice(mark[1]));
+      } else p.textContent = text;
+      a.append(title, where, p); li.append(a); list.append(li);
+    }
+    status.textContent = hits.length === 0 ? `Ingen sider passer på “${query}”. Prøv et andet ord.`
+      : hits.length === 1 ? '1 side' : hits.length > MAX ? `${hits.length} sider, de ${MAX} bedste vises` : `${hits.length} sider`;
+    panel.hidden = false;
+  }
+
+  let seq = 0;
+  async function run() {
+    const query = input.value.trim(), mine = ++seq;
+    if (query.length < 2) { panel.hidden = true; list.replaceChildren(); status.textContent = ''; return; }
+    let ms: MiniSearch<Doc>;
+    try { ms = await load(); } catch { index = undefined; status.textContent = 'Søgningen kunne ikke hentes. Prøv igen.'; panel.hidden = false; return; }
+    if (mine !== seq) return;
+    // All words must match. If that gives nothing, any word may match.
+    let results = ms.search(query);
+    if (results.length === 0) results = ms.search(query, { combineWith: 'OR' });
+    const typed = fold(query).split(/[\s\p{P}]+/u).filter(t => t.length > 1);
+    render(query, results.map(r => ({ ...(r as unknown as Doc), terms: [...new Set([...typed, ...r.terms.map(fold)])] })));
+  }
+
+  input.addEventListener('focus', () => { void load().catch(() => { index = undefined; }); }, { once: true });
+  input.addEventListener('input', run);
+  const links = () => [...list.querySelectorAll('a')];
+  root.addEventListener('keydown', e => {
+    const all = links(), at = all.indexOf(document.activeElement as HTMLAnchorElement);
+    if (e.key === 'Escape') { if (!panel.hidden) { panel.hidden = true; input.focus(); e.stopPropagation(); } else input.value = ''; return; }
+    if (e.key === 'Enter' && e.target === input && all[0]) { e.preventDefault(); all[0].click(); return; }
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    if (panel.hidden || all.length === 0) return;
+    e.preventDefault();
+    const next = e.key === 'ArrowDown' ? (at < 0 ? 0 : Math.min(at + 1, all.length - 1)) : at <= 0 ? -1 : at - 1;
+    (next < 0 ? input : all[next]!).focus();
+  });
+  input.addEventListener('focus', () => { if (input.value.trim().length >= 2 && list.childElementCount) panel.hidden = false; });
+  document.addEventListener('click', e => { if (!root.contains(e.target as Node)) panel.hidden = true; });
+</script>
