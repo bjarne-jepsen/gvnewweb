@@ -76,7 +76,7 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect(home).toMatch(/<nav aria-labelledby="sidefod-genveje"><p class="footer-label" id="sidefod-genveje">Genveje<\/p><ul class="footer-links"><li><a href="\/foreningen\/kontakt\/">Kontakt<\/a><\/li><\/ul><\/nav>/);
   // The menu: each page section is a panel with its landing page first and its pages alphabetically; news is a plain link.
   const nav = [...home.matchAll(/<nav aria-label="Hovednavigation" class="site-nav">([\s\S]*?)<\/nav>/g)][0]![1]!;
-  expect(nav.match(/href="([^"]+)"/g)).toEqual(['href="/"', 'href="/foreningen/"', 'href="/foreningen/kontakt/"', 'href="/foreningen/om-foreningen/"', 'href="/bo-her/"', 'href="/bo-her/leje-af-lokaler/"', 'href="/nyheder/"']);
+  expect(nav.match(/href="([^"]+)"/g)).toEqual(['href="/foreningen/"', 'href="/foreningen/kontakt/"', 'href="/foreningen/om-foreningen/"', 'href="/bo-her/"', 'href="/bo-her/leje-af-lokaler/"', 'href="/nyheder/"']);
   expect(nav).toContain('<details class="nav-group" data-nav-group> <summary>Foreningen</summary>');
   expect(nav).toContain('<a class="nav-landing" href="/foreningen/">Gå til Foreningen</a>');
   expect(nav).not.toContain('2026-10-20-vandet-lukkes');
@@ -85,7 +85,7 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect(home).toContain('<div class="search" data-search hidden>');
   // CVI (docs/cvi.md): the favicon is a data URI, so it adds no output file; header and footer carry the name as text.
   expect(home).toContain('<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,');
-  expect(home).toContain('<a class="brand" href="/"><span class="brand-name">Grøndalsvænge</span>');
+  expect(home).toContain('<a class="brand" href="/" aria-current="page"><span class="brand-sub">Andelsboligforeningen</span><span class="brand-name">Grøndalsvænge</span></a>');
   expect(home).toContain('<p class="footer-name">Grøndalsvænge</p>');
   expect(home).toMatch(/<link rel="stylesheet" href="\/_astro\/[^"]+\.css">/);
 
@@ -179,6 +179,6 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   await sync(); await expectGreen();
   const menu = [...(await html('index.html')).matchAll(/<nav aria-label="Hovednavigation" class="site-nav">([\s\S]*?)<\/nav>/g)][0]![1]!.replace(/<div class="nav-panel">[\s\S]*?<\/div>/g, '');
   expect([...menu.matchAll(/<a href="([^"]+)"[^>]*>([^<]+)|<summary[^>]*>([^<]+)/g)].map(m => m[3] ? `panel ${m[3]}` : `${m[1]} ${m[2]}`))
-    .toEqual(['/ Forside', '/nyheder/ Nyheder', 'panel Om foreningen']);
+    .toEqual(['/nyheder/ Nyheder', 'panel Om foreningen']);
   expect(await html('index.html')).toContain('<a class="nav-landing" href="/foreningen/">Gå til Om foreningen</a>');
 }, 90000);
