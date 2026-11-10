@@ -8,8 +8,8 @@
   },
   "1Z7KDNh0x0Jxmh2Ixnea7zxjtFKndVNIb": {
     "key": "faellesskab",
-    "label": "Fællesskab",
-    "order": 30,
+    "label": "Socialt",
+    "order": 40,
     "kind": "gdoc",
     "intro": "Fester og traditioner, klubber og aktiviteter, legepladser og grupper på Facebook."
   },
@@ -23,7 +23,7 @@
   "1glUX6NnjvzF4JY17wyKcKYrXcAuvzDN6": {
     "key": "foreningen",
     "label": "Foreningen",
-    "order": 40,
+    "order": 30,
     "kind": "gdoc",
     "intro": "Historien, husene og kvarteret, og hvordan man får et hus i Grøndalsvænge."
   },
