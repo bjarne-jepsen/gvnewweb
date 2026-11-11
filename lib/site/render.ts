@@ -5,9 +5,13 @@ import { validateMarkdown } from '../sync/markdown';
 const escape = (s: string) => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 const unsupported = (node: Nodes): never => { throw new Error(`Kan ikke vise Markdown-elementet ${node.type}`); };
 
+/** What a link becomes: an address on the site, plain text (drop) or the link as written (undefined). */
+export type LinkTarget = { path: string } | 'drop' | undefined;
+
 /** Renders the validated Markdown dialect only. Every text and attribute is escaped and any
- * node outside the dialect throws, so raw HTML can never pass through to the page. */
-export function renderBody(body: string, isLocalImage: (url: string) => boolean, imageUrl: (url: string) => string) {
+ * node outside the dialect throws, so raw HTML can never pass through to the page.
+ * linkTarget lets the caller turn links to other Google Docs into links to their pages. */
+export function renderBody(body: string, isLocalImage: (url: string) => boolean, imageUrl: (url: string) => string, linkTarget: (url: string) => LinkTarget = () => undefined) {
   const tree = validateMarkdown(body, isLocalImage);
   let tables = 0;
   const img = (n: Extract<Nodes, { type: 'image' }>) => `<img src="${escape(imageUrl(n.url))}" alt="${escape(n.alt ?? '')}" loading="lazy" decoding="async">`;
@@ -20,6 +24,9 @@ export function renderBody(body: string, isLocalImage: (url: string) => boolean,
     if (n.type === 'link') {
       const href = safeHref(n.url); // validateMarkdown already applies the same rule; checked again here
       if (!href) throw new Error('Usikker linkprotokol');
+      const target = linkTarget(href);
+      if (target === 'drop') return inline(n.children);
+      if (target) return `<a href="${escape(target.path)}">${inline(n.children)}</a>`;
       return `<a href="${escape(href)}" rel="noreferrer">${inline(n.children)}</a>`;
     }
     return unsupported(n);

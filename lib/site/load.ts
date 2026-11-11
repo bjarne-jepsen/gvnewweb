@@ -2,12 +2,12 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { siteConfigSchema } from '../sync/config';
 import { guideMetaSchema, localImage, newsMetaSchema } from '../sync/content';
-import { FRONTPAGE_FILE, frontpageSchema } from '../sync/frontpage';
+import { docIdOf, FRONTPAGE_FILE, frontpageSchema } from '../sync/frontpage';
 import { parseMarkdown, splitFrontmatter } from '../sync/markdown';
 import { manualRedirectsSchema } from '../sync/sections';
 import { pathOf } from '../sync/slugs';
 import { readContent } from '../sync/sync';
-import { renderBody } from './render';
+import { renderBody, type LinkTarget } from './render';
 import { copenhagenDay, frontpage } from './sections';
 
 /** intro: plain paragraphs separated by a blank line, from the folder's _intro document. */
@@ -40,16 +40,34 @@ export async function loadSite(root = '.', buildAt = new Date(process.env.BUILD_
   const sections: SiteSection[] = known.filter(s => s.kind === 'notice' || used.has(s.key))
     .sort((a, b) => a.order - b.order || collator.compare(a.label, b.label) || (a.key < b.key ? -1 : 1))
     .map((s, order) => ({ key: s.key, order, label: s.label, intro: s.intro, path: `/${s.key}/`, news: s.kind === 'notice' }));
-  const items: SiteItem[] = [], assets = new Map<string, Uint8Array>();
+  const items: SiteItem[] = [], assets = new Map<string, Uint8Array>(), warnings: string[] = [];
+  const newsMeta = (entry: { id: string; files: Map<string, Uint8Array> }) => newsMetaSchema.parse(JSON.parse(Buffer.from(entry.files.get(`${entry.id}.json`)!).toString('utf8')));
+  const shown = (meta: { date: string; expires?: string | undefined }) => !(meta.date > buildDay || (meta.expires && meta.expires < buildDay));
+  // Editors link between documents with ordinary Google Docs links. Such a link points at the document's
+  // page; a link to a document that is not shown on the site becomes plain text. Either way no Drive ID
+  // reaches the page.
+  const pathOfDoc = new Map<string, string>();
+  for (const entry of entries.values()) {
+    const slug = slugs[entry.id];
+    if (slug && (entry.kind !== 'notice' || shown(newsMeta(entry)))) pathOfDoc.set(entry.id, pathOf(slug));
+  }
+  const linkTarget = (title: string) => (url: string): LinkTarget => {
+    const id = docIdOf(url);
+    if (!id) return undefined;
+    const path = pathOfDoc.get(id);
+    if (path) return { path };
+    warnings.push(`${title}: et link til et Google-dokument, der ikke er en side på hjemmesiden, vises som almindelig tekst`);
+    return 'drop';
+  };
   for (const entry of entries.values()) {
     const slug = slugs[entry.id];
     if (!slug || slug.section !== entry.section) throw new Error(`content/_slugs.json: ${entry.id} mangler eller peger på en anden sektion`);
     const path = pathOf(slug), common = { id: entry.id, section: entry.section, slug: slug.slug, path, title: entry.title, updatedAt: entry.updatedAt };
     if (entry.kind === 'notice') {
-      const meta = newsMetaSchema.parse(JSON.parse(Buffer.from(entry.files.get(`${entry.id}.json`)!).toString('utf8')));
-      if (meta.date > buildDay || (meta.expires && meta.expires < buildDay)) continue;
+      const meta = newsMeta(entry);
+      if (!shown(meta)) continue;
       const base = { ...common, search: searchText(meta.body, meta.keywords ?? []) };
-      const html = renderBody(meta.body, () => false, () => { throw new Error('Nyheder kan ikke have billeder'); });
+      const html = renderBody(meta.body, () => false, () => { throw new Error('Nyheder kan ikke have billeder'); }, linkTarget(entry.title));
       items.push({ ...base, kind: 'notice', summary: meta.summary, html, date: meta.date, ...(meta.expires ? { expires: meta.expires } : {}) });
     } else {
       const { meta, body } = splitFrontmatter(Buffer.from(entry.files.get(`${entry.id}.md`)!).toString('utf8'));
@@ -57,7 +75,7 @@ export async function loadSite(root = '.', buildAt = new Date(process.env.BUILD_
       const base = { ...common, search: searchText(body, front.keywords ?? []) };
       for (const [name, bytes] of entry.files) if (name.startsWith(`${entry.id}/`)) assets.set(`${path}${name.slice(entry.id.length + 1)}`, bytes);
       const isLocal = localImage(entry.id), imageUrl = (url: string) => `${path}${url.slice(entry.id.length + 3)}`;
-      const html = renderBody(body, isLocal, imageUrl);
+      const html = renderBody(body, isLocal, imageUrl, linkTarget(entry.title));
       const image = firstImage(body, isLocal);
       items.push({ ...base, kind: 'page', summary: front.summary, html, ...(image ? { image: { src: imageUrl(image.url), alt: image.alt } } : {}) });
     }
@@ -71,7 +89,7 @@ export async function loadSite(root = '.', buildAt = new Date(process.env.BUILD_
     if (live.has(item.path)) throw new Error(`${item.path} bruges af flere sider`);
     live.add(item.path);
   }
-  const warnings: string[] = [], redirects: SiteRedirect[] = [], links: SiteLink[] = [];
+  const redirects: SiteRedirect[] = [], links: SiteLink[] = [];
   // The _forside document decides the front page; without it the built-in defaults are used.
   const fromDrive = await readFile(join(contentDir, FRONTPAGE_FILE), 'utf8').then(raw => frontpageSchema.parse(JSON.parse(raw)), error => { if (error.code === 'ENOENT') return undefined; throw error; });
   const pathOfId = new Map(items.filter(i => i.kind === 'page').map(i => [i.id, i.path]));
