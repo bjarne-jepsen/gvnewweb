@@ -94,3 +94,25 @@ test('genveje og sidefod peger kun på sider, der findes; ProBo kun med https', 
   expect(() => siteConfigSchema.parse({ ...config, links: { probo: 'http://probo.example.test/' } })).toThrow('https');
   expect(() => siteConfigSchema.parse({ ...config, links: { andet: 'https://x.test/' } })).toThrow();
 });
+
+test('links til andre Google-dokumenter peger på deres sider, og intet Drive-ID når siden', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'gv-site-')); roots.push(root);
+  const config = { rootFolderId: 'root' };
+  await mkdir(join(root, 'config')); await writeFile(join(root, 'config/site.json'), JSON.stringify(config));
+  const drive = new FakeDrive();
+  drive.folder('f-foreningen', '40 Foreningen', 'root');
+  drive.gdoc('doc-kontakt', 'Kontakt', 'f-foreningen', docJson('doc-kontakt', [{ text: 'Skriv til os.' }]));
+  drive.gdoc('doc-b', 'Bestyrelsen', 'f-foreningen', docJson('doc-b', [
+    { text: 'Kontakt', href: 'https://docs.google.com/document/u/1/d/doc-kontakt/edit' },
+    { text: 'Kladde', href: 'https://docs.google.com/document/d/doc-privat/edit?tab=t.0' },
+    { text: 'Andelsbo', href: 'https://andelsbo.dk/' },
+  ]));
+  await syncContent({ config: siteConfigSchema.parse(config), drive, contentDir: join(root, 'content') });
+  const s = await loadSite(root);
+  const { html } = s.items.find(i => i.id === 'doc-b')!;
+  expect(html).toContain('<a href="/foreningen/kontakt/">Kontakt</a>');
+  expect(html).toContain('<p>Kladde</p>');
+  expect(html).toContain('<a href="https://andelsbo.dk/" rel="noreferrer">Andelsbo</a>');
+  expect(html).not.toContain('doc-');
+  expect(s.warnings.filter(w => w.startsWith('Bestyrelsen'))).toEqual(['Bestyrelsen: et link til et Google-dokument, der ikke er en side på hjemmesiden, vises som almindelig tekst']);
+});
