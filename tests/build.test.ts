@@ -68,8 +68,8 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect(first.log).toContain('Forsiden: "Sælg dit hus" → /bo-her/saelg-dit-hus/ springes over, fordi siden ikke findes');
   expect([...home.matchAll(/href="(\/nyheder\/[^"]+)"/g)].map(m => m[1])).toEqual(['/nyheder/2026-10-20-vandet-lukkes/', '/nyheder/2026-09-01-aeldre-nyhed-a/', '/nyheder/2026-08-01-aeldre-nyhed-b/']);
   expect(home).not.toContain('OLDEST_NEWS');
-  // The newest news is set large, the next two as a list. The menu covers the sections, so the front page has no section overview.
-  expect(home.match(/<article class="news-lead">/g)).toHaveLength(1);
+  // The three latest news as equal rows in one list. The menu covers the sections, so the front page has no section overview.
+  expect(home).not.toContain('news-lead');
   expect(home.match(/<ul class="news-list">/g)).toHaveLength(1);
   expect(home.indexOf('id="seneste-nyt"')).toBeLessThan(home.indexOf('id="genveje"'));
   expect(home).toContain('<p class="more"><a href="/nyheder/">Alle nyheder</a></p>');

@@ -68,18 +68,16 @@ main { min-height: 60vh; padding-block: clamp(2.5rem, 6vw, 5.5rem) 7.5rem; overf
 .front-grid { display: grid; gap: clamp(3rem, 6vw, 5rem); align-items: start; }
 .front-label { margin: 0 0 var(--space-l); font-size: var(--text-sm); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; line-height: 1.4; color: var(--color-ink); }
 
-/* News: the newest one large, the next ones as a list with the date under the title (it follows the title in the markup). */
-.news-lead { display: flex; flex-direction: column; padding-top: var(--space-m); border-top: 2px solid var(--color-ink); }
-.news-lead .meta { order: -1; margin-bottom: var(--space-xs); }
-.news-lead h3 { margin: 0 0 var(--space-s); font-size: clamp(1.75rem, 1.2rem + 2vw, 2.75rem); line-height: 1.08; letter-spacing: -.03em; }
-.news-summary { font-size: var(--text-lg); line-height: 1.45; max-width: 40ch; margin: 0; }
-.news-list { list-style: none; padding: 0; margin: var(--space-2xl) 0 0; }
-.news-list > li { display: flex; flex-direction: column; padding-block: var(--space-m); border-top: 1px solid var(--color-line); }
+/* News: equal rows with the date above the title (it follows the title in the markup) and the summary under it. */
+.news-list { list-style: none; padding: 0; margin: 0; }
+.news-list > li { display: flex; flex-direction: column; padding-block: var(--space-l); border-top: 1px solid var(--color-line); }
+.news-list > li:first-child { border-top: 2px solid var(--color-ink); }
 .news-list > li:last-child { border-bottom: 1px solid var(--color-line); }
 .news-list .meta { order: -1; margin: 0 0 var(--space-2xs); }
-.news-list h3 { margin: 0; }
-:is(.news-lead, .news-list) h3 a { display: inline-block; padding-block: .3rem; margin-block: -.3rem; text-decoration: none; }
-:is(.news-lead, .news-list) h3 a:hover { text-decoration: underline; text-decoration-thickness: 2px; }
+.news-list h3 { margin: 0; font-size: var(--text-lg); line-height: 1.25; }
+.news-summary { margin: var(--space-xs) 0 0; max-width: 52ch; color: var(--color-muted); }
+.news-list h3 a { display: inline-block; padding-block: .3rem; margin-block: -.3rem; text-decoration: none; }
+.news-list h3 a:hover { text-decoration: underline; text-decoration-thickness: 2px; }
 
 /* "Det vigtigste": a green panel with white links on lines. */
 .front-important { background: var(--color-green); color: var(--color-paper); padding: var(--space-l) var(--space-l) var(--space-xs); }

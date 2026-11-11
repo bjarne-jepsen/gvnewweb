@@ -4,15 +4,14 @@ import Base from '../layouts/Base.astro';
 import { date } from '../../lib/site/sections';
 // The menu panels and the search cover the way around the site, so the front page holds only the
 // intro, the latest news and the most important pages. Intro and shortcuts come from the _forside document.
-// News come first: the newest one is set large, the next two as a short list. "Det vigtigste" sits beside
+// News come first, the three latest as a list of equal rows. "Det vigtigste" sits beside
 // them in a green panel on wide screens and under them on narrow ones.
 const intro = (await getCollection('frontpage'))[0]!.data.intro.split('\n\n').filter(Boolean);
 const shortcuts = (await getCollection('links')).map(l => l.data).filter(l => l.group === 'shortcut').sort((a, b) => a.order - b.order);
 // Items are sorted newest news first, so the first three notices are the latest visible ones.
 const news = (await getCollection('items')).map(i => i.data).filter(i => i.kind === 'notice').slice(0, 3);
-const [lead, ...rest] = news;
 const newsSection = (await getCollection('sections')).map(s => s.data).find(s => s.news);
-const showNews = newsSection && lead;
+const showNews = newsSection && news.length > 0;
 ---
 <Base title="Forside">
   <div class="front-head">
@@ -22,15 +21,11 @@ const showNews = newsSection && lead;
   <div class="front-grid">
     {showNews && <section class="front-news" aria-labelledby="seneste-nyt">
       <h2 id="seneste-nyt" class="front-label">Seneste nyt</h2>
-      <article class="news-lead">
-        <h3><a href={lead.path}>{lead.title}</a></h3>
-        <p class="meta"><time datetime={lead.date}>{date(lead.date)}</time></p>
-        {lead.summary && <p class="news-summary">{lead.summary}</p>}
-      </article>
-      {rest.length > 0 && <ul class="news-list">{rest.map(n => <li>
+      <ul class="news-list">{news.map(n => <li>
         <h3><a href={n.path}>{n.title}</a></h3>
         <p class="meta"><time datetime={n.date}>{date(n.date)}</time></p>
-      </li>)}</ul>}
+        {n.summary && <p class="news-summary">{n.summary}</p>}
+      </li>)}</ul>
       <p class="more"><a href={newsSection.path}>Alle nyheder</a></p>
     </section>}
     {shortcuts.length > 0 && <section class="front-important" aria-labelledby="genveje">
