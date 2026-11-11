@@ -31,7 +31,7 @@ const favicon = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www
     <a class="skip" href="#indhold">Spring til indhold</a>
     <header class="site-header">
       <div class="wrap">
-        <a class="brand" href="/" aria-current={current('/') ? 'page' : undefined}><span class="brand-sub">Andelsboligforeningen</span><span class="brand-name">Grøndalsvænge</span></a>
+        <a class="brand" href="/" aria-current={current('/') ? 'page' : undefined}><span class="brand-name">Andelsboligforeningen</span><span class="brand-sub">Grøndalsvænge</span></a>
         <nav aria-label="Hovednavigation" class="site-nav">
           {navigation.map(s => s.pages.length === 0
             ? <a href={s.path} aria-current={current(s.path) ? 'page' : undefined}>{s.label}</a>
