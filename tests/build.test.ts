@@ -7,7 +7,7 @@ import { siteConfigSchema } from '../lib/sync/config';
 import { serializeSlugs, setSlug, slugsSchema } from '../lib/sync/slugs';
 import { syncContent } from '../lib/sync/sync';
 import { walk } from '../scripts/verify-output';
-import { docJson, FakeDrive, png, sheetJson } from './helpers/fake-drive';
+import { docJson, FakeDrive, png } from './helpers/fake-drive';
 
 const root = await mkdtemp(join(tmpdir(), 'gv-build-'));
 afterAll(() => rm(root, { recursive: true, force: true }));
@@ -46,13 +46,13 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   drive.gdoc('private', 'PRIVATE_CANARY', 'internt', canary('private', 'PRIVATE_CANARY'));
   drive.gdoc('red', 'REDAKTION_CANARY', 'f-redaktion', canary('red', 'REDAKTION_CANARY'));
   drive.gdoc('rootfile', 'ROOT_CANARY', 'root', canary('rootfile', 'ROOT_CANARY'));
-  drive.sheet('news', 'Nyheder', 'f-nyheder', sheetJson([['ID', 'Dato', 'Titel', 'Tekst', 'Udløber', 'Status'],
-    ['n-live', '2026-10-20', 'Vandet lukkes', 'Mandag kl. 9-12.', '', 'offentlig'],
-    ['n-old1', '2026-09-01', 'Ældre nyhed A', 'Tekst', '', 'offentlig'], ['n-old2', '2026-08-01', 'Ældre nyhed B', 'Tekst', '', 'offentlig'],
-    ['n-old3', '2026-07-01', 'OLDEST_NEWS', 'Tekst', '', 'offentlig'],
-    ['n-expired', '2026-01-10', 'EXPIRED_CANARY', 'Tekst', '2026-01-31', 'offentlig'],
-    ['n-future', '2099-01-01', 'FUTURE_CANARY', 'Tekst', '', 'offentlig'],
-    ['n-draft', '2026-10-20', 'DRAFT_CANARY', 'Tekst', '', 'kladde']]));
+  const news = (id: string, name: string, date: string, text = 'Tekst', parent = 'f-nyheder', expires?: string) =>
+    drive.gdoc(id, name, parent, docJson(id, [{ text: `Dato: ${date}` }, ...(expires ? [{ text: `Vises til: ${expires}` }] : []), { text }]));
+  news('nhlive', 'Vandet lukkes', '2026-10-20', 'Mandag kl. 9-12.');
+  news('nhold1', 'Ældre nyhed A', '2026-09-01'); news('nhold2', 'Ældre nyhed B', '2026-08-01'); news('nhold3', 'OLDEST_NEWS', '2026-07-01');
+  news('nhexpired', 'EXPIRED_CANARY', '2026-01-10', 'Tekst', 'f-nyheder', '2026-01-31');
+  news('nhfuture', 'FUTURE_CANARY', '2099-01-01');
+  news('nhdraft', 'DRAFT_CANARY', '2026-10-20', 'Tekst', 'internt'); // drafts live outside the section
   await sync();
   // An interrupted dev server left its lock behind (phase 5f): the build takes it over.
   const gone = Bun.spawn(['true']); await gone.exited;
@@ -126,8 +126,8 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   // News: expired and future rows are in content/ but not built; drafts never reach content/.
   expect(await html('nyheder/2026-10-20-vandet-lukkes/index.html')).toContain('<time datetime="2026-10-20">20. oktober 2026</time>');
   expect(await html('nyheder/index.html')).toContain('Mandag kl. 9-12.');
-  expect(await Bun.file(join(root, 'content/nyheder/n-expired.json')).exists()).toBe(true);
-  expect(await Bun.file(join(root, 'content/nyheder/n-draft.json')).exists()).toBe(false);
+  expect(await Bun.file(join(root, 'content/nyheder/nhexpired.json')).exists()).toBe(true);
+  expect(await Bun.file(join(root, 'content/nyheder/nhdraft.json')).exists()).toBe(false);
 
   // 2. Renaming keeps the URL and changes the title.
   drive.update('doc-1', { name: 'Om Grøndalsvænge', modifiedTime: '2026-10-22T08:00:00Z' });

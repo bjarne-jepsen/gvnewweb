@@ -12,14 +12,14 @@ Grøndalsvænge hjemmeside (fællesdrev)
 ├── 20 Bo her             Google Docs → /bo-her/
 ├── 30 Fællesskab         Google Docs → /faellesskab/
 ├── 40 Foreningen         Google Docs → /foreningen/
-├── 50 Nyheder            Ét Google Sheets-ark → /nyheder/
+├── 50 Nyheder            Ét Google-dokument pr. nyhed → /nyheder/
 ├── _forside              Google-dokument → forsidens intro og Det vigtigste
-└── dokumenter, vejledninger, kalender, redaktion   Intet tal: læses ikke
+└── Nyhedskladder, dokumenter, redaktion …   Intet tal: læses ikke
 ```
 
 - **Sektioner:** Tallet (1-3 cifre og et mellemrum) bestemmer rækkefølgen i menuen. Resten af navnet er menunavnet. Adressen dannes af navnet, første gang mappen ses, og følger derefter mappens ID. En omdøbt mappe beholder altså sin adresse. Sync gemmer sektionerne i `content/_sections.json`.
 - **Ny, slettet eller privat:** En ny nummereret mappe bliver en sektion, så snart den indeholder en side. En mappe, der slettes eller mister sit tal, fjernes fra sitet. Havde den sider, stopper kørslen, indtil man vælger "Publicér og tillad sletning". En mappe uden tal er privat. Et navn som "2024 Generalforsamling" (fire cifre) bliver aldrig en sektion.
-- **Nyheder:** En sektionsmappe med et Google-ark er en nyhedssektion. Den vises også, når der ingen aktuelle nyheder er.
+- **Nyheder:** Sektionen med adressen `/nyheder/` er nyhedssektionen. Adressen følger mappen, så den er det stadig, hvis mappen omdøbes. Den vises også, når der ingen aktuelle nyheder er.
 - **Intro:** Et Google-dokument med navnet `_intro` i sektionsmappen bliver sektionens introtekst. Kun almindelige afsnit bruges. Uden `_intro` er der ingen intro.
 - **Søgeord:** Et afsnit, der begynder med `Søgeord:`, fx `Søgeord: trailer, boremaskine, telt`, vises ikke på siden. Ordene hjælper kun søgningen med at finde siden, også når folk bruger andre ord end dem i teksten. Adskil ordene med komma. Højst 40 ord pr. side.
 
@@ -93,13 +93,16 @@ Den gamle sti flyttes til `previousPaths` og bliver en redirect-side. Det samme 
 
 ### Nyheder
 
-Der ligger ét regneark i `nyheder/` med én række pr. nyhed. Første række er overskrifterne `ID`, `Dato`, `Titel`, `Tekst`, `Udløber` og `Status`, i vilkårlig rækkefølge.
+Én nyhed er ét Google-dokument direkte i nyhedsmappen. Dokumentets navn er titlen. Teksten skrives som på en almindelig side, med overskrifter, lister, fed, links og tabeller.
 
-- **Status:** Kun status `offentlig` publiceres. `kladde`, en tom status og alt andet publiceres ikke og kommer ikke i `content/`. Ukendt status giver en advarsel.
-- **ID:** ID'et udfyldes automatisk af [scripts/apps-script/nyheder-id.gs](scripts/apps-script/nyheder-id.gs), som indsættes under *Udvidelser → Apps Script*. En række uden ID publiceres ikke. Kopierer man en hel række, følger ID'et med. Så skal ID-cellen i kopien tømmes, ellers rapporteres de to rækker som dubletter.
-- **Dato:** Datoen er publiceringsdatoen. En fremtidig dato vises fra den dag. `Udløber` er valgfri og inklusiv. Begge regnes i dansk tid og filtreres ved build, ikke ved synkronisering.
-- **Tekst:** En tom linje i cellen starter et nyt afsnit. Links i cellen og nøgne `https://`-adresser bliver links.
-- **Adresse:** Adressen dannes af dato og titel, fx `/nyheder/2026-10-21-generalforsamling/`, og bevares derefter.
+- **Kladder:** En nyhed, der ikke er klar, ligger i en mappe uden tal, fx `Nyhedskladder`, og flyttes ind i nyhedsmappen, når den skal publiceres. Flyttes den ud igen, fjernes den fra sitet. Ikke-accepterede forslag kommer aldrig med.
+- **Dato:** Uden noget får nyheden datoen for den dag, den publiceres første gang, og beholder den. Vil man selv bestemme datoen, skriver man et afsnit `Dato: 21.10.2026`. Det kan også skrives `2026-10-21` eller `21. oktober 2026`. En fremtidig dato vises fra den dag.
+- **Udløb:** Valgfrit afsnit `Vises til: 31.12.2026`. Dagen er inklusiv. Begge datoer regnes i dansk tid og filtreres ved build, ikke ved synkronisering.
+- **Skjulte linjer:** Afsnit med `Dato:`, `Vises til:` og `Søgeord:` vises ikke i nyheden.
+- **Teaser:** Første afsnit bliver teaseren på forsiden og i nyhedslisten.
+- **Billeder:** Understøttes ikke endnu. En nyhed med et billede publiceres ikke og giver en fejl i rapporten.
+- **Fejl:** En ugyldig dato, `Vises til` før datoen eller en nyhed uden tekst giver en fejl. Den sidste gyldige version beholdes.
+- **Adresse:** Adressen dannes af dato og titel første gang, fx `/nyheder/2026-10-21-generalforsamling/`, og bevares derefter.
 
 ### Markdown
 

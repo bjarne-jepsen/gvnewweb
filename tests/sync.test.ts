@@ -11,7 +11,7 @@ import { hasChanges, renderReport } from '../lib/sync/report';
 import { setSlug, slugify, slugsSchema } from '../lib/sync/slugs';
 import { readContent, syncContent } from '../lib/sync/sync';
 import { walk } from '../scripts/verify-output';
-import { docJson, FakeDrive, sheetJson } from './helpers/fake-drive';
+import { docJson, FakeDrive } from './helpers/fake-drive';
 
 // The folder-model rules from phase 2a, exercised with Google Docs (PDF support was removed in 5a).
 const roots: string[] = [];
@@ -287,7 +287,7 @@ test('nummererede mapper er sektioner: navn og tal følger mappen, adressen føl
   expect(await w.json('_sections.json')).toEqual({
     'f-bo': { key: 'bo-her', label: 'Bo her', order: 20, kind: 'gdoc', intro: 'Praktisk information.\n\nAndet afsnit.' },
     'f-foreningen': { key: 'foreningen', label: 'foreningen', order: 10, kind: 'gdoc', intro: '' },
-    'f-nyheder': { key: 'nyheder', label: 'nyheder', order: 20, kind: 'gdoc', intro: '' },
+    'f-nyheder': { key: 'nyheder', label: 'nyheder', order: 20, kind: 'notice', intro: '' },
   });
   // The intro document is never a page; folders with a year or without a space stay private.
   expect(Object.keys(await w.tree())).toEqual(['_slugs.json', 'bo-her/doc-a.md']);
@@ -307,19 +307,20 @@ test('nummererede mapper er sektioner: navn og tal følger mappen, adressen føl
   expect((await w.json('_sections.json'))['f-bo'].intro).toBe('');
 });
 
-test('en ny mappe får aldrig en adresse, der er i brug; en mappe med et ark er en nyhedssektion', async () => {
+test('en ny mappe får aldrig en adresse, der er i brug; adressen /nyheder/ er nyhedssektionen', async () => {
   const w = await world();
   await mkdir(w.contentDir, { recursive: true });
   await writeFile(join(w.contentDir, '_redirects.json'), '{"/andelshaveren/": "/foreningen/"}\n');
   w.drive.folder('f-x1', '30 Foreningen', 'root');
   w.drive.folder('f-x2', '40 Andelshaveren', 'root');
   w.drive.folder('f-x3', '50 Opslag', 'root');
-  w.drive.sheet('ark', 'Opslag', 'f-x3', sheetJson([['ID', 'Dato', 'Titel', 'Tekst', 'Udløber', 'Status'], ['n-1', '2026-10-01', 'Fest', 'Tekst', '', 'offentlig']]));
+  w.drive.gdoc('nh-1', 'Fest', 'f-nyheder', docJson('nh-1', [{ text: 'Dato: 1.10.2026' }, { text: 'Tekst' }]));
+  w.drive.gdoc('op-1', 'Opslag', 'f-x3', docJson('op-1', [{ text: 'Tekst' }]));
   const report = await w.run();
   const sections = await w.json('_sections.json');
-  expect([sections['f-x1'].key, sections['f-x2'].key, sections['f-x3'].key, sections['f-x3'].kind]).toEqual(['foreningen-2', 'andelshaveren-2', 'opslag', 'notice']);
+  expect([sections['f-x1'].key, sections['f-x2'].key, sections['f-x3'].key, sections['f-x3'].kind, sections['f-nyheder'].kind]).toEqual(['foreningen-2', 'andelshaveren-2', 'opslag', 'gdoc', 'notice']);
   expect(report.warnings).toContainEqual({ section: 'foreningen-2', title: '30 Foreningen', message: 'Adressen /foreningen/ er optaget; sektionen får /foreningen-2/' });
-  expect(Object.keys(await w.tree())).toContain('opslag/n-1.json');
+  expect(Object.keys(await w.tree())).toContain('nyheder/nh-1.json');
 });
 
 test('_intro: kun ét Google-dokument; fejl beholder den sidste intro', async () => {

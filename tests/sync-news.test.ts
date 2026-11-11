@@ -3,139 +3,120 @@ import { rejects } from 'node:assert/strict';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
-import { sheetRows } from '../lib/google/sheets';
 import { digest } from '../lib/sync/content';
 import { siteConfigSchema } from '../lib/sync/config';
-import { GDOC } from '../lib/sync/drive';
-import { paragraphsOf, parseDate, parseNews } from '../lib/sync/news';
+import { parseDate } from '../lib/sync/news';
 import { hasChanges } from '../lib/sync/report';
 import { syncContent } from '../lib/sync/sync';
 import { walk } from '../scripts/verify-output';
-import { FakeDrive, sheetJson } from './helpers/fake-drive';
-
-const serial = (iso: string) => (Date.parse(`${iso}T00:00:00Z`) - Date.UTC(1899, 11, 30)) / 86_400_000;
-const header = ['ID', 'Dato', 'Titel', 'Tekst', 'Udløber', 'Status'];
-type Row = Parameters<typeof sheetJson>[0][number];
-const generalforsamling: Row = ['n-aaa111', serial('2026-10-21'), 'Generalforsamling',
-  { text: 'Indkaldelse og dagsorden.\nSe bilag.\n\nLæs mere på https://groendalsvaenge.dk/gf. Tak!', links: [{ start: 12, end: 24, uri: 'https://example.test/dagsorden' }] }, '', 'offentlig'];
-const baseRows: Row[] = [
-  generalforsamling,
-  ['n-bbb222', '2026-10-01', 'DRAFT_CANARY', 'Tekst', '', 'kladde'],
-  ['n-ccc333', '2026-10-01', 'EMPTY_CANARY', 'Tekst', '', ''],
-  ['n-ddd444', '2026-10-01', 'UNKNOWN_CANARY', 'Tekst', '', 'måske'],
-  ['', '2026-10-02', 'Uden ID', 'Tekst', '', 'offentlig'],
-  ['n-eee555', '21.10.2026', 'Vandet lukkes', 'Mandag kl. 9-12.', '31-10-2026', 'Offentlig'],
-];
+import { docJson, FakeDrive, png } from './helpers/fake-drive';
 
 const roots: string[] = [];
 afterEach(async () => { await Promise.all(roots.splice(0).map(p => rm(p, { recursive: true, force: true }))); });
-async function world(rows: Row[] = baseRows) {
+type Paras = Parameters<typeof docJson>[1];
+async function world() {
   const dir = await mkdtemp(join(tmpdir(), 'gv-news-')); roots.push(dir);
   const drive = new FakeDrive();
   drive.folder('f-nyheder', '90 Nyheder', 'root');
-  drive.sheet('sheet', 'Nyheder', 'f-nyheder', sheetJson([header, ...rows]));
+  drive.folder('f-kladder', 'Nyhedskladder', 'root');
+  const add = (id: string, name: string, paras: Paras, parent = 'f-nyheder') => drive.gdoc(id, name, parent, docJson(id, paras));
+  add('nh-gf', 'Generalforsamling', [
+    { text: 'Dato: 21.10.2026' }, { text: 'Indkaldelse og dagsorden.' }, { text: 'Dagsorden', style: 'HEADING_1' },
+    { text: 'Valg af dirigent', bullet: true }, { text: 'Beretning', bullet: true },
+    { text: 'Læs mere', href: 'https://groendalsvaenge.dk/gf' }, { text: 'Søgeord: GF, årsmøde' }]);
+  add('nh-vand', 'Vandet lukkes', [{ text: 'Vises til: 31. oktober 2026' }, { text: 'Mandag kl. 9-12.' }]);
+  add('nh-kladde', 'DRAFT_CANARY', [{ text: 'Ikke klar endnu.' }], 'f-kladder');
   const config = siteConfigSchema.parse({ rootFolderId: 'root' });
   const contentDir = join(dir, 'content');
-  const run = (allowMassRemoval = false) => syncContent({ config, drive, contentDir, allowMassRemoval, now: new Date('2026-10-21T20:00:00Z') });
+  let now = new Date('2026-10-21T20:00:00Z');
+  const run = (allowMassRemoval = false) => syncContent({ config, drive, contentDir, allowMassRemoval, now });
   const tree = async () => Object.fromEntries(await Promise.all((await walk(contentDir).catch(() => [])).filter(p => !p.endsWith('_sections.json')).sort().map(async p => [relative(contentDir, p), digest(await readFile(p))])));
   const news = async (id: string) => JSON.parse(await readFile(join(contentDir, `nyheder/${id}.json`), 'utf8'));
-  const setRows = (next: Row[]) => drive.update('sheet', { sheet: sheetJson([header, ...next]) });
-  return { drive, contentDir, run, tree, news, setRows };
+  const slug = async (id: string) => JSON.parse(await readFile(join(contentDir, '_slugs.json'), 'utf8'))[id]?.slug;
+  return { drive, contentDir, run, tree, news, slug, add, setNow: (at: string) => { now = new Date(at); } };
 }
 
-test('kun "offentlig" publiceres; kladde, tom og ukendt status når ikke content/', async () => {
+test('ét Google-dokument pr. nyhed; Dato, Vises til og Søgeord vises ikke; kladder uden for sektionen publiceres ikke', async () => {
   const w = await world();
   const report = await w.run();
-  expect(Object.keys(await w.tree())).toEqual(['_slugs.json', 'nyheder/n-aaa111.json', 'nyheder/n-eee555.json']);
+  expect(report.errors).toEqual([]);
+  expect(Object.keys(await w.tree())).toEqual(['_slugs.json', 'nyheder/nh-gf.json', 'nyheder/nh-vand.json']);
   for (const path of await walk(w.contentDir)) expect(await readFile(path, 'utf8')).not.toMatch(/CANARY/);
-  expect(report.warnings).toEqual([{ section: 'nyheder', title: 'UNKNOWN_CANARY', message: 'Ukendt status "måske"; publiceres ikke' }]);
-  expect(report.errors).toEqual([{ section: 'nyheder', title: 'Uden ID', message: 'Mangler ID; publiceres ikke' }]);
-  expect(await w.news('n-aaa111')).toEqual({
-    id: 'n-aaa111', title: 'Generalforsamling', date: '2026-10-21', summary: 'Indkaldelse og dagsorden. Se bilag.',
-    body: 'Indkaldelse [og dagsorden](https://example.test/dagsorden).\\\nSe bilag.\n\nLæs mere på [https://groendalsvaenge.dk/gf](https://groendalsvaenge.dk/gf). Tak!\n',
-    updatedAt: '2026-10-21T08:00:00.000Z' });
-  expect((await w.news('n-eee555'))).toMatchObject({ date: '2026-10-21', expires: '2026-10-31' });
-  expect(JSON.parse(await readFile(join(w.contentDir, '_slugs.json'), 'utf8'))['n-aaa111'].slug).toBe('2026-10-21-generalforsamling');
+  expect(await w.news('nh-gf')).toEqual({
+    id: 'nh-gf', title: 'Generalforsamling', date: '2026-10-21', summary: 'Indkaldelse og dagsorden.',
+    body: 'Indkaldelse og dagsorden.\n\n## Dagsorden\n\n- Valg af dirigent\n- Beretning\n\n[Læs mere](https://groendalsvaenge.dk/gf)\n',
+    updatedAt: '2026-10-21T08:00:00.000Z', keywords: ['GF', 'årsmøde'] });
+  // No "Dato:" line: the day of the first publication, in Danish time.
+  expect(await w.news('nh-vand')).toMatchObject({ date: '2026-10-21', expires: '2026-10-31', body: 'Mandag kl. 9-12.\n' });
+  expect(await w.slug('nh-gf')).toBe('2026-10-21-generalforsamling');
 });
 
-test('rækkefølgen af rækker påvirker hverken ID\'er eller output', async () => {
+test('uden Dato-linje beholder nyheden datoen fra første publicering, også når teksten rettes', async () => {
   const w = await world();
   await w.run();
-  const before = await w.tree();
-  w.setRows([...baseRows].reverse());
+  w.setNow('2026-11-05T10:00:00Z');
   expect(hasChanges(await w.run())).toBe(false);
-  expect(await w.tree()).toEqual(before);
+  w.drive.update('nh-vand', { doc: docJson('nh-vand', [{ text: 'Mandag kl. 9-14.' }]), modifiedTime: '2026-11-05T09:00:00Z' });
+  const report = await w.run();
+  expect(report.changed.map(c => c.id)).toEqual(['nh-vand']);
+  expect(await w.news('nh-vand')).toMatchObject({ date: '2026-10-21', body: 'Mandag kl. 9-14.\n' });
+  expect(await w.news('nh-vand')).not.toHaveProperty('expires');
+  // A new item without a date gets today's; one with a date in the future keeps it and is filtered at build.
+  w.add('nh-ny', 'Fastelavn', [{ text: 'Tøndeslagning.' }]);
+  w.add('nh-snart', 'Juletræ', [{ text: 'Dato: 2026-12-01' }, { text: 'Vi tænder træet.' }]);
+  await w.run();
+  expect([(await w.news('nh-ny')).date, (await w.news('nh-snart')).date]).toEqual(['2026-11-05', '2026-12-01']);
+  expect(await w.slug('nh-ny')).toBe('2026-11-05-fastelavn');
 });
 
-test('rækkefejl beholder sidste version; resten synkroniseres', async () => {
+test('fejl i et dokument beholder sidste version; resten synkroniseres', async () => {
   const w = await world();
   await w.run();
   const before = await w.tree();
-  w.setRows([
-    ['n-aaa111', 'i morgen', 'Generalforsamling', 'Ny tekst', '', 'offentlig'],
-    ['n-eee555', '2026-10-21', 'Vandet lukkes', 'Ny tekst', '2026-10-01', 'offentlig'],
-    ['n-fff666', '2026-10-22', 'Ny A', 'Tekst', '', 'offentlig'], ['n-fff666', '2026-10-22', 'Ny B', 'Tekst', '', 'offentlig'],
-    ['n-ggg777', '2026-10-22', 'Ny C', 'Tekst', '', 'offentlig'],
-  ]);
+  w.drive.update('nh-gf', { doc: docJson('nh-gf', [{ text: 'Dato: i morgen' }, { text: 'Ny tekst' }]) });
+  w.drive.update('nh-vand', { doc: docJson('nh-vand', [{ text: 'Dato: 21.10.2026' }, { text: 'Vises til: 1.10.2026' }, { text: 'Ny tekst' }]) });
+  w.drive.images.set('https://lh3.googleusercontent.com/x', png);
+  w.drive.gdoc('nh-billede', 'Med billede', 'f-nyheder', docJson('nh-billede', [{ text: 'Se her.' }, { text: '', image: 'i1' }], { i1: { uri: 'https://lh3.googleusercontent.com/x', alt: 'Kort' } }));
+  w.add('nh-tom', 'Kun dato', [{ text: 'Dato: 22.10.2026' }]);
+  w.add('nh-ok', 'Ny nyhed', [{ text: 'Tekst.' }]);
   const report = await w.run();
   expect(report.errors.map(e => [e.id, e.message])).toEqual([
-    ['n-aaa111', 'Ugyldig eller manglende dato'], ['n-eee555', 'Udløbsdatoen ligger før datoen'],
-    ['n-fff666', 'Samme fil optræder flere gange, eller ID kolliderer med et andet ID'], ['n-fff666', 'Samme fil optræder flere gange, eller ID kolliderer med et andet ID']]);
-  expect(report.added.map(a => a.id)).toEqual(['n-ggg777']);
+    ['nh-billede', 'Billeder i nyheder understøttes ikke endnu; fjern billedet fra dokumentet; sidste gyldige version beholdes'],
+    ['nh-gf', '"Dato: i morgen" er ikke en gyldig dato. Skriv fx Dato: 21.10.2026; sidste gyldige version beholdes'],
+    ['nh-tom', 'Nyheden har ingen tekst; sidste gyldige version beholdes'],
+    ['nh-vand', '"Vises til" ligger før datoen; sidste gyldige version beholdes']]);
+  expect(report.added.map(a => a.id)).toEqual(['nh-ok']);
   const after = await w.tree();
-  expect(after['nyheder/n-aaa111.json']).toBe(before['nyheder/n-aaa111.json']);
-  expect(after['nyheder/n-eee555.json']).toBe(before['nyheder/n-eee555.json']);
+  expect(after['nyheder/nh-gf.json']).toBe(before['nyheder/nh-gf.json']);
+  expect(after['nyheder/nh-vand.json']).toBe(before['nyheder/nh-vand.json']);
 });
 
-test('manglende kolonne, ulæseligt ark og to ark beholder alle nyheder', async () => {
+test('andre filtyper giver advarsler; en flyttet kladde fjerner nyheden; tømt mappe kræver tilladelse', async () => {
   const w = await world();
-  await w.run();
-  const before = await w.tree();
-  w.drive.update('sheet', { sheet: sheetJson([['ID', 'Dato', 'Titel', 'Tekst'], ['n-aaa111', '2026-10-21', 'X', 'Y']]) });
-  expect((await w.run()).errors).toEqual([{ section: 'nyheder', title: 'Nyheder', message: 'Nyhedsarket mangler kolonnen "status" i første række; nyhederne er uændrede' }]);
-  w.setRows(baseRows); w.drive.denied.add('sheet');
-  expect((await w.run()).errors[0]!.message).toBe('Synkroniseringskontoen kan ikke læse arket; nyhederne er uændrede');
-  w.drive.denied.clear(); w.drive.sheet('sheet-2', 'Nyheder kopi', 'f-nyheder', sheetJson([header]));
-  expect((await w.run()).errors[0]!.message).toBe('Der må kun ligge ét nyhedsark i mappen; nyhederne er uændrede');
-  expect(await w.tree()).toEqual(before);
-});
-
-test('offentlig → kladde fjerner nyheden; andre filer i nyheder/ giver advarsler', async () => {
-  const w = await world();
-  w.drive.file('doc', 'nyhed 1', 'f-nyheder', GDOC);
-  const first = await w.run();
-  expect(first.warnings.map(x => x.message)).toContain(`Filtypen ${GDOC} accepteres ikke i nyheder`);
-  w.setRows(baseRows.map(r => r[0] === 'n-eee555' ? [...r.slice(0, 5), 'kladde'] : r));
-  expect((await w.run()).removed.map(r => r.id)).toEqual(['n-eee555']);
-  expect(Object.keys(await w.tree())).toEqual(['_slugs.json', 'nyheder/n-aaa111.json']);
-});
-
-test('et tømt ark kræver tilladelse til masseudtagning', async () => {
-  const w = await world();
-  await w.run();
-  w.setRows([]);
+  w.drive.file('ark', 'Gammelt nyhedsark', 'f-nyheder', 'application/vnd.google-apps.spreadsheet');
+  expect((await w.run()).warnings.map(x => x.message)).toContain('Filtypen application/vnd.google-apps.spreadsheet accepteres ikke i nyheder');
+  w.drive.update('nh-vand', { parent: 'f-kladder' });
+  expect((await w.run()).removed.map(r => r.id)).toEqual(['nh-vand']);
+  w.drive.update('nh-vand', { parent: 'f-nyheder' }); await w.run();
+  w.drive.update('nh-vand', { parent: 'f-kladder' }); w.drive.update('nh-gf', { parent: 'f-kladder' });
   await rejects(w.run(), /2 af 2 filer/);
   expect((await w.run(true)).removed).toHaveLength(2);
 });
 
-describe('nyhedsparser', () => {
-  test('datoer: serienummer, ISO og danske skrivemåder; ugyldige afvises', () => {
-    const cell = (text: string, number?: number) => ({ text, runs: [], ...(number !== undefined ? { number } : {}) });
-    expect([parseDate(cell('21.10.2026', serial('2026-10-21'))), parseDate(cell('2026-10-21')), parseDate(cell('21-10-2026')), parseDate(cell('1.2.2027')), parseDate(cell('21/10/2026'))])
-      .toEqual(['2026-10-21', '2026-10-21', '2026-10-21', '2027-02-01', '2026-10-21']);
-    for (const bad of ['30.02.2026', '2026-13-01', 'i morgen', '21.10.26', '']) expect(parseDate(cell(bad))).toBeUndefined();
-    expect(parseDate(cell('5', 5))).toBeUndefined(); // a plain number is not a date
-  });
-  test('afsnit, linjeskift og links; kun http(s) bliver links', () => {
-    expect(paragraphsOf([{ text: 'Et\nTo\n\n  \nTre (se https://example.test/a.) og javascript:alert(1)' }])).toEqual([
-      [{ text: 'Et\nTo' }], [{ text: 'Tre (se ' }, { text: 'https://example.test/a', href: 'https://example.test/a' }, { text: '.) og javascript:alert(1)' }]]);
-    const rows = sheetRows(sheetJson([[{ text: 'Klik her', hyperlink: 'javascript:alert(1)' }, { text: 'Klik her', hyperlink: 'https://example.test/' }]]));
-    expect(rows[0]!.map(c => c.runs)).toEqual([[{ text: 'Klik her' }], [{ text: 'Klik her', href: 'https://example.test/' }]]);
-  });
-  test('kolonner findes efter navn uanset rækkefølge og store bogstaver; dubletter afvises', () => {
-    const parsed = parseNews(sheetRows(sheetJson([['status', 'TITEL', 'tekst', 'dato', 'id'], ['offentlig', 'A', 'B', '2026-10-21', 'n-xyz']])));
-    expect(parsed.rows).toEqual([{ id: 'n-xyz', title: 'A', date: '2026-10-21', paragraphs: [[{ text: 'B' }]] }]);
-    expect(() => parseNews(sheetRows(sheetJson([['ID', 'ID', 'Dato', 'Titel', 'Tekst', 'Status']])))).toThrow('flere gange');
-    expect(() => parseNews([])).toThrow('mangler kolonnen');
+test('nyhedssektionen er den med adressen /nyheder/; den forbliver det efter omdøbning', async () => {
+  const w = await world();
+  await w.run();
+  w.drive.update('f-nyheder', { name: '90 Nyt fra foreningen' });
+  const report = await w.run();
+  const sections = JSON.parse(await readFile(join(w.contentDir, '_sections.json'), 'utf8'));
+  expect(sections['f-nyheder']).toMatchObject({ key: 'nyheder', label: 'Nyt fra foreningen', kind: 'notice' });
+  expect(report.removed).toEqual([]);
+});
+
+describe('datoer', () => {
+  test('ISO, danske skrivemåder og månedsnavne; ugyldige afvises', () => {
+    expect(['21.10.2026', '2026-10-21', '21-10-2026', '21/10/2026', '21. oktober 2026', '21 okt. 2026', '21. Okt 2026', ' 1.2.2027 ', '3. maj 2027', '5. marts 2027'].map(parseDate))
+      .toEqual(['2026-10-21', '2026-10-21', '2026-10-21', '2026-10-21', '2026-10-21', '2026-10-21', '2026-10-21', '2027-02-01', '2027-05-03', '2027-03-05']);
+    for (const bad of ['30.02.2026', '2026-13-01', 'i morgen', '21.10.26', '', '21. ok 2026', '21. oktobr 2026', '5']) expect([bad, parseDate(bad)]).toEqual([bad, undefined]);
   });
 });

@@ -7,7 +7,7 @@ import { loadSite } from '../lib/site/load';
 import { renderBody } from '../lib/site/render';
 import { siteConfigSchema } from '../lib/sync/config';
 import { syncContent } from '../lib/sync/sync';
-import { docJson, FakeDrive, sheetJson } from './helpers/fake-drive';
+import { docJson, FakeDrive } from './helpers/fake-drive';
 
 const local = (url: string) => url.startsWith('./d/');
 test('renderer escaper tekst og attributter og kender kun dialekten', () => {
@@ -56,30 +56,28 @@ test('nyheder filtreres ved build: fra datoen, til og med udløbsdagen i dansk t
   await mkdir(join(root, 'config')); await writeFile(join(root, 'config/site.json'), JSON.stringify(config));
   const drive = new FakeDrive();
   drive.folder('f-nyheder', '90 Nyheder', 'root');
-  drive.sheet('sheet', 'Nyheder', 'f-nyheder', sheetJson([['ID', 'Dato', 'Titel', 'Tekst', 'Udløber', 'Status'],
-    ['n-old', '2026-09-01', 'Gammel', 'Tekst', '', 'offentlig'], ['n-exp', '2026-10-01', 'Udløber', 'Tekst', '2026-10-31', 'offentlig'],
-    ['n-future', '2099-01-01', 'Fremtid', 'Tekst', '', 'offentlig']]));
+  const news = (id: string, name: string, lines: string[]) => drive.gdoc(id, name, 'f-nyheder', docJson(id, [...lines.map(text => ({ text })), { text: 'Tekst' }]));
+  news('nh-old', 'Gammel', ['Dato: 2026-09-01']); news('nh-exp', 'Udløber', ['Dato: 2026-10-01', 'Vises til: 2026-10-31']); news('nh-future', 'Fremtid', ['Dato: 2099-01-01']);
   await syncContent({ config: siteConfigSchema.parse(config), drive, contentDir: join(root, 'content') });
   const visible = async (at: string) => (await loadSite(root, new Date(at))).items.map(i => i.title);
   expect(await visible('2026-10-31T22:30:00Z')).toEqual(['Udløber', 'Gammel']); // 23:30 the 31st in Copenhagen
   expect(await visible('2026-10-31T23:30:00Z')).toEqual(['Gammel']);           // 00:30 the 1st
   expect(await visible('2099-01-01T00:30:00+01:00')).toEqual(['Fremtid', 'Gammel']);
   const s = await loadSite(root, new Date('2026-10-21T12:00:00Z'));
-  expect(s.internalIds).toEqual([]); expect(s.buildDay).toBe('2026-10-21');
+  expect(s.internalIds.sort()).toEqual(['nh-exp', 'nh-future', 'nh-old']); expect(s.buildDay).toBe('2026-10-21');
   expect(s.items[0]).toMatchObject({ kind: 'notice', path: '/nyheder/2026-10-01-udloeber/', date: '2026-10-01', expires: '2026-10-31', html: '<p>Tekst</p>' });
   await rejects(loadSite(root, new Date('ugyldig')), /BUILD_AT/);
 });
 
 test('menuen følger tallene; en sektion uden sider vises ikke, en nyhedssektion altid', async () => {
   const root = await site({ foreningen: '40 Foreningen', bo: '20 Bo her', tom: '30 Tom', nyheder: '90 Nyheder', privat: 'Kladder' });
-  // No sheet yet, so "Nyheder" is an empty page section; with a sheet it is a news section and shown.
-  expect((await loadSite(root)).sections.map(s => s.label)).toEqual(['Foreningen']);
+  // The section with the address /nyheder/ is the news section; it is shown also without news. "Tom" is not.
+  expect((await loadSite(root)).sections.map(s => s.label)).toEqual(['Foreningen', 'Nyheder']);
   const drive = new FakeDrive();
   for (const [id, name] of [['f-foreningen', '40 Foreningen'], ['f-bo', '20 Bo her'], ['f-tom', '30 Tom'], ['f-nyheder', '90 Nyheder']]) drive.folder(id!, name!, 'root');
   drive.gdoc('doc-a', 'Om foreningen', 'f-foreningen', docJson('doc-a', [{ text: 'Tekst.' }]));
   drive.gdoc('doc-b', 'Bestyrelsen', 'f-foreningen', docJson('doc-b', [{ text: 'Mere.' }]));
   drive.gdoc('doc-c', 'Affald', 'f-bo', docJson('doc-c', [{ text: 'Tirsdag.' }]));
-  drive.sheet('ark', 'Nyheder', 'f-nyheder', sheetJson([['ID', 'Dato', 'Titel', 'Tekst', 'Udløber', 'Status']]));
   await syncContent({ config: siteConfigSchema.parse({ rootFolderId: 'root' }), drive, contentDir: join(root, 'content') });
   expect((await loadSite(root)).sections.map(s => [s.order, s.label, s.path, s.news])).toEqual([
     [0, 'Bo her', '/bo-her/', false], [1, 'Foreningen', '/foreningen/', false], [2, 'Nyheder', '/nyheder/', true]]);
