@@ -36,7 +36,6 @@ p { max-width: var(--measure); margin: 0 0 var(--space-m); }
 main { min-height: 60vh; padding-block: clamp(2.5rem, 6vw, 5.5rem) 7.5rem; overflow-wrap: break-word; }
 .intro { font-size: var(--text-lg); line-height: 1.45; max-width: 54ch; margin-bottom: var(--space-xl); }
 .intro:has(+ .intro) { margin-bottom: var(--space-m); }
-.prototype { display: block; font-size: var(--text-sm); color: var(--color-muted); margin-bottom: var(--space-xl); }
 .meta { font-size: var(--text-sm); color: var(--color-muted); }
 .back { font-size: 1rem; margin-bottom: var(--space-l); }
 .back::before { content: "←"; }
