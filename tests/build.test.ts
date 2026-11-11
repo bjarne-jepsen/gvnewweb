@@ -99,7 +99,7 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect(shortcutPage).toContain('<h1>Leje af lokaler</h1>'); expect(shortcutPage).toContain('<p>Sådan lejer du lokalerne.</p>');
   expect((await walk(join(root, 'dist'))).filter(p => /\.pdf$/i.test(p))).toEqual([]);
   const page = await html('foreningen/om-foreningen/index.html');
-  expect(page).toContain('<h1>Om foreningen</h1>'); expect(page).toContain('<h2>Velkommen</h2>');
+  expect(page).toContain('<h1>Om foreningen</h1>'); expect(page).toContain('<h2 id="velkommen">Velkommen</h2>');
   expect(page).toContain(`<img src="/foreningen/om-foreningen/${image}" alt="Kort over området"`);
   // CVI 2: content pages have a breadcrumb and end with the update date and a button to the contact page.
   expect(page).toContain('<nav class="crumbs" aria-label="Brødkrumme"> <ol><li><a href="/foreningen/">Foreningen</a></li><li aria-current="page">Om foreningen</li></ol> </nav>');

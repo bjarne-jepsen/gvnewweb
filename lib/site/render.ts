@@ -1,9 +1,13 @@
 import type { Nodes, PhrasingContent, RootContent } from 'mdast';
 import { safeHref } from '../contracts/blocks';
+import { slugify } from '../sync/slugs';
 import { validateMarkdown } from '../sync/markdown';
 
 const escape = (s: string) => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 const unsupported = (node: Nodes): never => { throw new Error(`Kan ikke vise Markdown-elementet ${node.type}`); };
+
+/** Ids the layout uses itself; a heading never takes one of them. */
+const RESERVED_IDS = ['indhold', 'sidefod-genveje', 'paa-denne-side', 'genveje', 'seneste-nyt', 'soeg', 'soeg-resultater', 'soeg-status'];
 
 /** What a link becomes: an address on the site, plain text (drop) or the link as written (undefined). */
 export type LinkTarget = { path: string } | 'drop' | undefined;
@@ -14,6 +18,16 @@ export type LinkTarget = { path: string } | 'drop' | undefined;
 export function renderBody(body: string, isLocalImage: (url: string) => boolean, imageUrl: (url: string) => string, linkTarget: (url: string) => LinkTarget = () => undefined) {
   const tree = validateMarkdown(body, isLocalImage);
   let tables = 0;
+  // Every H2 gets a stable id from its text, so the panel "På denne side" can link to it.
+  const ids = new Set<string>(RESERVED_IDS);
+  const text = (nodes: PhrasingContent[]): string => nodes.map(n => 'value' in n ? n.value : 'children' in n ? text(n.children) : n.type === 'image' ? '' : ' ').join('');
+  const headingId = (nodes: PhrasingContent[]) => {
+    const slug = slugify(text(nodes), 'x'), base = slug === 'side-x' ? 'afsnit' : slug;
+    let id = base, n = 1;
+    while (ids.has(id)) id = `${base}-${++n}`;
+    ids.add(id);
+    return id;
+  };
   const img = (n: Extract<Nodes, { type: 'image' }>) => `<img src="${escape(imageUrl(n.url))}" alt="${escape(n.alt ?? '')}" loading="lazy" decoding="async">`;
   const inline = (nodes: PhrasingContent[]): string => nodes.map(n => {
     if (n.type === 'text') return escape(n.value);
@@ -33,7 +47,7 @@ export function renderBody(body: string, isLocalImage: (url: string) => boolean,
   }).join('');
   const block = (n: RootContent): string => {
     if (n.type === 'paragraph') return n.children.length === 1 && n.children[0]!.type === 'image' ? `<figure>${img(n.children[0]!)}</figure>` : `<p>${inline(n.children)}</p>`;
-    if (n.type === 'heading') return `<h${n.depth}>${inline(n.children)}</h${n.depth}>`;
+    if (n.type === 'heading') return n.depth === 2 ? `<h2 id="${headingId(n.children)}">${inline(n.children)}</h2>` : `<h${n.depth}>${inline(n.children)}</h${n.depth}>`;
     if (n.type === 'thematicBreak') return '<hr>';
     if (n.type === 'list') return `<ul>${n.children.map(item => `<li>${item.children.map(c => c.type === 'paragraph' ? inline(c.children) : block(c)).join('<br>')}</li>`).join('')}</ul>`;
     if (n.type === 'table') {
