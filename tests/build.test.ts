@@ -72,7 +72,7 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect(home.match(/<ul class="entries cards">/g)).toHaveLength(1);
   expect(home).toContain('<p class="more"><a href="/nyheder/">Alle nyheder</a></p>');
   expect(home).not.toContain('class="sections"'); expect(home).not.toContain('Find rundt');
-  expect(home).toContain('<h1 class="visually-hidden">Andelsboligforeningen Grøndalsvænge</h1>');
+  expect(home).toContain('<h1>Velkommen</h1>'); expect(home).not.toContain('Lokal prototype med');
   expect(home).toContain('<p class="intro">Grøndalsvænge er en andelsboligforening med 389 fritliggende huse');
   expect(await html('nyheder/index.html')).toContain('OLDEST_NEWS');
   expect(home).toMatch(/<nav aria-labelledby="sidefod-genveje"><p class="footer-label" id="sidefod-genveje">Genveje<\/p><ul class="footer-links"><li><a href="\/foreningen\/kontakt\/">Kontakt<\/a><\/li><\/ul><\/nav>/);

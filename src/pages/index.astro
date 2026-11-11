@@ -11,8 +11,7 @@ const news = (await getCollection('items')).map(i => i.data).filter(i => i.kind 
 const newsSection = (await getCollection('sections')).map(s => s.data).find(s => s.news);
 ---
 <Base title="Forside">
-  <p class="prototype">Lokal prototype med indhold fra foreningens Google Drive</p>
-  <h1 class="visually-hidden">Andelsboligforeningen Grøndalsvænge</h1>
+  <h1>Velkommen</h1>
   {intro.map(p => <p class="intro">{p}</p>)}
   {shortcuts.length > 0 && <section aria-labelledby="genveje">
     <h2 id="genveje">Det vigtigste</h2>
