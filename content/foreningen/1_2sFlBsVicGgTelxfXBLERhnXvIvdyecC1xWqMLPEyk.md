@@ -1,32 +1,26 @@
 ---
 id: "1_2sFlBsVicGgTelxfXBLERhnXvIvdyecC1xWqMLPEyk"
 title: "Bestyrelsen"
-updatedAt: "2026-10-22T17:16:42.406Z"
-summary: "Andelsboligforeningen Grøndalsvænge drives af en bestyrelse i samarbejde med foreningens administrator. Bestyrelsen består af 9 medlemmer og 2 suppleanter, som alle skal bo i Grøndalsvænge."
+updatedAt: "2026-11-11T16:20:03.681Z"
+summary: "Andelsboligforeningen Grøndalsvænge ledes af en bestyrelse på 9 medlemmer og 2 suppleanter i samarbejde med foreningens administrator. Alle bestyrelsesmedlemmer skal have bopæl i Grøndalsvænge."
 ---
 
-Andelsboligforeningen Grøndalsvænge drives af en bestyrelse i samarbejde med foreningens administrator. Bestyrelsen består af **9 medlemmer og 2 suppleanter**, som alle skal bo i Grøndalsvænge.
+Andelsboligforeningen Grøndalsvænge ledes af en bestyrelse på 9 medlemmer og 2 suppleanter i samarbejde med foreningens administrator. Alle bestyrelsesmedlemmer skal have bopæl i Grøndalsvænge.
 
-## Bestyrelsens medlemmer
+### Valg og sammensætning
 
-Valgt efter generalforsamlingen, der blev holdt fra den 8. juni 2026:
+Bestyrelsen vælges på den ordinære generalforsamling. Medlemmer vælges for to år ad gangen med forskudt udskiftning (halvdelen i lige år, halvdelen i ulige år) for at sikre kontinuitet. Suppleanter vælges for ét år ad gangen.
 
-- **Formand:** Mikael Koch-Hansen (på valg i 2027)
-- **Næstformand:** Lasse Glenstrup (på valg i 2027)
-- **Bestyrelsesmedlemmer på valg i 2027:** Bjarne Jepsen, Stig Kiefer og Mikkel Kiefer
-- **Bestyrelsesmedlemmer på valg i 2028:** Steen Baagøe Nielsen, Simon Juul Nielsen, Margit Preuss og Lotte Beyer Cramer
-- **Suppleant på valg i 2027:** Peter Jespersen
+Valgt på generalforsamlingen 8. juni 2026:
 
-Du kontakter bestyrelsen via udvalgenes e-mailadresser på siden Kontakt.
+- Formand: Mikael Koch-Hansen (på valg 2027)
+- Næstformand: Lasse Glenstrup (på valg 2027)
+- Bestyrelsesmedlemmer på valg i 2027: Bjarne Jepsen, Stig Kiefer og Mikkel Kiefer
+- Bestyrelsesmedlemmer på valg i 2028: Steen Baagøe Nielsen, Simon Juul Nielsen, Margit Preuss og Lotte Beyer Cramer
+- Suppleant på valg i 2027: Peter Jespersen \[TK: Mangler 2. suppleant — vedtægterne nævner 2 suppleanter, men kun 1 er oplistet\]
 
-## Valg til bestyrelsen
+### Arbejde og kontakt
 
-Bestyrelsen vælges på den ordinære generalforsamling. For at sikre kontinuitet er medlemmerne valgt for to år ad gangen, så halvdelen er på valg i lige år og den anden halvdel i ulige år. Suppleanter er på valg hvert år.
+Bestyrelsen holder møde hver tredje uge samt efter behov. Arbejdet følger en forretningsorden, som ligger på ProBo.
 
-## Bestyrelsens arbejde
-
-Bestyrelsen holder møde **hver tredje uge** og derudover møder i udvalgene og ekstra møder efter behov. Arbejdet følger en forretningsorden, som findes i ProBo. Bestyrelsesmedlemmerne fordeler sig i en række udvalg, som er beskrevet på siden Udvalg og arbejdsgrupper.
-
-## Honorar
-
-Generalforsamlingen i 2025 besluttede at afsætte 200.000 kr. om året til honorering af bestyrelsesarbejdet. Bestyrelsesmedlemmer får 20.000 kr. om året, og suppleanter med aktivt udvalgsarbejde får en skattefri godtgørelse på 4.000 kr. om året. Medlemmerne kan frasige sig honoraret eller donere det til et formål, der kommer foreningen til gode. Aflønningspolitikken findes i ProBo.
+Bestyrelsens medlemmer er fordelt på en række udvalg. Du finder udvalgsbeskrivelserne under [Udvalg og arbejdsgrupper](https://docs.google.com/document/u/1/d/1xsAbkVu-_RVP2IcGA3ixg3r3IAkfFWrj5n8SIUl3EPw/edit) og kontakter bestyrelsen via udvalgenes mailadresser under [Kontakt](https://docs.google.com/document/u/1/d/13Q3ILe2EykiacnUJoAhgvfgnx1mDvy3NHvjhOeIuPT0/edit).
