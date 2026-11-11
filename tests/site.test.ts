@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { loadSite } from '../lib/site/load';
 import { renderBody } from '../lib/site/render';
+import { tableOfContents } from '../lib/site/toc';
 import { siteConfigSchema } from '../lib/sync/config';
 import { syncContent } from '../lib/sync/sync';
 import { docJson, FakeDrive } from './helpers/fake-drive';
@@ -12,7 +13,7 @@ import { docJson, FakeDrive } from './helpers/fake-drive';
 const local = (url: string) => url.startsWith('./d/');
 test('renderer escaper tekst og attributter og kender kun dialekten', () => {
   const html = renderBody('## A \\&amp; \\<b\\>\n\n[l](https://example.test/?a=1&b="x") **f** *k*\\\nny\n\n- et\n- to\n\n---\n\n| h1 | h2 |\n| --- | --- |\n| c1 | c2 |\n\n![Alt "x"](./d/abcdef0123456789.png)\n', local, u => `/s/p/${u.slice(4)}`);
-  expect(html).toContain('<h2>A &amp;amp; &lt;b&gt;</h2>');
+  expect(html).toContain('<h2 id="a-amp-b">A &amp;amp; &lt;b&gt;</h2>');
   expect(html).toContain('<a href="https://example.test/?a=1&amp;b=%22x%22" rel="noreferrer">l</a> <strong>f</strong> <em>k</em><br>');
   expect(html).toContain('<ul><li>et</li><li>to</li></ul>');
   expect(html).toContain('<thead><tr><th>h1</th><th>h2</th></tr></thead><tbody><tr><td>c1</td><td>c2</td></tr></tbody>');
@@ -115,4 +116,23 @@ test('links til andre Google-dokumenter peger på deres sider, og intet Drive-ID
   expect(html).toContain('<a href="https://andelsbo.dk/" rel="noreferrer">Andelsbo</a>');
   expect(html).not.toContain('doc-');
   expect(s.warnings.filter(w => w.startsWith('Bestyrelsen'))).toEqual(['Bestyrelsen: et link til et Google-dokument, der ikke er en side på hjemmesiden, vises som almindelig tekst']);
+});
+
+test('H2 får et unikt id fra teksten, og layoutets egne id\'er er reserveret', () => {
+  const html = renderBody('## Fester og **traditioner**\n\n## Fester og traditioner\n\n## Indhold\n\n## !!!\n\n### Ingen id\n', local, u => u);
+  expect(html).toContain('<h2 id="fester-og-traditioner">Fester og <strong>traditioner</strong></h2>');
+  expect(html).toContain('<h2 id="fester-og-traditioner-2">');
+  expect(html).toContain('<h2 id="indhold-2">');
+  expect(html).toContain('<h2 id="afsnit">');
+  expect(html).toContain('<h3>Ingen id</h3>');
+});
+
+test('"På denne side": kun ved mindst tre H2, med ingressen skilt fra', () => {
+  const body = renderBody('Ingres.\n\n## Én\n\nTekst.\n\n## To **fed**\n\n## Tre\n', local, u => u);
+  const toc = tableOfContents(body);
+  expect(toc.headings).toEqual([{ id: 'en', label: 'Én' }, { id: 'to-fed', label: 'To fed' }, { id: 'tre', label: 'Tre' }]);
+  expect(toc.lead).toBe('<p>Ingres.</p>');
+  expect(toc.lead + toc.rest).toBe(body);
+  expect(tableOfContents(renderBody('## Én\n\n## To\n', local, u => u)).headings).toEqual([]);
+  expect(tableOfContents(renderBody('## Én\n\n## To\n\n## Tre\n', local, u => u)).lead).toBe('');
 });

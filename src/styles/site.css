@@ -127,7 +127,7 @@ main { min-height: 60vh; padding-block: clamp(2.5rem, 6vw, 5.5rem) 7.5rem; overf
 .page h1 { max-width: none; }
 .page > .meta { margin-top: calc(-1 * var(--space-xs)); }
 .prose > :first-child { margin-top: 0; }
-.prose > p:first-child { margin-bottom: 2.5em; font-size: var(--text-lg); line-height: 1.45; }
+.prose:not(.prose-rest) > p:first-child { margin-bottom: 2.5em; font-size: var(--text-lg); line-height: 1.45; }
 .prose p { max-width: none; margin: 0 0 1.1em; }
 .prose h2 { margin: 2.75em 0 .6em; padding-top: .8em; border-top: 1px solid var(--color-ink); }
 .prose h3 { margin: 1.9em 0 .4em; }
@@ -139,6 +139,27 @@ main { min-height: 60vh; padding-block: clamp(2.5rem, 6vw, 5.5rem) 7.5rem; overf
 .prose figure { margin: var(--space-xl) 0; }
 .prose img { display: block; max-width: 100%; height: auto; border-radius: var(--radius); }
 .prose hr { border: 0; border-top: 1px solid var(--color-line); margin: var(--space-2xl) 0; }
+
+/* "På denne side": a green panel with the page's H2s, like "Det vigtigste" on the front page.
+   Narrow screens: under the intro. Wide screens: a sticky column to the right of the text. */
+.toc { background: var(--color-green); color: var(--color-paper); padding: var(--space-l) var(--space-l) var(--space-xs); margin: 0 0 var(--space-2xl); }
+.toc :focus-visible { outline-color: var(--color-paper); }
+.toc-label { margin: 0 0 var(--space-xs); font-size: var(--text-sm); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; line-height: 1.4; }
+.toc ul { list-style: none; padding: 0; margin: 0; }
+.toc li + li { border-top: 1px solid rgb(255 255 255 / .22); }
+.toc a { display: flex; justify-content: space-between; align-items: center; gap: var(--space-m); min-height: 3rem; padding-block: var(--space-xs); color: var(--color-paper); text-decoration: none; font-size: 1rem; font-weight: 700; line-height: 1.3; }
+.toc a::after { content: "↓" / ""; flex: none; transition: transform .15s; }
+.toc a:hover { color: var(--color-paper); text-decoration: underline; text-decoration-thickness: 1px; }
+.toc a:hover::after { transform: translateY(.15em); }
+.has-toc .prose-lead > p:first-child { margin-bottom: var(--space-xl); }
+.prose h2 { scroll-margin-top: var(--space-l); }
+@media (prefers-reduced-motion: no-preference) { html:has(.toc) { scroll-behavior: smooth; } }
+@media (min-width: 64rem) {
+  .page.has-toc { max-width: none; display: grid; grid-template-columns: minmax(0, var(--content-max)) minmax(15rem, 18rem); column-gap: clamp(3rem, 6vw, 6rem); }
+  .has-toc > * { grid-column: 1; }
+  .has-toc > .toc { grid-column: 2; grid-row: 2 / span 3; align-self: start; position: sticky; top: var(--space-xl); margin: 0; }
+  .has-toc .prose-lead > p:first-child { margin-bottom: 2.5em; }
+}
 
 /* End of a content page: the update date and a button to the contact page. */
 .page-end { max-width: var(--content-max); margin-top: 4.5rem; padding-top: 1.75rem; border-top: 1px solid var(--color-line); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-l); }
@@ -152,6 +173,21 @@ main { min-height: 60vh; padding-block: clamp(2.5rem, 6vw, 5.5rem) 7.5rem; overf
 .table-scroll table { border-collapse: collapse; width: 100%; font-size: 1rem; line-height: 1.5; }
 .table-scroll th, .table-scroll td { padding: .7em 1em .7em 0; text-align: left; vertical-align: top; min-width: 7rem; border-bottom: 1px solid var(--color-line); }
 .table-scroll thead th { font-weight: 700; border-bottom-color: var(--color-ink); }
+
+/* A row of houses drawn in green above the footer (src/components/Roofline.astro). The line draws itself in
+   under two seconds, stays, fades and starts over: one round is 12 seconds. Still with reduced motion. */
+.roofline { margin-top: -3.5rem; margin-bottom: -1px; }
+.roofline svg { display: block; width: 100%; height: clamp(3.75rem, 2.5rem + 3vw, 5.75rem); }
+.roofline path { fill: none; stroke: var(--color-green); stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+@media (prefers-reduced-motion: no-preference) {
+  .roofline path { stroke-dasharray: 1; animation: roofline 12s ease-in-out infinite; }
+}
+@keyframes roofline {
+  0% { stroke-dashoffset: 1; opacity: 1; }
+  15% { stroke-dashoffset: 0; }
+  88% { stroke-dashoffset: 0; opacity: 1; }
+  97%, 100% { stroke-dashoffset: 0; opacity: 0; }
+}
 
 /* Footer: dark, with the name set large. */
 .site-footer { background: var(--color-dark); color: var(--color-on-dark); padding-block: 5rem 3rem; font-size: .9375rem; }
@@ -177,7 +213,7 @@ main { min-height: 60vh; padding-block: clamp(2.5rem, 6vw, 5.5rem) 7.5rem; overf
 @media print {
   html { background: #fff; }
   body { font-size: 11pt; }
-  .skip, .site-header nav, .site-footer, .back, .more, .crumbs, .button, .tile-picture { display: none; }
+  .skip, .site-header nav, .site-footer, .back, .more, .crumbs, .button, .tile-picture, .toc, .roofline { display: none; }
   .site-header { border-bottom: 0; margin-bottom: var(--space-l); }
   .wrap { max-width: none; padding-inline: 0; }
   .site-header .wrap, main { padding-block: 0; }
