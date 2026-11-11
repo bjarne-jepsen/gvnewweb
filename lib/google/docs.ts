@@ -72,6 +72,12 @@ export async function googleDocsBlocks(input: unknown, expectedId: string, resol
           const href = link ? safeHref(link.url) : undefined;
           if (link && !href) throw new Error('Google Docs: kun links til websider (http/https) og e-mail til én adresse understøttes');
           content.push({ text: z.string().parse(run.content).replace(/\u000b/g, '\n'), ...(href ? { href } : {}), ...(style.bold ? { bold: true } : {}), ...(style.italic ? { italic: true } : {}) });
+        } else if (element.richLink) {
+          // A smart chip (@-link to a file or page) becomes an ordinary link with the chip's title as text.
+          const props = object(object(element.richLink).richLinkProperties ?? {});
+          const href = safeHref(props.uri), title = typeof props.title === 'string' ? props.title.trim() : '';
+          if (!href || !title) throw new Error('Google Docs: et link-chip mangler titel eller adresse');
+          content.push({ text: title, href });
         } else if (element.inlineObjectElement) {
           if (inCell) throw new Error('Google Docs: billeder i tabelceller understøttes ikke');
           flush();

@@ -35,6 +35,7 @@ p { max-width: var(--measure); margin: 0 0 var(--space-m); }
 
 main { min-height: 60vh; padding-block: clamp(2.5rem, 6vw, 5.5rem) 7.5rem; overflow-wrap: break-word; }
 .intro { font-size: var(--text-lg); line-height: 1.45; max-width: 54ch; margin-bottom: var(--space-xl); }
+.intro:has(+ .intro) { margin-bottom: var(--space-m); }
 .prototype { display: block; font-size: var(--text-sm); color: var(--color-muted); margin-bottom: var(--space-xl); }
 .meta { font-size: var(--text-sm); color: var(--color-muted); }
 .back { font-size: 1rem; margin-bottom: var(--space-l); }
@@ -42,7 +43,7 @@ main { min-height: 60vh; padding-block: clamp(2.5rem, 6vw, 5.5rem) 7.5rem; overf
 
 /* Stand-alone links are at least 44 px high (docs/cvi.md); the negative margin keeps the layout. */
 .back, .more a, .footer-links a, .crumbs a { display: inline-flex; align-items: center; gap: .3em; min-height: 44px; }
-.entries :is(h2, h3) a, .sections h3 a { display: inline-block; padding-block: .6rem; margin-block: -.6rem; }
+.entries :is(h2, h3) a { display: inline-block; padding-block: .6rem; margin-block: -.6rem; }
 
 /* Lists of entries (section pages, news). */
 .entries { list-style: none; padding: 0; margin: var(--space-l) 0; max-width: 48rem; }
@@ -59,14 +60,11 @@ main { min-height: 60vh; padding-block: clamp(2.5rem, 6vw, 5.5rem) 7.5rem; overf
 .entries.cards :is(h2, h3) a:hover { text-decoration: underline; }
 .entries.cards p:not(.meta) { font-size: 1rem; }
 
-/* Front page: shortcut tiles and the section overview. */
+/* Front page: shortcut tiles. */
 .shortcuts { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr)); gap: var(--space-s); }
 .shortcuts a { display: flex; justify-content: space-between; align-items: center; gap: var(--space-m); height: 100%; min-height: 3.5rem; padding: var(--space-m) var(--space-l); background: var(--color-surface); border-radius: var(--radius); color: var(--color-ink); text-decoration: none; font-size: var(--text-base); font-weight: 700; line-height: 1.3; }
 .shortcuts a::after { content: "→"; color: var(--color-green); }
 .shortcuts a:hover { background: var(--color-surface-hover); color: var(--color-ink); text-decoration: underline; text-decoration-thickness: 1px; }
-.sections { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); gap: 0 var(--space-xl); }
-.sections > li { border-top: 1px solid var(--color-line); padding-block: var(--space-l); }
-.sections p { color: var(--color-muted); margin: 0; }
 .more { font-weight: 700; margin-top: var(--space-l); }
 .more a::after { content: "→"; }
 

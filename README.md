@@ -13,6 +13,7 @@ Grøndalsvænge hjemmeside (fællesdrev)
 ├── 30 Fællesskab         Google Docs → /faellesskab/
 ├── 40 Foreningen         Google Docs → /foreningen/
 ├── 50 Nyheder            Ét Google Sheets-ark → /nyheder/
+├── _forside              Google-dokument → forsidens intro og Det vigtigste
 └── dokumenter, vejledninger, kalender, redaktion   Intet tal: læses ikke
 ```
 
@@ -22,7 +23,9 @@ Grøndalsvænge hjemmeside (fællesdrev)
 - **Intro:** Et Google-dokument med navnet `_intro` i sektionsmappen bliver sektionens introtekst. Kun almindelige afsnit bruges. Uden `_intro` er der ingen intro.
 - **Søgeord:** Et afsnit, der begynder med `Søgeord:`, fx `Søgeord: trailer, boremaskine, telt`, vises ikke på siden. Ordene hjælper kun søgningen med at finde siden, også når folk bruger andre ord end dem i teksten. Adskil ordene med komma. Højst 40 ord pr. side.
 
-Forsidens tekst, genveje og sidefodens links ligger i [lib/site/sections.ts](lib/site/sections.ts). En genvej til en side, der ikke findes endnu, udelades med en advarsel ved build. ProBo-linket i sidefoden sættes i `links.probo` i [config/site.json](config/site.json) (kun https).
+- **Forsiden:** Et Google-dokument med navnet `_forside` direkte i roden styrer forsiden. Almindelige afsnit bliver introteksten. Hvert punkt i en punktliste med et link til en sides Google-dokument bliver et felt under "Det vigtigste", i samme rækkefølge og med punktets tekst. Linket kan være et almindeligt link (Ctrl+K) eller et @-link. Det peger på dokumentet, så feltet følger siden, også hvis den skifter navn eller sektion. Overskrifter bruges ikke. Punkter uden link til en side på hjemmesiden springes over med en advarsel. Uden `_forside` bruges standardteksterne nedenfor.
+
+Sidefodens links og forsidens standardtekst og -genveje ligger i [lib/site/sections.ts](lib/site/sections.ts). En genvej til en side, der ikke findes endnu, udelades med en advarsel ved build. ProBo-linket i sidefoden sættes i `links.probo` i [config/site.json](config/site.json) (kun https).
 
 - **Genveje:** En genvej publicerer målfilens indhold. Genvejens navn bliver titlen, og målets ID bliver indholdets ID.
 - **Titel:** Filens navn (eller genvejens).

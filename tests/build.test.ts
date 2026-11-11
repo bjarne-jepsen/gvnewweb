@@ -68,10 +68,12 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect(first.log).toContain('Forsiden: "Sælg dit hus" → /bo-her/saelg-dit-hus/ springes over, fordi siden ikke findes');
   expect([...home.matchAll(/href="(\/nyheder\/[^"]+)"/g)].map(m => m[1])).toEqual(['/nyheder/2026-10-20-vandet-lukkes/', '/nyheder/2026-09-01-aeldre-nyhed-a/', '/nyheder/2026-08-01-aeldre-nyhed-b/']);
   expect(home).not.toContain('OLDEST_NEWS');
-  // CVI L2: the news are cards, "Find rundt" lists every section except the news in config order.
+  // CVI L2: the news are cards. The menu covers the sections, so the front page has no section overview and no visible welcome heading.
   expect(home.match(/<ul class="entries cards">/g)).toHaveLength(1);
   expect(home).toContain('<p class="more"><a href="/nyheder/">Alle nyheder</a></p>');
-  expect([...home.matchAll(/<ul class="sections">([\s\S]*?)<\/ul>/g)][0]![1]!.match(/href="([^"]+)"/g)).toEqual(['href="/foreningen/"', 'href="/bo-her/"']);
+  expect(home).not.toContain('class="sections"'); expect(home).not.toContain('Find rundt');
+  expect(home).toContain('<h1 class="visually-hidden">Andelsboligforeningen Grøndalsvænge</h1>');
+  expect(home).toContain('<p class="intro">Grøndalsvænge er en andelsboligforening med 389 fritliggende huse');
   expect(await html('nyheder/index.html')).toContain('OLDEST_NEWS');
   expect(home).toMatch(/<nav aria-labelledby="sidefod-genveje"><p class="footer-label" id="sidefod-genveje">Genveje<\/p><ul class="footer-links"><li><a href="\/foreningen\/kontakt\/">Kontakt<\/a><\/li><\/ul><\/nav>/);
   // The menu: each page section is a panel with its landing page first and its pages alphabetically; news is a plain link.
@@ -108,9 +110,8 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   // The tile shows the document's first image; a page without images gets the placeholder.
   expect(await html('foreningen/index.html')).toContain(`<img src="/foreningen/om-foreningen/${image}" alt="Kort over området" loading="lazy"`);
   expect(await html('bo-her/index.html')).toContain('<svg viewBox="0 0 300 200" aria-hidden="true"');
-  // The intro comes from the folder's _intro document: every paragraph on the section page, the first on the front page.
+  // The intro comes from the folder's _intro document: every paragraph on the section page.
   expect(await html('foreningen/index.html')).toContain('<p class="intro">Bestyrelse og regler.</p><p class="intro">Skriv til os.</p>');
-  expect(home).toContain('<h3><a href="/foreningen/">Foreningen</a></h3> <p>Bestyrelse og regler.</p>');
   expect(await html('nyheder/index.html')).toContain('<ul class="entries cards"><li>');
   expect(await readFile(dist(`foreningen/om-foreningen/${image}`))).toEqual(png);
   for (const path of await walk(join(root, 'dist'))) expect((await readFile(path)).toString()).not.toMatch(/CANARY|target-doc|doc-1/);
@@ -181,4 +182,15 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect([...menu.matchAll(/<a href="([^"]+)"[^>]*>([^<]+)|<summary[^>]*>([^<]+)/g)].map(m => m[3] ? `panel ${m[3]}` : `${m[1]} ${m[2]}`))
     .toEqual(['/nyheder/ Nyheder', 'panel Om foreningen']);
   expect(await html('index.html')).toContain('<a class="nav-landing" href="/foreningen/">Gå til Om foreningen</a>');
+  // 8. A _forside document in the root sets the intro and "Det vigtigste": links to pages by document,
+  // so the page's changed address is followed; a link to a document outside the sections is left out.
+  const link = (id: string) => `https://docs.google.com/document/d/${id}/edit`;
+  drive.gdoc('forside', '_forside', 'root', docJson('forside', [{ text: 'Det vigtigste', style: 'HEADING_1' }, { text: 'Vi er 389 huse.' }, { text: 'Kontakt os', bullet: true, href: link('1Kontakt9xQz') },
+    { text: 'Om os', bullet: true, href: link('doc-1') }, { text: 'Hemmelig', bullet: true, href: link('private') }]));
+  await sync(); const withFront = await expectGreen();
+  const front = await html('index.html');
+  expect(front).toContain('<p class="intro">Vi er 389 huse.</p>'); expect(front).not.toContain('389 fritliggende');
+  expect(front).toContain('<ul class="shortcuts"><li><a href="/foreningen/kontakt/">Kontakt os</a></li><li><a href="/foreningen/om-os/">Om os</a></li></ul>');
+  expect(withFront.log).toContain('Forsiden: "Hemmelig" springes over, fordi dokumentet ikke er en side på hjemmesiden');
+  for (const path of await walk(join(root, 'dist'))) expect((await readFile(path)).toString()).not.toMatch(/CANARY|Hemmelig|docs\.google\.com|"private"/);
 }, 90000);

@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { siteConfigSchema } from '../sync/config';
 import { guideMetaSchema, localImage, newsMetaSchema } from '../sync/content';
+import { FRONTPAGE_FILE, frontpageSchema } from '../sync/frontpage';
 import { parseMarkdown, splitFrontmatter } from '../sync/markdown';
 import { manualRedirectsSchema } from '../sync/sections';
 import { pathOf } from '../sync/slugs';
@@ -20,7 +21,7 @@ export interface SiteImage { src: string; alt: string }
 export interface SiteRedirect { from: string; to: string }
 /** A front-page shortcut or footer link. Internal links always point at a page that exists. */
 export interface SiteLink { id: string; group: 'shortcut' | 'footer'; order: number; label: string; href: string; external: boolean }
-export interface Site { sections: SiteSection[]; items: SiteItem[]; redirects: SiteRedirect[]; links: SiteLink[]; assets: Map<string, Uint8Array>; warnings: string[]; internalIds: string[]; buildDay: string; origin: string }
+export interface Site { frontpage: { intro: string }; sections: SiteSection[]; items: SiteItem[]; redirects: SiteRedirect[]; links: SiteLink[]; assets: Map<string, Uint8Array>; warnings: string[]; internalIds: string[]; buildDay: string; origin: string }
 
 export { manualRedirectsSchema };
 const collator = new Intl.Collator('da-DK');
@@ -71,7 +72,16 @@ export async function loadSite(root = '.', buildAt = new Date(process.env.BUILD_
     live.add(item.path);
   }
   const warnings: string[] = [], redirects: SiteRedirect[] = [], links: SiteLink[] = [];
-  for (const [group, where, list] of [['shortcut', 'Forsiden', frontpage.shortcuts], ['footer', 'Sidefoden', frontpage.footer]] as const) list.forEach((link, order) => {
+  // The _forside document decides the front page; without it the built-in defaults are used.
+  const fromDrive = await readFile(join(contentDir, FRONTPAGE_FILE), 'utf8').then(raw => frontpageSchema.parse(JSON.parse(raw)), error => { if (error.code === 'ENOENT') return undefined; throw error; });
+  const pathOfId = new Map(items.filter(i => i.kind === 'page').map(i => [i.id, i.path]));
+  const shortcuts = fromDrive ? fromDrive.shortcuts.flatMap(s => {
+    const path = pathOfId.get(s.id);
+    if (!path) warnings.push(`Forsiden: "${s.label}" springes over, fordi dokumentet ikke er en side på hjemmesiden`);
+    return path ? [{ label: s.label, path }] : [];
+  }) : frontpage.shortcuts;
+  const intro = fromDrive ? fromDrive.intro : frontpage.intro;
+  for (const [group, where, list] of [['shortcut', 'Forsiden', shortcuts], ['footer', 'Sidefoden', frontpage.footer]] as const) list.forEach((link, order) => {
     if (live.has(link.path)) links.push({ id: `${group}-${order}`, group, order, label: link.label, href: link.path, external: false });
     else warnings.push(`${where}: "${link.label}" → ${link.path} springes over, fordi siden ikke findes`);
   });
@@ -90,7 +100,7 @@ export async function loadSite(root = '.', buildAt = new Date(process.env.BUILD_
   redirects.sort((a, b) => a.from < b.from ? -1 : 1);
   // Drive IDs must never reach the output; news IDs are editor-facing and not secret.
   const internalIds = [...entries.values()].filter(e => e.kind !== 'notice').map(e => e.id);
-  return { sections, items, redirects, links, assets, warnings, internalIds, buildDay, origin: new URL(config.siteUrl).origin };
+  return { frontpage: { intro }, sections, items, redirects, links, assets, warnings, internalIds, buildDay, origin: new URL(config.siteUrl).origin };
 }
 
 /** Headings and running text of a Markdown body, for the search index. Image alt text is left out. */

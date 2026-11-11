@@ -8,6 +8,7 @@ import type { SiteConfig } from './config';
 import { digest, guideFingerprint, guideMetaSchema, imageFormat, localImage, MAX_IMAGE_BYTES, MAX_IMAGES, newsFingerprint, newsMetaSchema, serializeNews } from './content';
 import { DriveAccessError, FOLDER, GDOC, SHEET, SHORTCUT, type DriveItem, type DriveSource } from './drive';
 import { assertRoundTrip, blocksToMarkdown, extractKeywords, flattenBlocks, plainText, splitFrontmatter, summaryOf, validateMarkdown, withFrontmatter, type SerializableBlock } from './markdown';
+import { fetchFrontpage, FRONTPAGE_FILE, frontpageSchema, isFrontpageDoc, serializeFrontpage, type Frontpage } from './frontpage';
 import { parseNews, type NewsRow } from './news';
 import { emptyReport, type ReportEntry, type SyncReport } from './report';
 import { manualRedirectsSchema, parseSectionName, sectionKey, sectionsSchema, serializeSections, type Kind, type SectionEntry, type Sections } from './sections';
@@ -77,7 +78,7 @@ async function knownSections(contentDir: string): Promise<{ file?: Sections; byK
   }
   return { byKey };
 }
-const manualFiles = new Set(['_slugs.json', '_redirects.json', '_sections.json']);
+const manualFiles = new Set(['_slugs.json', '_redirects.json', '_sections.json', FRONTPAGE_FILE]);
 /** Top-level entries of content/ that are neither a known section nor one of the three JSON files. */
 async function strayEntries(contentDir: string, keys: Set<string>) {
   return (await list(contentDir)).filter(e => !(e.isFile() && manualFiles.has(e.name)) && !(e.isDirectory() && keys.has(e.name)));
@@ -153,7 +154,9 @@ export async function syncContent(o: SyncOptions): Promise<SyncReport> {
     const rootItems = await drive.listFolder(config.rootFolderId);
     if (!rootItems.length) throw new Error('Rodmappen er tom, eller synkroniseringskontoen kan ikke se den. Tjek, at det delte drev er delt med servicekontoen');
     const found: { id: string; name: string; order: number; label: string }[] = [];
+    const frontDocs: DriveItem[] = [];
     for (const item of rootItems) {
+      if (isFrontpageDoc(item)) { frontDocs.push(item); continue; }
       if (item.mimeType !== FOLDER) { warn({ section: '(rod)', title: item.name, message: 'Fil direkte i roden; publiceres ikke' }); continue; }
       const parsed = parseSectionName(item.name);
       if (parsed) found.push({ id: item.id, name: item.name, ...parsed });
@@ -227,6 +230,24 @@ export async function syncContent(o: SyncOptions): Promise<SyncReport> {
       catch (error) { fail({ section, title: '_intro', message: `${error instanceof DriveAccessError ? 'Ingen adgang til filen' : message(error)}; introen er uændret` }); }
     }
     for (const section of kinds.keys()) if (!intros.has(section)) introOf.get(section)!.intro = '';
+    // The front page: intro and "Det vigtigste" from the _forside document in the root. Without it the
+    // build uses its built-in defaults; on an error the last version is kept.
+    const priorFrontRaw = await readJson(join(contentDir, FRONTPAGE_FILE));
+    const priorFront = priorFrontRaw === undefined ? undefined : frontpageSchema.parse(priorFrontRaw);
+    let frontpage: Frontpage | undefined;
+    const front = '(forside)';
+    if (frontDocs.length > 1) { fail({ section: front, title: '_forside', message: 'Der må kun ligge ét _forside-dokument i roden; forsiden er uændret' }); frontpage = priorFront; }
+    else if (frontDocs.length === 1 && frontDocs[0]!.mimeType !== GDOC) warn({ section: front, title: frontDocs[0]!.name, message: '_forside skal være et Google-dokument; forsiden bruger standardteksterne' });
+    else if (frontDocs.length === 1) {
+      try {
+        const parsed = await fetchFrontpage(drive, frontDocs[0]!.id);
+        frontpage = parsed.frontpage;
+        for (const p of parsed.problems) warn({ section: front, title: 'Det vigtigste', message: p });
+      } catch (error) {
+        fail({ section: front, title: '_forside', message: `${error instanceof DriveAccessError ? 'Ingen adgang til filen' : message(error)}; forsiden er uændret` });
+        frontpage = priorFront;
+      }
+    }
     // Each news section has exactly one sheet; its published rows become candidates.
     // If the sheet cannot be read or understood, every existing news item in the section is kept.
     for (const [section, found] of sheets) {
@@ -286,6 +307,9 @@ export async function syncContent(o: SyncOptions): Promise<SyncReport> {
       output.set(c.id, { section: c.section, kind: c.kind, id: c.id, title: c.title, updatedAt, fingerprint: fetched.fingerprint, files: fetched.build(updatedAt) });
       if (same) report.unchanged++; else (prior ? report.changed : report.added).push({ section: c.section, id: c.id, title: c.title });
     }
+    for (const s of frontpage?.shortcuts ?? []) if (output.get(s.id)?.kind !== 'gdoc') warn({ section: '(forside)', title: 'Det vigtigste', message: `"${s.label}" linker til et dokument, der ikke er en side på hjemmesiden; punktet vises ikke` });
+    if ((frontpage && serializeFrontpage(frontpage)) !== (priorFront && serializeFrontpage(priorFront)))
+      report.sections.push({ section: '(forside)', title: '_forside', message: frontpage ? 'Forsidens intro eller Det vigtigste er ændret' : 'Forsiden bruger igen standardteksterne' });
     for (const [id, prior] of existing) if (!output.has(id)) report.removed.push({ section: prior.section, id, title: prior.title });
     // Loose files and folders in content/ are cleaned up. _slugs.json keeps its entries, so a
     // returning page, or a section folder restored from the trash, gets its old address back.
@@ -330,6 +354,8 @@ export async function syncContent(o: SyncOptions): Promise<SyncReport> {
     }
     await writeFile(join(staging, '_slugs.json'), serializeSlugs(slugsSchema.parse(slugs)));
     await writeFile(join(staging, '_sections.json'), serializeSections(sections));
+    if (frontpage) await writeFile(join(staging, FRONTPAGE_FILE), serializeFrontpage(frontpage));
+    else await rm(join(staging, FRONTPAGE_FILE), { force: true });
     const check = new Map<string, Entry>();
     for (const [section, kind] of kinds) await readSection(join(staging, section), section, kind, check);
     if (check.size !== output.size || [...output.values()].some(e => check.get(e.id)?.fingerprint !== e.fingerprint)) throw new Error('Intern fejl: staging afviger fra planen');
