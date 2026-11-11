@@ -20,14 +20,15 @@ export const guideMetaSchema = z.strictObject({
 /** What decides whether a page changed. Without keywords it is the body's digest, as before keywords existed. */
 export const guideFingerprint = (body: string, keywords?: string[]) => digest(keywords?.length ? `${JSON.stringify(keywords)}\n${body}` : body);
 export type GuideMeta = z.infer<typeof guideMetaSchema>;
-/** content/<section>/<newsId>.json, one file per published row of the news sheet. */
-export const newsIdPattern = /^[a-zA-Z0-9_-]{3,64}$/;
+/** content/nyheder/<driveId>.json, one file per news document. Images are not supported in news yet. */
 export const newsMetaSchema = z.strictObject({
-  id: z.string().regex(newsIdPattern), title: z.string().min(1).max(300), date: z.iso.date(), expires: z.iso.date().optional(),
+  id: driveIdSchema, title: z.string().min(1).max(300), date: z.iso.date(), expires: z.iso.date().optional(),
   summary: z.string().max(400), body: z.string().min(1).max(20_000), updatedAt: z.iso.datetime(),
+  keywords: z.array(z.string().min(1).max(60)).min(1).max(40).optional(),
 });
 export type NewsMeta = z.infer<typeof newsMetaSchema>;
-export const newsFingerprint = (m: Omit<NewsMeta, 'updatedAt'>) => digest(JSON.stringify([m.id, m.title, m.date, m.expires ?? null, m.summary, m.body]));
+/** Without keywords the fingerprint is the same as before keywords existed. */
+export const newsFingerprint = (m: Omit<NewsMeta, 'updatedAt'>) => digest(JSON.stringify([m.id, m.title, m.date, m.expires ?? null, m.summary, m.body, ...(m.keywords?.length ? [m.keywords] : [])]));
 export const serializeNews = (meta: NewsMeta) => JSON.stringify(newsMetaSchema.parse(meta), null, 2) + '\n';
 export const imageNamePattern = /^[a-f0-9]{16}\.(png|jpg|webp)$/;
 /** Markdown may only reference images in the document's own folder: ./<driveId>/<hash>.<ext> */

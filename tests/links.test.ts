@@ -3,10 +3,8 @@ import { rejects } from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { inlineSchema, safeHref } from '../lib/contracts/blocks';
 import { googleDocsBlocks } from '../lib/google/docs';
-import { sheetRows } from '../lib/google/sheets';
 import { renderBody } from '../lib/site/render';
 import { assertRoundTrip, blocksToMarkdown, validateMarkdown, type SerializableBlock } from '../lib/sync/markdown';
-import { sheetJson } from './helpers/fake-drive';
 
 // Phase 5e: e-mail links. One rule (safeHref) for parser, Markdown validation, rendering and news.
 test('linkreglen: http(s) og mailto til én adresse uden parametre', () => {
@@ -37,9 +35,4 @@ test('mailto overlever rundturen gennem Markdown og renderes som link', () => {
   assertRoundTrip(blocks, validateMarkdown(md, () => false));
   expect(renderBody(md, () => false, u => u)).toBe('<p>Skriv til <a href="mailto:kom@groendalsvaenge.dk" rel="noreferrer"><strong>Kommunikationsudvalget</strong></a>.</p>');
   for (const bad of ['[x](mailto:a@b.dk?bcc=c@d.dk)\n', '[x](mailto:a@b.dk,c@d.dk)\n', '[x](javascript:alert(1))\n']) expect(() => validateMarkdown(bad, () => false)).toThrow('ikke-tilladte');
-});
-
-test('et mailto-link i en celle i nyhedsarket bliver et link; andet bliver tekst', () => {
-  const rows = sheetRows(sheetJson([[{ text: 'Skriv til os', hyperlink: 'mailto:kom@groendalsvaenge.dk' }, { text: 'Skjult', hyperlink: 'mailto:a@b.dk?bcc=c@d.dk' }]]));
-  expect(rows[0]!.map(c => c.runs)).toEqual([[{ text: 'Skriv til os', href: 'mailto:kom@groendalsvaenge.dk' }], [{ text: 'Skjult' }]]);
 });

@@ -2,25 +2,25 @@ import { cp, mkdir, readdir, readFile, rename, rm, writeFile } from 'node:fs/pro
 import { dirname, join } from 'node:path';
 import { z } from 'zod';
 import { googleDocsBlocks } from '../google/docs';
-import { sheetRows } from '../google/sheets';
 import { acquireLock } from '../lock';
 import type { SiteConfig } from './config';
 import { digest, guideFingerprint, guideMetaSchema, imageFormat, localImage, MAX_IMAGE_BYTES, MAX_IMAGES, newsFingerprint, newsMetaSchema, serializeNews } from './content';
-import { DriveAccessError, FOLDER, GDOC, SHEET, SHORTCUT, type DriveItem, type DriveSource } from './drive';
+import { DriveAccessError, FOLDER, GDOC, SHORTCUT, type DriveItem, type DriveSource } from './drive';
 import { assertRoundTrip, blocksToMarkdown, extractKeywords, flattenBlocks, plainText, splitFrontmatter, summaryOf, validateMarkdown, withFrontmatter, type SerializableBlock } from './markdown';
 import { fetchFrontpage, FRONTPAGE_FILE, frontpageSchema, isFrontpageDoc, serializeFrontpage, type Frontpage } from './frontpage';
-import { parseNews, type NewsRow } from './news';
+import { extractNewsDates, NEWS_SECTION } from './news';
+import { copenhagenDay } from '../site/sections';
 import { emptyReport, type ReportEntry, type SyncReport } from './report';
 import { manualRedirectsSchema, parseSectionName, sectionKey, sectionsSchema, serializeSections, type Kind, type SectionEntry, type Sections } from './sections';
 import { pathOf, serializeSlugs, slugify, slugsSchema, takenPaths, type Slugs } from './slugs';
 
 export interface SyncOptions { config: SiteConfig; drive: DriveSource; contentDir: string; allowMassRemoval?: boolean; now?: Date }
 export type { Kind } from './sections';
-/** A file, or for notices one published row of the section's news sheet (item = the sheet). */
-interface Candidate { section: string; kind: Kind; id: string; title: string; item: DriveItem; news?: NewsRow }
+/** One Google document: a page, or a news item in the news section. */
+interface Candidate { section: string; kind: Kind; id: string; title: string; item: DriveItem }
 /** Everything one published item consists of, as files relative to its section folder. */
 export interface Entry { section: string; kind: Kind; id: string; title: string; updatedAt: string; fingerprint: string; files: Map<string, Uint8Array> }
-interface Fetched { fingerprint: string; build(updatedAt: string): Map<string, Uint8Array> }
+interface Fetched { fingerprint: string; build(updatedAt: string): Map<string, Uint8Array>; date?: string }
 
 const isMissing = (error: unknown) => (error as NodeJS.ErrnoException).code === 'ENOENT';
 const message = (error: unknown) => error instanceof Error ? error.message : String(error);
@@ -118,13 +118,19 @@ async function fetchGuide(drive: DriveSource, c: Candidate): Promise<Fetched> {
     [`${c.id}.md`, utf8(withFrontmatter({ id: c.id, title: c.title, updatedAt, summary, ...(keywords.length ? { keywords } : {}) }, body))],
     ...[...images].map(([name, bytes]) => [`${c.id}/${name}`, bytes] as [string, Uint8Array])]) };
 }
-/** One sheet row → the same validated Markdown dialect; no images in news. */
-async function fetchNotice(_drive: DriveSource, c: Candidate): Promise<Fetched> {
-  const row = c.news!, blocks: SerializableBlock[] = row.paragraphs.map(content => ({ type: 'paragraph', content }));
-  const body = blocksToMarkdown(blocks, () => { throw new Error('Nyheder kan ikke have billeder'); });
+/** A news document → the same validated Markdown dialect. "Dato:" and "Vises til:" lines set the dates;
+ * without "Dato:" an item keeps the date it was first published with, and a new item gets today's. */
+async function fetchNotice(drive: DriveSource, c: Candidate, firstDate: string): Promise<Fetched> {
+  const { bodyBlocks } = await googleDocsBlocks(await drive.readDocument(c.id), c.id, async () => { throw new Error('Billeder i nyheder understøttes ikke endnu; fjern billedet fra dokumentet'); });
+  const dated = extractNewsDates(bodyBlocks as SerializableBlock[]);
+  const { blocks, keywords } = extractKeywords(dated.blocks);
+  if (!blocks.some(b => b.type !== 'separator')) throw new Error('Nyheden har ingen tekst');
+  const body = blocksToMarkdown(blocks, () => { throw new Error('Billeder i nyheder understøttes ikke endnu'); });
   assertRoundTrip(blocks, validateMarkdown(body, () => false));
-  const meta = { id: c.id, title: c.title, date: row.date, ...(row.expires ? { expires: row.expires } : {}), summary: summaryOf(blocks), body };
-  return { fingerprint: newsFingerprint(meta), build: updatedAt => new Map([[`${c.id}.json`, utf8(serializeNews({ ...meta, updatedAt }))]]) };
+  const date = dated.date ?? firstDate;
+  if (dated.expires && dated.expires < date) throw new Error('"Vises til" ligger før datoen');
+  const meta = { id: c.id, title: c.title, date, ...(dated.expires ? { expires: dated.expires } : {}), summary: summaryOf(blocks), body, ...(keywords.length ? { keywords } : {}) };
+  return { date, fingerprint: newsFingerprint(meta), build: updatedAt => new Map([[`${c.id}.json`, utf8(serializeNews({ ...meta, updatedAt }))]]) };
 }
 
 /** The _intro document of a section: its paragraphs as plain text. Headings, lists and tables are left out. */
@@ -134,7 +140,6 @@ async function fetchIntro(drive: DriveSource, id: string) {
   if (text.length > 2000) throw new Error('Introen er for lang (højst 2000 tegn)');
   return text;
 }
-const isSheet = (i: DriveItem) => i.mimeType === SHEET || (i.mimeType === SHORTCUT && i.shortcutDetails?.targetMimeType === SHEET);
 const isIntro = (i: DriveItem) => i.name.normalize('NFC').trim().toLowerCase() === '_intro';
 const compareId = <T extends { id: string }>(a: T, b: T) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
 
@@ -182,7 +187,7 @@ export async function syncContent(o: SyncOptions): Promise<SyncReport> {
         if (key !== base) warn({ section: key, title: f.name, message: `Adressen /${base}/ er optaget; sektionen får /${key}/` });
         taken.add(key);
       }
-      const kind: Kind = folderListings.get(f.id)!.some(isSheet) ? 'notice' : 'gdoc';
+      const kind: Kind = key === NEWS_SECTION ? 'notice' : 'gdoc';
       sections[f.id] = { key, label: f.label, order: f.order, kind, intro: (known.file ? known.file[f.id]?.intro : known.byKey.get(key)?.intro) ?? '' };
     }
     const kinds = new Map(Object.values(sections).map(s => [s.key, s.kind]));
@@ -196,7 +201,6 @@ export async function syncContent(o: SyncOptions): Promise<SyncReport> {
 
     // 2. Resolve shortcuts and filter by type. Only direct children of a section are considered.
     const candidates: Candidate[] = [];
-    const sheets = new Map([...kinds].filter(([, kind]) => kind === 'notice').map(([section]) => [section, [] as DriveItem[]]));
     const intros = new Map<string, DriveItem[]>();
     for (const [section, items] of listings) for (const item of items) {
       const kind = kinds.get(section)!;
@@ -215,8 +219,7 @@ export async function syncContent(o: SyncOptions): Promise<SyncReport> {
         }
         if (target.trashed) { warn({ section, id: target.id, title: item.name, message: 'Målfilen ligger i papirkurven; siden fjernes' }); continue; }
       }
-      if (target.mimeType !== { gdoc: GDOC, notice: SHEET }[kind]) { warn({ section, id: target.id, title: item.name, message: `Filtypen ${target.mimeType} accepteres ikke i ${section}` }); continue; }
-      if (kind === 'notice') { sheets.get(section)!.push(target); continue; }
+      if (target.mimeType !== GDOC) { warn({ section, id: target.id, title: item.name, message: `Filtypen ${target.mimeType} accepteres ikke i ${section}` }); continue; }
       const title = item.name.normalize('NFC').trim();
       if (!title) { fail({ section, id: target.id, title: item.name, message: 'Tom titel' }); keep.add(target.id); continue; }
       candidates.push({ section, kind, id: target.id, title, item: target });
@@ -248,25 +251,6 @@ export async function syncContent(o: SyncOptions): Promise<SyncReport> {
         frontpage = priorFront;
       }
     }
-    // Each news section has exactly one sheet; its published rows become candidates.
-    // If the sheet cannot be read or understood, every existing news item in the section is kept.
-    for (const [section, found] of sheets) {
-      const keepSection = () => { for (const e of existing.values()) if (e.section === section) keep.add(e.id); };
-      if (found.length !== 1) {
-        if (found.length) { fail({ section, title: found.map(s => s.name).join(', '), message: 'Der må kun ligge ét nyhedsark i mappen; nyhederne er uændrede' }); keepSection(); }
-        else warn({ section, title: '(nyhedsark)', message: 'Der ligger intet nyhedsark i mappen' });
-        continue;
-      }
-      const sheet = found[0]!;
-      let parsed: ReturnType<typeof parseNews>;
-      try { parsed = parseNews(sheetRows(await drive.readSheet(sheet.id))); }
-      catch (error) { fail({ section, title: sheet.name, message: `${error instanceof DriveAccessError ? 'Synkroniseringskontoen kan ikke læse arket' : message(error)}; nyhederne er uændrede` }); keepSection(); continue; }
-      for (const p of parsed.problems) {
-        (p.warning ? warn : fail)({ section, title: p.title, ...(p.id ? { id: p.id } : {}), message: p.message });
-        if (p.id) keep.add(p.id);
-      }
-      for (const row of parsed.rows) candidates.push({ section, kind: 'notice', id: row.id, title: row.title, item: sheet, news: row });
-    }
     const byId = Map.groupBy(candidates, c => c.id), byLower = Map.groupBy([...new Set([...byId.keys(), ...existing.keys()])], id => id.toLowerCase());
     const unique = candidates.filter(c => {
       const clash = byId.get(c.id)!.length > 1 || byLower.get(c.id.toLowerCase())!.length > 1;
@@ -277,10 +261,16 @@ export async function syncContent(o: SyncOptions): Promise<SyncReport> {
     // 3. Fetch, convert, verify and assign slugs. Failures keep the last valid version.
     const output = new Map<string, Entry>();
     const keepPrior = (id: string) => { const prior = existing.get(id); if (prior) output.set(id, prior); };
+    // The date a news item was published with last time; a new item without a "Dato:" line gets today's.
+    const today = copenhagenDay(o.now ?? new Date());
+    const priorDate = (id: string) => {
+      const prior = existing.get(id);
+      return prior?.kind === 'notice' ? newsMetaSchema.parse(JSON.parse(Buffer.from(prior.files.get(`${id}.json`)!).toString('utf8'))).date : undefined;
+    };
     keep.forEach(keepPrior);
     for (const c of unique) {
       let fetched: Fetched;
-      try { fetched = await { gdoc: fetchGuide, notice: fetchNotice }[c.kind](drive, c); }
+      try { fetched = c.kind === 'notice' ? await fetchNotice(drive, c, priorDate(c.id) ?? today) : await fetchGuide(drive, c); }
       catch (error) {
         keepPrior(c.id);
         fail({ section: c.section, id: c.id, title: c.title, message: `${error instanceof DriveAccessError ? 'Ingen adgang til filen' : message(error)}; sidste gyldige version beholdes` });
@@ -291,7 +281,7 @@ export async function syncContent(o: SyncOptions): Promise<SyncReport> {
       // New, returning and moved files must claim their path; a page already live there keeps it.
       if (!entry || entry.section !== c.section || existing.get(c.id)?.section !== c.section) {
         // News slugs start with the date, so recurring titles ("Generalforsamling") do not collide.
-        const slug = entry?.slug ?? slugify(c.news ? `${c.news.date} ${c.title}` : c.title, c.id);
+        const slug = entry?.slug ?? slugify(fetched.date ? `${fetched.date} ${c.title}` : c.title, c.id);
         const path = pathOf({ section: c.section, slug });
         if (takenPaths(slugs, active, c.id).has(path)) {
           keepPrior(c.id);

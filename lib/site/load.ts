@@ -48,7 +48,7 @@ export async function loadSite(root = '.', buildAt = new Date(process.env.BUILD_
     if (entry.kind === 'notice') {
       const meta = newsMetaSchema.parse(JSON.parse(Buffer.from(entry.files.get(`${entry.id}.json`)!).toString('utf8')));
       if (meta.date > buildDay || (meta.expires && meta.expires < buildDay)) continue;
-      const base = { ...common, search: searchText(meta.body, []) };
+      const base = { ...common, search: searchText(meta.body, meta.keywords ?? []) };
       const html = renderBody(meta.body, () => false, () => { throw new Error('Nyheder kan ikke have billeder'); });
       items.push({ ...base, kind: 'notice', summary: meta.summary, html, date: meta.date, ...(meta.expires ? { expires: meta.expires } : {}) });
     } else {
@@ -98,8 +98,8 @@ export async function loadSite(root = '.', buildAt = new Date(process.env.BUILD_
     sources.add(from);
   }
   redirects.sort((a, b) => a.from < b.from ? -1 : 1);
-  // Drive IDs must never reach the output; news IDs are editor-facing and not secret.
-  const internalIds = [...entries.values()].filter(e => e.kind !== 'notice').map(e => e.id);
+  // Drive IDs must never reach the output. News items are Google documents too.
+  const internalIds = [...entries.values()].map(e => e.id);
   return { frontpage: { intro }, sections, items, redirects, links, assets, warnings, internalIds, buildDay, origin: new URL(config.siteUrl).origin };
 }
 

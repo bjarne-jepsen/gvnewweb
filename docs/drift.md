@@ -118,12 +118,23 @@ En mappe i roden, hvis navn starter med et tal, er en sektion på sitet. Se regl
 | Slet mappen, flyt den ud af roden eller fjern tallet | Sektionen og dens sider forsvinder. Kræver *Publicér og tillad sletning* |
 | Læg et Google-dokument med navnet `_intro` i mappen | Dokumentets afsnit bliver sektionens intro |
 | Skriv et afsnit `Søgeord: trailer, telt` i et dokument | Afsnittet vises ikke. Søgningen finder siden på de ord |
+| Læg et Google-dokument i nyhedsmappen | En ny nyhed. Datoen er dagen for første publicering, medmindre dokumentet har et afsnit `Dato: 21.10.2026` |
+| Flyt en nyhed til en mappe uden tal, fx "Nyhedskladder" | Nyheden forsvinder fra sitet |
 | Læg et Google-dokument med navnet `_forside` i roden | Afsnittene bliver forsidens intro. Punkter med link til en side bliver "Det vigtigste" |
 
 En sektion, der hentes tilbage fra papirkurven, får sine gamle adresser igen. En ny mappe med samme navn som en eksisterende sektion får `-2` i adressen. En sektions adresse kan i dag ikke ændres uden at flytte siderne til en ny mappe.
 
+## Skift fra nyhedsarket til dokumenter (november 2026)
+
+Nyheder skrives nu som ét Google-dokument pr. nyhed (se README under "Nyheder"). Ved skiftet:
+
+1. Slet nyhedsarket i nyhedsmappen. Ligger det der stadig, giver det en advarsel, men det publiceres ikke.
+2. Opret mappen `Nyhedskladder` i roden af fællesdrevet, uden tal foran.
+3. Den første kørsel efter skiftet fjerner de to testnyheder fra arket. Det er hele nyhedssektionen, så kørslen skal startes med *Publicér og tillad sletning*.
+
 ## Kendte begrænsninger
 
+- **Dato-chips:** En dato indsat med @ i Google Docs understøttes ikke, og dokumentet publiceres ikke. Skriv datoen som almindelig tekst, fx `Dato: 21.10.2026`.
 - **Ikke afprøvet mod Cloudflare og Google.** `_redirects`, `_headers` og uploaden er kun testet lokalt og med `wrangler --help`. Første kørsel viser, om opsætningen er rigtig.
 - **Tokenet i arket er bundet til Bjarnes GitHub-konto.** Når foreningen overtager repo'et, skal der laves et nyt token. Det samme gælder Cloudflare-kontoen.
 - **Admin får ingen besked, hvis kørslen fejler.** GitHub sender en e-mail til repo-ejeren. Rapporten står i kørslens oversigt.

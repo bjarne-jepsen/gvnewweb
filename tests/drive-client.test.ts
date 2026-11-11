@@ -36,7 +36,7 @@ test('listFolder afviser ufuldstændige, gentagne og ugyldige listninger', async
 test('404 bliver til DriveAccessError uden token; andre fejl afbryder', async () => {
   const secret = 'SENSITIVE_TOKEN_CANARY';
   const client = new GoogleReadClient(secret, async () => new Response(`private ${secret}`, { status: 404 }));
-  for (const call of [() => client.getFile('abc'), () => client.readDocument('abc'), () => client.readSheet('abc'), () => client.listFolder('abc')]) {
+  for (const call of [() => client.getFile('abc'), () => client.readDocument('abc'), () => client.listFolder('abc')]) {
     await rejects(call(), error => { expect(error).toBeInstanceOf(DriveAccessError); expect(String(error)).not.toContain(secret); return true; });
   }
   await rejects(new GoogleReadClient(secret, async () => new Response('x', { status: 500 })).getFile('abc'), error => !(error instanceof DriveAccessError) && /HTTP 500/.test(String(error)));
@@ -51,17 +51,6 @@ test('readDocument henter altid uden forslag og med alle faner', async () => {
   expect(seen!.searchParams.get('includeTabsContent')).toBe('true');
   await rejects(new GoogleReadClient('t', async () => new Response('', { status: 404 })).readDocument('doc'), DriveAccessError);
   await rejects(client.readDocument('../x'));
-});
-
-test('readSheet henter grid data fra Sheets API med GET', async () => {
-  let seen: URL | undefined;
-  const client = new GoogleReadClient('t', async (url, init) => { expect(init.method).toBe('GET'); seen = new URL(url); return Response.json({ sheets: [] }); });
-  expect(await client.readSheet('sheet_1')).toEqual({ sheets: [] });
-  expect(seen!.origin + seen!.pathname).toBe('https://sheets.googleapis.com/v4/spreadsheets/sheet_1');
-  expect(seen!.searchParams.get('includeGridData')).toBe('true');
-  expect(seen!.searchParams.get('fields')).toContain('textFormatRuns');
-  await rejects(new GoogleReadClient('t', async () => new Response('', { status: 404 })).readSheet('s'), DriveAccessError);
-  await rejects(client.readSheet('../x'));
 });
 
 test('fejl viser hverken HTTP-svar, token eller rå netværksfejl', async () => {
