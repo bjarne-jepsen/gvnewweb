@@ -87,7 +87,7 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect(home).toContain('<div class="search" data-search hidden>');
   // CVI (docs/cvi.md): the favicon is a data URI, so it adds no output file; header and footer carry the name as text.
   expect(home).toContain('<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,');
-  expect(home).toContain('<a class="brand" href="/" aria-current="page"><span class="brand-sub">Andelsboligforeningen</span><span class="brand-name">Grøndalsvænge</span></a>');
+  expect(home).toContain('<a class="brand" href="/" aria-current="page"><span class="brand-name">Andelsboligforeningen</span><span class="brand-sub">Grøndalsvænge</span></a>');
   expect(home).toContain('<p class="footer-name">Grøndalsvænge</p>');
   expect(home).toMatch(/<link rel="stylesheet" href="\/_astro\/[^"]+\.css">/);
 
