@@ -10,6 +10,10 @@ const base = { section: z.string(), slug: z.string(), path, title: z.string(), u
   search: z.object({ headings: z.array(z.string()), text: z.string(), keywords: z.array(z.string()) }) };
 
 export const collections = {
+  frontpage: defineCollection({
+    loader: async () => [{ id: 'forside', ...(await load()).frontpage }],
+    schema: z.object({ intro: z.string() }),
+  }),
   sections: defineCollection({
     loader: async () => (await load()).sections.map(s => ({ id: s.key, ...s })),
     schema: z.object({ key: z.string(), order: z.number(), label: z.string(), intro: z.string(), path, news: z.boolean() }),
