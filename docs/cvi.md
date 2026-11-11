@@ -68,7 +68,7 @@ Der bruges kun systemfonte: `--font-sans: "Helvetica Neue", Helvetica, Arial, sa
 
 **Billeder.** I fuld tekstbredde, uden radius, ramme eller skygge.
 
-**Forside.** Uændret layout fra version 1, men med de nye fonte og farver. Genvejene er lysegrå fliser med fed tekst og grøn pil. Nyhedskort har en streg i blæk foroven.
+**Forside.** Øverst "Velkommen" meget stort med ingressen til højre og en streg i blæk under, som på landingssiderne. Derunder to spalter (fra 60rem): til venstre "Seneste nyt", hvor den nyeste nyhed står stort med dato og resumé og de to næste som en liste med dato; til højre "Det vigtigste" som et grønt panel med hvide links på linjer og en pil. På smalle skærme står nyhederne først og panelet under. Spalteoverskrifterne er små versaler med spatiering. Hvid tekst på grøn er en af de godkendte kombinationer, og fokusringen er hvid i panelet.
 
 **Landingssider (sektioner).** Bygger på Bjarnes mockup "Landingsside Fællesskab" (november 2026). Øverst står sektionens navn meget stort (`--text-display`, op til 6rem, 400 / 0,95) med ingressen fra `_intro` til højre og en streg i blæk under. Derunder har hver side et kort med billede, titel (H2) og første afsnit. Hele kortet er klikbart, men kun titlen er linket. Alle kort er lige store og har et billede i 3:2. De står tre på en række på brede skærme (fra 64rem), to på mellemstore (fra 40rem) og under hinanden på smalle. Det skæve grid fra mockuppen er sat på pause, indtil det er besluttet, hvordan billedernes format skal styres. Kortene har ingen numre. Rækkefølgen er stadig alfabetisk. Nyhedssektionen beholder sine nyhedskort.
 

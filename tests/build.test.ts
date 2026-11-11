@@ -68,8 +68,10 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect(first.log).toContain('Forsiden: "Sælg dit hus" → /bo-her/saelg-dit-hus/ springes over, fordi siden ikke findes');
   expect([...home.matchAll(/href="(\/nyheder\/[^"]+)"/g)].map(m => m[1])).toEqual(['/nyheder/2026-10-20-vandet-lukkes/', '/nyheder/2026-09-01-aeldre-nyhed-a/', '/nyheder/2026-08-01-aeldre-nyhed-b/']);
   expect(home).not.toContain('OLDEST_NEWS');
-  // CVI L2: the news are cards. The menu covers the sections, so the front page has no section overview and no visible welcome heading.
-  expect(home.match(/<ul class="entries cards">/g)).toHaveLength(1);
+  // The newest news is set large, the next two as a list. The menu covers the sections, so the front page has no section overview.
+  expect(home.match(/<article class="news-lead">/g)).toHaveLength(1);
+  expect(home.match(/<ul class="news-list">/g)).toHaveLength(1);
+  expect(home.indexOf('id="seneste-nyt"')).toBeLessThan(home.indexOf('id="genveje"'));
   expect(home).toContain('<p class="more"><a href="/nyheder/">Alle nyheder</a></p>');
   expect(home).not.toContain('class="sections"'); expect(home).not.toContain('Find rundt');
   expect(home).toContain('<h1>Velkommen</h1>'); expect(home).not.toContain('Lokal prototype med');
