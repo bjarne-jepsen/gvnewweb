@@ -4,8 +4,8 @@
 export const frontpage = {
   intro: 'Grøndalsvænge er en andelsboligforening med 389 fritliggende huse, bygget 1914–1928 på grænsen mellem Vanløse og København NV.',
   shortcuts: [
+    { label: 'Hjertestarter', path: '/faellesskab/hjertestarter/' },
     { label: 'Kontakt', path: '/foreningen/kontakt/' },
-    { label: 'Sådan får du et hus', path: '/om-groendalsvaenge/saadan-faar-du-et-hus/' },
     { label: 'Sælg dit hus', path: '/bo-her/saelg-dit-hus/' },
     { label: 'Planlægger du at bygge?', path: '/bo-her/planlaegger-du-at-bygge/' },
     { label: 'Forsikringsskader', path: '/bo-her/forsikringsskader/' },
