@@ -7,8 +7,8 @@ export async function getStaticPaths() {
   return (await getCollection('sections')).map(({ data: section }) => ({ params: { section: section.key }, props: { section, entries: items.filter(i => i.section === section.key) } }));
 }
 const { section, entries } = Astro.props;
-// A news section shows its notices as cards. Other sections are landing pages: a large title, the intro
-// from _intro as running text with links, and a plain list of the section's pages (docs/cvi.md).
+// A news section shows its notices as cards. Other sections are landing pages: a large title with the intro
+// from _intro beside it, as running text with links. The menu lists the pages, so there are no tiles (docs/cvi.md).
 // introHtml is rendered from validated Markdown at build time (lib/site/load.ts), with every text escaped.
 const news = entries.length > 0 && entries.every(e => e.kind === 'notice');
 ---
@@ -19,13 +19,9 @@ const news = entries.length > 0 && entries.every(e => e.kind === 'notice');
     <Fragment set:html={section.introHtml} />
     <Entries heading="h2" cards entries={entries} />
   </> : <>
-    <div class="landing-head"><h1>{section.label}</h1></div>
-    <div class:list={['landing-body', { 'no-intro': !section.introHtml }]}>
+    <div class="landing-head">
+      <h1>{section.label}</h1>
       {section.introHtml && <div class="landing-intro"><Fragment set:html={section.introHtml} /></div>}
-      <section class="landing-pages" aria-labelledby="sider-i-sektionen">
-        <h2 id="sider-i-sektionen" class="front-label">Sider i {section.label}</h2>
-        <Entries entries={entries} empty="Der er ingen offentliggjorte sider her endnu." />
-      </section>
     </div>
   </>}
 </Base>

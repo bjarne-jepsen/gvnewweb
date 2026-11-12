@@ -98,18 +98,13 @@ main { min-height: 60vh; padding-block: clamp(2.5rem, 6vw, 5.5rem) 7.5rem; overf
 .more a::after { content: "→"; transition: transform .15s; }
 .more a:hover::after { transform: translateX(.2em); }
 
-/* Section landing pages: a large title over a line, then the intro as running text and a list of the
-   section's pages. Side by side from 60rem, the list to the right; on narrow screens the list follows the intro. */
-.landing-head { padding-bottom: var(--space-l); border-bottom: 1px solid var(--color-ink); margin-bottom: clamp(2.5rem, 5vw, 4.5rem); }
-.landing-head h1 { font-size: var(--text-display); line-height: .95; letter-spacing: -.045em; max-width: none; margin: 0; hyphens: auto; }
-.landing-body { display: grid; gap: var(--space-xl); }
-.landing-intro .intro { max-width: 40rem; }
-.landing-intro .intro:last-child { margin-bottom: 0; }
-.landing-pages .entries { margin: 0; }
-.landing-pages .entries > li { padding-block: var(--space-m); }
-.landing-pages .entries h3 { margin: 0 0 var(--space-2xs); font-size: var(--text-h3); }
-.landing-pages .entries p { margin: 0; font-size: 1rem; }
-@media (min-width: 60rem) { .landing-body:not(.no-intro) { grid-template-columns: 7fr 5fr; gap: clamp(3rem, 6vw, 6rem); } }
+/* Section landing pages: a large title with the intro beside it. The intro can run to several
+   paragraphs; from 50rem it stands to the right of the title, on narrow screens under it. */
+.landing-head { display: grid; gap: 1.75rem; align-items: start; padding-bottom: var(--space-2xl, 4rem); }
+.landing-head h1 { font-size: var(--text-display); line-height: .95; letter-spacing: -.045em; max-width: none; margin: 0; hyphens: manual; overflow-wrap: break-word; }
+.landing-intro .intro { font-size: 1.25rem; line-height: 1.5; max-width: 44ch; margin: 0; }
+.landing-intro .intro + .intro { margin-top: var(--space-m); }
+@media (min-width: 50rem) { .landing-head { grid-template-columns: 6fr 6fr; gap: var(--space-xl); } }
 
 /* Content pages: breadcrumb, article and the body text from lib/site/render.ts. */
 .crumbs { margin: 0 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-muted); }
