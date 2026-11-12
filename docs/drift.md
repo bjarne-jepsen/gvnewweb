@@ -116,7 +116,7 @@ En mappe i roden, hvis navn starter med et tal, er en sektion på sitet. Se regl
 | Omdøb "20 Bo her" til "20 Bo i Grøndalsvænge" | Nyt menunavn. Adressen er stadig `/bo-her/` |
 | Skift 20 til 15 | Kun rækkefølgen i menuen ændres |
 | Slet mappen, flyt den ud af roden eller fjern tallet | Sektionen og dens sider forsvinder. Kræver *Publicér og tillad sletning* |
-| Læg et Google-dokument med navnet `_intro` i mappen | Første afsnit er en kort ingres ved siden af titlen (højst ca. 200 tegn). De næste afsnit står som brødtekst under titlen. Links til andre Google-dokumenter og til sektionsmapper bliver links på hjemmesiden. Højst 2000 tegn i alt |
+| Læg et Google-dokument med navnet `_intro` i mappen | Første afsnit er en kort ingres ved siden af titlen (højst ca. 200 tegn). De næste afsnit står som brødtekst under titlen. Overskrifter (fx Overskrift 2) efter første afsnit vises som mellemrubrikker; en overskrift før første afsnit vises ikke. Links til andre Google-dokumenter og til sektionsmapper bliver links på hjemmesiden. Højst 2000 tegn i alt |
 | Skriv et afsnit `Søgeord: trailer, telt` i et dokument | Afsnittet vises ikke. Søgningen finder siden på de ord |
 | Læg et Google-dokument i nyhedsmappen | En ny nyhed. Datoen er dagen for første publicering, medmindre dokumentet har et afsnit `Dato: 21.10.2026` |
 | Flyt en nyhed til en mappe uden tal, fx "Nyhedskladder" | Nyheden forsvinder fra sitet |

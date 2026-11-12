@@ -133,17 +133,21 @@ async function fetchNotice(drive: DriveSource, c: Candidate, firstDate: string):
   return { date, fingerprint: newsFingerprint(meta), build: updatedAt => new Map([[`${c.id}.json`, utf8(serializeNews({ ...meta, updatedAt }))]]) };
 }
 
-/** The _intro document of a section: its paragraphs as Markdown (the first is the short lead), so links and bold survive. Headings,
- * lists and tables are left out. Links to other Google Docs and to section folders become site links at build time. */
+/** The _intro document of a section: its paragraphs and headings as Markdown (the first paragraph is the short
+ * lead), so links and bold survive. Every heading becomes an H2 on the landing page, whatever its level in
+ * Docs; a heading before the first paragraph is left out, since the lead stands beside the title. Lists and
+ * tables are left out. Links to other Google Docs and to section folders become site links at build time. */
 async function fetchIntro(drive: DriveSource, id: string) {
   const { bodyBlocks } = await googleDocsBlocks(await drive.readDocument(id), id, async () => { throw new Error('Introen kan ikke have billeder'); });
-  const paragraphs = flattenBlocks(bodyBlocks as SerializableBlock[]).flatMap(b => b.type === 'paragraph' && plainText(b.content).trim()
-    ? [{ ...b, content: b.content.map(r => ({ ...r, text: r.text.replace(/\s+/g, ' ') })) }] : []);
-  if (paragraphs.map(b => plainText(b.content).trim()).join('\n\n').length > 2000) throw new Error('Introen er for lang (højst 2000 tegn)');
-  const text = blocksToMarkdown(paragraphs, () => { throw new Error('Introen kan ikke have billeder'); }).trim();
-  assertRoundTrip(paragraphs, validateMarkdown(text, () => false));
+  const kept = flattenBlocks(bodyBlocks as SerializableBlock[]).flatMap(b => (b.type === 'paragraph' || b.type === 'heading') && plainText(b.content).trim()
+    ? [{ ...b, ...(b.type === 'heading' ? { level: 2 } : {}), content: b.content.map(r => ({ ...r, text: r.text.replace(/\s+/g, ' ') })) }] : []);
+  const first = kept.findIndex(b => b.type === 'paragraph');
+  const blocks = first < 0 ? [] : kept.slice(first);
+  if (blocks.map(b => plainText(b.content).trim()).join('\n\n').length > 2000) throw new Error('Introen er for lang (højst 2000 tegn)');
+  const text = blocksToMarkdown(blocks, () => { throw new Error('Introen kan ikke have billeder'); }).trim();
+  assertRoundTrip(blocks, validateMarkdown(text, () => false));
   if (text.length > INTRO_MAX) throw new Error('Introen har for mange eller for lange links');
-  return { text, leadLength: paragraphs.length ? plainText(paragraphs[0]!.content).trim().length : 0 };
+  return { text, leadLength: blocks.length ? plainText(blocks[0]!.content).trim().length : 0, droppedHeadings: (first < 0 ? kept : kept.slice(0, first)).length };
 }
 const LEAD_MAX = 200;
 const isIntro = (i: DriveItem) => i.name.normalize('NFC').trim().toLowerCase() === '_intro';
@@ -236,9 +240,10 @@ export async function syncContent(o: SyncOptions): Promise<SyncReport> {
       if (docs.length > 1) { fail({ section, title: '_intro', message: 'Der må kun ligge ét _intro-dokument i mappen; introen er uændret' }); continue; }
       if (docs[0]!.mimeType !== GDOC) { warn({ section, title: docs[0]!.name, message: '_intro skal være et Google-dokument; sektionen vises uden intro' }); target.intro = ''; continue; }
       try {
-        const { text, leadLength } = await fetchIntro(drive, docs[0]!.id);
+        const { text, leadLength, droppedHeadings } = await fetchIntro(drive, docs[0]!.id);
         target.intro = text;
         // The first paragraph stands beside the title on the landing page; the rest goes under it.
+        if (droppedHeadings) warn({ section, title: '_intro', message: 'En overskrift før første afsnit vises ikke: første afsnit står ved siden af titlen. Flyt overskriften ned under første afsnit' });
         if (leadLength > LEAD_MAX) warn({ section, title: '_intro', message: `Første afsnit står ved siden af titlen og bør højst være ${LEAD_MAX} tegn (det er ${leadLength}). Skriv den lange tekst i de næste afsnit` });
       }
       catch (error) { fail({ section, title: '_intro', message: `${error instanceof DriveAccessError ? 'Ingen adgang til filen' : message(error)}; introen er uændret` }); }

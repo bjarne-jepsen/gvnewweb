@@ -34,7 +34,7 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   await symlink(resolve('node_modules'), join(root, 'node_modules'), 'dir');
   await mkdir(join(root, 'config')); await writeFile(join(root, 'config/site.json'), JSON.stringify(config));
   for (const [key, name] of [['foreningen', '10 Foreningen'], ['bo-her', '20 Bo her'], ['nyheder', '90 Nyheder'], ['redaktion', 'redaktion']]) drive.folder(`f-${key}`, name!, 'root');
-  drive.gdoc('intro', '_intro', 'f-foreningen', docJson('intro', [{ text: 'Bestyrelse og regler.' }, { text: 'Skriv til os.' }]));
+  drive.gdoc('intro', '_intro', 'f-foreningen', docJson('intro', [{ text: 'Bestyrelse og regler.' }, { text: 'Kontakt', style: 'HEADING_2' }, { text: 'Skriv til os.' }]));
   drive.folder('internt', 'Internt', 'elsewhere');
   drive.gdoc('target-doc', 'Lokaleleje_intern_v3', 'internt', docJson('target-doc', [{ text: 'Sådan lejer du lokalerne.' }]));
   drive.shortcut('sc-doc', 'Leje af lokaler', 'f-bo-her', 'target-doc');
@@ -111,7 +111,7 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect(await html('foreningen/index.html')).not.toContain('<img');
   expect(await html('foreningen/index.html')).not.toContain('class="entries"');
   // The intro comes from the folder's _intro document: every paragraph on the section page.
-  expect(await html('foreningen/index.html')).toContain('<div class="landing-intro"><p class="intro">Bestyrelse og regler.</p></div> </div> <div class="landing-text"><p>Skriv til os.</p></div>');
+  expect(await html('foreningen/index.html')).toContain('<div class="landing-intro"><p class="intro">Bestyrelse og regler.</p></div> </div> <div class="landing-text"><h2 id="kontakt">Kontakt</h2>\n<p>Skriv til os.</p></div>');
   expect(await html('nyheder/index.html')).toContain('<ul class="entries cards"><li>');
   expect(await readFile(dist(`foreningen/om-foreningen/${image}`))).toEqual(png);
   for (const path of await walk(join(root, 'dist'))) expect((await readFile(path)).toString()).not.toMatch(/CANARY|target-doc|doc-1/);
