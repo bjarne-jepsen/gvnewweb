@@ -16,7 +16,7 @@ export const collections = {
   }),
   sections: defineCollection({
     loader: async () => (await load()).sections.map(s => ({ id: s.key, ...s })),
-    schema: z.object({ key: z.string(), order: z.number(), label: z.string(), introHtml: z.string(), path, news: z.boolean() }),
+    schema: z.object({ key: z.string(), order: z.number(), label: z.string(), leadHtml: z.string(), bodyHtml: z.string(), path, news: z.boolean() }),
   }),
   items: defineCollection({
     loader: async () => (await load()).items,
