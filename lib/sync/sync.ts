@@ -133,7 +133,7 @@ async function fetchNotice(drive: DriveSource, c: Candidate, firstDate: string):
   return { date, fingerprint: newsFingerprint(meta), build: updatedAt => new Map([[`${c.id}.json`, utf8(serializeNews({ ...meta, updatedAt }))]]) };
 }
 
-/** The _intro document of a section: its paragraphs as Markdown, so links and bold survive. Headings,
+/** The _intro document of a section: its paragraphs as Markdown (the first is the short lead), so links and bold survive. Headings,
  * lists and tables are left out. Links to other Google Docs and to section folders become site links at build time. */
 async function fetchIntro(drive: DriveSource, id: string) {
   const { bodyBlocks } = await googleDocsBlocks(await drive.readDocument(id), id, async () => { throw new Error('Introen kan ikke have billeder'); });
@@ -143,8 +143,9 @@ async function fetchIntro(drive: DriveSource, id: string) {
   const text = blocksToMarkdown(paragraphs, () => { throw new Error('Introen kan ikke have billeder'); }).trim();
   assertRoundTrip(paragraphs, validateMarkdown(text, () => false));
   if (text.length > INTRO_MAX) throw new Error('Introen har for mange eller for lange links');
-  return text;
+  return { text, leadLength: paragraphs.length ? plainText(paragraphs[0]!.content).trim().length : 0 };
 }
+const LEAD_MAX = 200;
 const isIntro = (i: DriveItem) => i.name.normalize('NFC').trim().toLowerCase() === '_intro';
 const compareId = <T extends { id: string }>(a: T, b: T) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
 
@@ -234,7 +235,12 @@ export async function syncContent(o: SyncOptions): Promise<SyncReport> {
       const target = introOf.get(section)!;
       if (docs.length > 1) { fail({ section, title: '_intro', message: 'Der må kun ligge ét _intro-dokument i mappen; introen er uændret' }); continue; }
       if (docs[0]!.mimeType !== GDOC) { warn({ section, title: docs[0]!.name, message: '_intro skal være et Google-dokument; sektionen vises uden intro' }); target.intro = ''; continue; }
-      try { target.intro = await fetchIntro(drive, docs[0]!.id); }
+      try {
+        const { text, leadLength } = await fetchIntro(drive, docs[0]!.id);
+        target.intro = text;
+        // The first paragraph stands beside the title on the landing page; the rest goes under it.
+        if (leadLength > LEAD_MAX) warn({ section, title: '_intro', message: `Første afsnit står ved siden af titlen og bør højst være ${LEAD_MAX} tegn (det er ${leadLength}). Skriv den lange tekst i de næste afsnit` });
+      }
       catch (error) { fail({ section, title: '_intro', message: `${error instanceof DriveAccessError ? 'Ingen adgang til filen' : message(error)}; introen er uændret` }); }
     }
     for (const section of kinds.keys()) if (!intros.has(section)) introOf.get(section)!.intro = '';

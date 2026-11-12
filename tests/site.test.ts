@@ -38,7 +38,7 @@ async function site(folders: Record<string, string> = { foreningen: '40 Forening
 test('loadSite giver sorterede sider, stier og interne ID\'er kun til kontrol', async () => {
   const s = await loadSite(await site());
   expect(s.items.map(i => [i.title, i.path])).toEqual([['Bestyrelsen', '/foreningen/bestyrelsen/'], ['Om foreningen', '/foreningen/om-foreningen/']]);
-  expect(s.sections).toEqual([{ key: 'foreningen', order: 0, label: 'Foreningen', introHtml: '<p class="intro">Bestyrelse og regler.</p>\n<p class="intro">Kontakt os.</p>', path: '/foreningen/', news: false }]);
+  expect(s.sections).toEqual([{ key: 'foreningen', order: 0, label: 'Foreningen', leadHtml: '<p class="intro">Bestyrelse og regler.</p>', bodyHtml: '<p>Kontakt os.</p>', path: '/foreningen/', news: false }]);
   expect(s.internalIds.sort()).toEqual(['doc-a', 'doc-b']);
 });
 test('introen kan linke til sider og sektioner via Google Docs- og mappelinks; ukendte links bliver tekst', async () => {
@@ -58,12 +58,13 @@ test('introen kan linke til sider og sektioner via Google Docs- og mappelinks; u
   ]));
   await syncContent({ config: siteConfigSchema.parse(config), drive, contentDir: join(root, 'content') });
   const s = await loadSite(root);
-  expect(s.sections.find(x => x.key === 'om-groendalsvaenge')!.introHtml).toBe([
-    '<p class="intro"><a href="/om-groendalsvaenge/saadan-faar-du-et-hus/">Læs om at få et hus</a></p>',
-    '<p class="intro"><a href="/andelshaveren/"><strong>Andelshaveren</strong></a></p>',
-    '<p class="intro">Privat mappe</p>',
-    '<p class="intro">Ukendt dokument</p>',
-    '<p class="intro"><a href="https://rumly.dk/" rel="noreferrer">Rumly</a></p>',
+  const om = s.sections.find(x => x.key === 'om-groendalsvaenge')!;
+  expect(om.leadHtml).toBe('<p class="intro"><a href="/om-groendalsvaenge/saadan-faar-du-et-hus/">Læs om at få et hus</a></p>');
+  expect(om.bodyHtml).toBe([
+    '<p><a href="/andelshaveren/"><strong>Andelshaveren</strong></a></p>',
+    '<p>Privat mappe</p>',
+    '<p>Ukendt dokument</p>',
+    '<p><a href="https://rumly.dk/" rel="noreferrer">Rumly</a></p>',
   ].join('\n'));
   expect(s.warnings.filter(w => w.startsWith('Om Grøndalsvænge (intro)'))).toEqual([
     'Om Grøndalsvænge (intro): et link til en mappe, der ikke er en sektion på hjemmesiden, vises som almindelig tekst',

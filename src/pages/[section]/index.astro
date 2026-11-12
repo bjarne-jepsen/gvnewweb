@@ -7,21 +7,23 @@ export async function getStaticPaths() {
   return (await getCollection('sections')).map(({ data: section }) => ({ params: { section: section.key }, props: { section, entries: items.filter(i => i.section === section.key) } }));
 }
 const { section, entries } = Astro.props;
-// A news section shows its notices as cards. Other sections are landing pages: a large title with the intro
-// from _intro beside it, as running text with links. The menu lists the pages, so there are no tiles (docs/cvi.md).
-// introHtml is rendered from validated Markdown at build time (lib/site/load.ts), with every text escaped.
+// A news section shows its notices as cards. Other sections are landing pages: a large title with the first
+// paragraph of _intro beside it and the rest as running text under it. The menu lists the pages, so there are
+// no tiles (docs/cvi.md). leadHtml and bodyHtml are rendered from validated Markdown at build time (lib/site/load.ts), with every text escaped.
 const news = entries.length > 0 && entries.every(e => e.kind === 'notice');
 ---
 <Base title={section.label}>
   {news ? <>
     <a class="back" href="/">Til forsiden</a>
     <h1>{section.label}</h1>
-    <Fragment set:html={section.introHtml} />
+    <Fragment set:html={section.leadHtml} />
+    <Fragment set:html={section.bodyHtml} />
     <Entries heading="h2" cards entries={entries} />
   </> : <>
     <div class="landing-head">
       <h1>{section.label}</h1>
-      {section.introHtml && <div class="landing-intro"><Fragment set:html={section.introHtml} /></div>}
+      {section.leadHtml && <div class="landing-intro"><Fragment set:html={section.leadHtml} /></div>}
     </div>
+    {section.bodyHtml && <div class="landing-text"><Fragment set:html={section.bodyHtml} /></div>}
   </>}
 </Base>

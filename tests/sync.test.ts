@@ -323,6 +323,14 @@ test('en ny mappe får aldrig en adresse, der er i brug; adressen /nyheder/ er n
   expect(Object.keys(await w.tree())).toContain('nyheder/nh-1.json');
 });
 
+test('_intro: et langt første afsnit giver en advarsel, men bruges', async () => {
+  const w = await world();
+  w.drive.gdoc('intro', '_intro', 'f-foreningen', docJson('intro', [{ text: 'x'.repeat(201) }, { text: 'Resten.' }]));
+  const report = await w.run();
+  expect(report.warnings).toContainEqual({ section: 'foreningen', title: '_intro', message: 'Første afsnit står ved siden af titlen og bør højst være 200 tegn (det er 201). Skriv den lange tekst i de næste afsnit' });
+  expect((await w.json('_sections.json'))['f-foreningen'].intro).toBe(`${'x'.repeat(201)}\n\nResten.`);
+});
+
 test('_intro: kun ét Google-dokument; fejl beholder den sidste intro', async () => {
   const w = await world();
   w.drive.gdoc('intro', '_intro', 'f-foreningen', docJson('intro', [{ text: 'Om foreningen.' }]));

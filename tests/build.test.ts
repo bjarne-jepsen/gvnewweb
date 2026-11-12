@@ -111,7 +111,7 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect(await html('foreningen/index.html')).not.toContain('<img');
   expect(await html('foreningen/index.html')).not.toContain('class="entries"');
   // The intro comes from the folder's _intro document: every paragraph on the section page.
-  expect(await html('foreningen/index.html')).toContain('<p class="intro">Bestyrelse og regler.</p>\n<p class="intro">Skriv til os.</p>');
+  expect(await html('foreningen/index.html')).toContain('<div class="landing-intro"><p class="intro">Bestyrelse og regler.</p></div> </div> <div class="landing-text"><p>Skriv til os.</p></div>');
   expect(await html('nyheder/index.html')).toContain('<ul class="entries cards"><li>');
   expect(await readFile(dist(`foreningen/om-foreningen/${image}`))).toEqual(png);
   for (const path of await walk(join(root, 'dist'))) expect((await readFile(path)).toString()).not.toMatch(/CANARY|target-doc|doc-1/);

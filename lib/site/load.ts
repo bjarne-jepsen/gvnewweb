@@ -10,8 +10,9 @@ import { readContent } from '../sync/sync';
 import { renderBody, type LinkTarget } from './render';
 import { copenhagenDay, frontpage } from './sections';
 
-/** introHtml: the paragraphs of the folder's _intro document as HTML, with links to pages and sections. */
-export interface SiteSection { key: string; order: number; label: string; introHtml: string; path: string; news: boolean }
+/** The folder's _intro document as HTML, with links to pages and sections. leadHtml is the first paragraph
+ * (beside the title on a landing page), bodyHtml the rest (running text under the title). */
+export interface SiteSection { key: string; order: number; label: string; leadHtml: string; bodyHtml: string; path: string; news: boolean }
 /** search: what the search index gets beyond title and summary. Plain text only, from the same public body. */
 export interface SearchText { headings: string[]; text: string; keywords: string[] }
 interface ItemBase { id: string; section: string; slug: string; path: string; title: string; updatedAt: string; search: SearchText }
@@ -39,7 +40,7 @@ export async function loadSite(root = '.', buildAt = new Date(process.env.BUILD_
   const used = new Set([...entries.values()].map(e => e.section));
   const sections: SiteSection[] = known.filter(s => s.kind === 'notice' || used.has(s.key))
     .sort((a, b) => a.order - b.order || collator.compare(a.label, b.label) || (a.key < b.key ? -1 : 1))
-    .map((s, order) => ({ key: s.key, order, label: s.label, introHtml: '', path: `/${s.key}/`, news: s.kind === 'notice' }));
+    .map((s, order) => ({ key: s.key, order, label: s.label, leadHtml: '', bodyHtml: '', path: `/${s.key}/`, news: s.kind === 'notice' }));
   const items: SiteItem[] = [], assets = new Map<string, Uint8Array>(), warnings: string[] = [];
   const newsMeta = (entry: { id: string; files: Map<string, Uint8Array> }) => newsMetaSchema.parse(JSON.parse(Buffer.from(entry.files.get(`${entry.id}.json`)!).toString('utf8')));
   const shown = (meta: { date: string; expires?: string | undefined }) => !(meta.date > buildDay || (meta.expires && meta.expires < buildDay));
@@ -72,7 +73,11 @@ export async function loadSite(root = '.', buildAt = new Date(process.env.BUILD_
   const sectionByKey = new Map(known.map(s => [s.key, s]));
   for (const section of sections) {
     const intro = sectionByKey.get(section.key)!.intro;
-    section.introHtml = intro ? renderBody(intro, () => false, () => { throw new Error('Introen kan ikke have billeder'); }, introLinkTarget(`${section.label} (intro)`)).replaceAll('<p>', '<p class="intro">') : '';
+    // Paragraphs are separated by a blank line; a line break inside a paragraph is "\\" + newline.
+    const [lead = '', ...rest] = intro ? intro.split('\n\n') : [];
+    const html = (md: string) => md ? renderBody(md, () => false, () => { throw new Error('Introen kan ikke have billeder'); }, introLinkTarget(`${section.label} (intro)`)) : '';
+    section.leadHtml = html(lead).replace('<p>', '<p class="intro">');
+    section.bodyHtml = html(rest.join('\n\n'));
   }
   for (const entry of entries.values()) {
     const slug = slugs[entry.id];
