@@ -106,10 +106,10 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect(page).toMatch(/<p class="meta updated">Opdateret \d+\. \w+ \d{4}<\/p>/);
   expect(page).toContain('<a class="button" href="/foreningen/kontakt/">Kontakt foreningen');
   expect(await html('foreningen/kontakt/index.html')).not.toContain('class="button"');
-  // Other sections are landing pages: the intro, then a plain list of the pages without pictures.
-  expect(await html('foreningen/index.html')).toContain('<h2 id="sider-i-sektionen" class="front-label">Sider i Foreningen</h2> <ul class="entries"><li><h3><a href="/foreningen/kontakt/">Kontakt</a></h3>');
-  expect(await html('foreningen/index.html')).toContain('<h3><a href="/foreningen/om-foreningen/">Om foreningen</a></h3>');
+  // Other sections are landing pages: the title with the intro beside it, and no tiles or list (the menu lists the pages).
+  expect(await html('foreningen/index.html')).toContain('<div class="landing-head"> <h1>Foreningen</h1> <div class="landing-intro">');
   expect(await html('foreningen/index.html')).not.toContain('<img');
+  expect(await html('foreningen/index.html')).not.toContain('class="entries"');
   // The intro comes from the folder's _intro document: every paragraph on the section page.
   expect(await html('foreningen/index.html')).toContain('<p class="intro">Bestyrelse og regler.</p>\n<p class="intro">Skriv til os.</p>');
   expect(await html('nyheder/index.html')).toContain('<ul class="entries cards"><li>');
