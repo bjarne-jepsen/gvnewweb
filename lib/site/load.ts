@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { siteConfigSchema } from '../sync/config';
 import { guideMetaSchema, localImage, newsMetaSchema } from '../sync/content';
-import { docIdOf, FRONTPAGE_FILE, frontpageSchema } from '../sync/frontpage';
+import { docIdOf, FRONTPAGE_FILE, folderIdOf, frontpageSchema } from '../sync/frontpage';
 import { parseMarkdown, splitFrontmatter } from '../sync/markdown';
 import { manualRedirectsSchema } from '../sync/sections';
 import { pathOf } from '../sync/slugs';
@@ -10,8 +10,8 @@ import { readContent } from '../sync/sync';
 import { renderBody, type LinkTarget } from './render';
 import { copenhagenDay, frontpage } from './sections';
 
-/** intro: plain paragraphs separated by a blank line, from the folder's _intro document. */
-export interface SiteSection { key: string; order: number; label: string; intro: string; path: string; news: boolean }
+/** introHtml: the paragraphs of the folder's _intro document as HTML, with links to pages and sections. */
+export interface SiteSection { key: string; order: number; label: string; introHtml: string; path: string; news: boolean }
 /** search: what the search index gets beyond title and summary. Plain text only, from the same public body. */
 export interface SearchText { headings: string[]; text: string; keywords: string[] }
 interface ItemBase { id: string; section: string; slug: string; path: string; title: string; updatedAt: string; search: SearchText }
@@ -33,13 +33,13 @@ export async function loadSite(root = '.', buildAt = new Date(process.env.BUILD_
   const buildDay = copenhagenDay(buildAt);
   const config = siteConfigSchema.parse(JSON.parse(await readFile(join(root, 'config/site.json'), 'utf8')));
   const contentDir = join(root, 'content');
-  const { entries, slugs, sections: known } = await readContent(contentDir);
+  const { entries, slugs, sections: known, folderOf } = await readContent(contentDir);
   // Menu order is the number in front of the folder name. A page section without pages is not shown;
   // a news section is, also when no news is current.
   const used = new Set([...entries.values()].map(e => e.section));
   const sections: SiteSection[] = known.filter(s => s.kind === 'notice' || used.has(s.key))
     .sort((a, b) => a.order - b.order || collator.compare(a.label, b.label) || (a.key < b.key ? -1 : 1))
-    .map((s, order) => ({ key: s.key, order, label: s.label, intro: s.intro, path: `/${s.key}/`, news: s.kind === 'notice' }));
+    .map((s, order) => ({ key: s.key, order, label: s.label, introHtml: '', path: `/${s.key}/`, news: s.kind === 'notice' }));
   const items: SiteItem[] = [], assets = new Map<string, Uint8Array>(), warnings: string[] = [];
   const newsMeta = (entry: { id: string; files: Map<string, Uint8Array> }) => newsMetaSchema.parse(JSON.parse(Buffer.from(entry.files.get(`${entry.id}.json`)!).toString('utf8')));
   const shown = (meta: { date: string; expires?: string | undefined }) => !(meta.date > buildDay || (meta.expires && meta.expires < buildDay));
@@ -59,6 +59,21 @@ export async function loadSite(root = '.', buildAt = new Date(process.env.BUILD_
     warnings.push(`${title}: et link til et Google-dokument, der ikke er en side på hjemmesiden, vises som almindelig tekst`);
     return 'drop';
   };
+  // An intro may also link to a section folder in Drive; that becomes a link to the section's landing page.
+  const pathOfSection = new Map(sections.map(s => [s.key, s.path]));
+  const introLinkTarget = (title: string) => (url: string): LinkTarget => {
+    const folder = folderIdOf(url);
+    if (!folder) return linkTarget(title)(url);
+    const path = pathOfSection.get(folderOf.get(folder) ?? '');
+    if (path) return { path };
+    warnings.push(`${title}: et link til en mappe, der ikke er en sektion på hjemmesiden, vises som almindelig tekst`);
+    return 'drop';
+  };
+  const sectionByKey = new Map(known.map(s => [s.key, s]));
+  for (const section of sections) {
+    const intro = sectionByKey.get(section.key)!.intro;
+    section.introHtml = intro ? renderBody(intro, () => false, () => { throw new Error('Introen kan ikke have billeder'); }, introLinkTarget(`${section.label} (intro)`)).replaceAll('<p>', '<p class="intro">') : '';
+  }
   for (const entry of entries.values()) {
     const slug = slugs[entry.id];
     if (!slug || slug.section !== entry.section) throw new Error(`content/_slugs.json: ${entry.id} mangler eller peger på en anden sektion`);

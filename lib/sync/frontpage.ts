@@ -21,6 +21,11 @@ export function docIdOf(href: string | undefined) {
   const m = href && /^https:\/\/docs\.google\.com\/document\/(?:u\/\d+\/)?d\/([a-zA-Z0-9_-]+)(?:[/?#]|$)/.exec(href);
   return m ? m[1] : undefined;
 }
+/** The folder ID in a link to a Drive folder, e.g. https://drive.google.com/drive/folders/<id>. */
+export function folderIdOf(href: string | undefined) {
+  const m = href && /^https:\/\/drive\.google\.com\/drive\/(?:u\/\d+\/)?folders\/([a-zA-Z0-9_-]+)(?:[/?#]|$)/.exec(href);
+  return m ? m[1] : undefined;
+}
 const oneLine = (runs: Inline[]) => plainText(runs).replace(/\s+/g, ' ').trim();
 
 /** Paragraphs are the intro; each bullet with a link to a Google Doc is a shortcut, labelled with

@@ -98,28 +98,18 @@ main { min-height: 60vh; padding-block: clamp(2.5rem, 6vw, 5.5rem) 7.5rem; overf
 .more a::after { content: "→"; transition: transform .15s; }
 .more a:hover::after { transform: translateX(.2em); }
 
-/* Section landing pages: a large title with the intro beside it, then tiles of the same size.
-   Every picture is 3:2; photos are cropped around their centre (docs/cvi.md § 7). */
-.landing-head { display: grid; gap: 1.75rem; align-items: end; padding-bottom: var(--space-xl); border-bottom: 1px solid var(--color-ink); margin-bottom: clamp(3rem, 6vw, 5.5rem); }
+/* Section landing pages: a large title over a line, then the intro as running text and a list of the
+   section's pages. Side by side from 60rem, the list to the right; on narrow screens the list follows the intro. */
+.landing-head { padding-bottom: var(--space-l); border-bottom: 1px solid var(--color-ink); margin-bottom: clamp(2.5rem, 5vw, 4.5rem); }
 .landing-head h1 { font-size: var(--text-display); line-height: .95; letter-spacing: -.045em; max-width: none; margin: 0; hyphens: auto; }
-.landing-head .intro { font-size: 1.25rem; line-height: 1.5; max-width: 40ch; margin: 0; }
-.landing-head .intro + .intro { margin-top: var(--space-m); }
-.tiles { list-style: none; padding: 0; margin: 0; display: grid; gap: 3.5rem var(--space-xl); }
-.tiles > li { position: relative; }
-.tile-picture { margin-bottom: 1.25rem; aspect-ratio: 3 / 2; background: #E7EAE3; overflow: hidden; transition: filter .2s; }
-.tile-picture :is(svg, img) { display: block; width: 100%; height: 100%; }
-.tile-picture img { object-fit: cover; }
-.tiles h2 { margin: 0 0 .625rem; font-size: 1.75rem; line-height: 1.12; }
-.tiles h2 a { text-decoration: underline 2px transparent; text-underline-offset: .18em; transition: text-decoration-color .2s; }
-.tiles h2 a::after { content: ""; position: absolute; inset: 0; }
-.tiles h2 a:hover, .tiles h2 a:focus-visible { color: var(--color-ink); text-decoration-color: currentColor; }
-.tiles h2 a:focus-visible { outline: 0; }
-.tiles > li:has(a:focus-visible) { outline: var(--focus-ring); outline-offset: 6px; }
-.tiles > li:hover .tile-picture { filter: brightness(.95); }
-.tiles p { margin: 0; max-width: 46ch; }
-@media (min-width: 40rem) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (min-width: 50rem) { .landing-head { grid-template-columns: 7fr 5fr; gap: var(--space-xl); } }
-@media (min-width: 64rem) { .tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5rem var(--space-xl); } }
+.landing-body { display: grid; gap: var(--space-xl); }
+.landing-intro .intro { max-width: 40rem; }
+.landing-intro .intro:last-child { margin-bottom: 0; }
+.landing-pages .entries { margin: 0; }
+.landing-pages .entries > li { padding-block: var(--space-m); }
+.landing-pages .entries h3 { margin: 0 0 var(--space-2xs); font-size: var(--text-h3); }
+.landing-pages .entries p { margin: 0; font-size: 1rem; }
+@media (min-width: 60rem) { .landing-body:not(.no-intro) { grid-template-columns: 7fr 5fr; gap: clamp(3rem, 6vw, 6rem); } }
 
 /* Content pages: breadcrumb, article and the body text from lib/site/render.ts. */
 .crumbs { margin: 0 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-muted); }
@@ -202,7 +192,7 @@ main { min-height: 60vh; padding-block: clamp(2.5rem, 6vw, 5.5rem) 7.5rem; overf
 @media print {
   html { background: #fff; }
   body { font-size: 11pt; }
-  .skip, .site-header nav, .site-footer, .back, .more, .crumbs, .button, .tile-picture, .toc { display: none; }
+  .skip, .site-header nav, .site-footer, .back, .more, .crumbs, .button, .toc { display: none; }
   .site-header { border-bottom: 0; margin-bottom: var(--space-l); }
   .wrap { max-width: none; padding-inline: 0; }
   .site-header .wrap, main { padding-block: 0; }
