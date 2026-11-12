@@ -1,11 +1,11 @@
 ---
 id: "1LnIFKv5gTclgUUi64Sq7NUIGsMqdJ8zoyFc4qdJHGF4"
 title: "Hjertestarter"
-updatedAt: "2026-10-22T17:14:00.292Z"
-summary: "Hvis en person får hjertestop, er hurtig livreddende førstehjælp afgørende. Derfor har foreningen en hjertestarter ved Foreningsbygningen."
+updatedAt: "2026-11-12T21:16:56.486Z"
+summary: "Hvis en person får hjertestop, er hurtig livreddende førstehjælp afgørende. Derfor har foreningen en hjertestarter opsat på Forretningsbygningen ud mod Æblevej."
 ---
 
-Hvis en person får hjertestop, er **hurtig livreddende førstehjælp afgørende**. Derfor har foreningen en hjertestarter ved **Foreningsbygningen**.
+Hvis en person får hjertestop, er **hurtig livreddende førstehjælp afgørende**. Derfor har foreningen en hjertestarter opsat på **Forretningsbygning**en ud mod Æblevej.
 
 ## Andre hjertestartere i nærheden
 
@@ -14,8 +14,6 @@ Hvis en person får hjertestop, er **hurtig livreddende førstehjælp afgørende
 - **Privatbo på Hillerødgade (foran porten):** døgnåben
 - **Andelsboligforeningen GFG (Rønnebærvej og Godthåbsvej):** begge døgnåbne
 - **Godthåbstandlægerne:** i klinikkens åbningstid
-
-UDFYLDES: kort over hjertestarterne som billede med alternativ tekst.
 
 ## Lær mere, og bliv hjerteløber
 
