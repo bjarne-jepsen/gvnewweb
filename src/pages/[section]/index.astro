@@ -2,27 +2,30 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Entries from '../../components/Entries.astro';
-import Tiles from '../../components/Tiles.astro';
 export async function getStaticPaths() {
   const items = (await getCollection('items')).map(i => i.data);
   return (await getCollection('sections')).map(({ data: section }) => ({ params: { section: section.key }, props: { section, entries: items.filter(i => i.section === section.key) } }));
 }
 const { section, entries } = Astro.props;
-// A news section shows its notices as cards, other sections as a landing page with tiles (docs/cvi.md).
+// A news section shows its notices as cards. Other sections are landing pages: a large title, the intro
+// from _intro as running text with links, and a plain list of the section's pages (docs/cvi.md).
+// introHtml is rendered from validated Markdown at build time (lib/site/load.ts), with every text escaped.
 const news = entries.length > 0 && entries.every(e => e.kind === 'notice');
-const intro = section.intro ? section.intro.split('\n\n') : [];
 ---
 <Base title={section.label}>
   {news ? <>
     <a class="back" href="/">Til forsiden</a>
     <h1>{section.label}</h1>
-    {intro.map(p => <p class="intro">{p}</p>)}
+    <Fragment set:html={section.introHtml} />
     <Entries heading="h2" cards entries={entries} />
   </> : <>
-    <div class="landing-head">
-      <h1>{section.label}</h1>
-      {intro.length > 0 && <div>{intro.map(p => <p class="intro">{p}</p>)}</div>}
+    <div class="landing-head"><h1>{section.label}</h1></div>
+    <div class:list={['landing-body', { 'no-intro': !section.introHtml }]}>
+      {section.introHtml && <div class="landing-intro"><Fragment set:html={section.introHtml} /></div>}
+      <section class="landing-pages" aria-labelledby="sider-i-sektionen">
+        <h2 id="sider-i-sektionen" class="front-label">Sider i {section.label}</h2>
+        <Entries entries={entries} empty="Der er ingen offentliggjorte sider her endnu." />
+      </section>
     </div>
-    <Tiles label={section.label} entries={entries} />
   </>}
 </Base>

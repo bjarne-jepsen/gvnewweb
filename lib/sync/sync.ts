@@ -11,7 +11,7 @@ import { fetchFrontpage, FRONTPAGE_FILE, frontpageSchema, isFrontpageDoc, serial
 import { extractNewsDates, NEWS_SECTION } from './news';
 import { copenhagenDay } from '../site/sections';
 import { emptyReport, type ReportEntry, type SyncReport } from './report';
-import { manualRedirectsSchema, parseSectionName, sectionKey, sectionsSchema, serializeSections, type Kind, type SectionEntry, type Sections } from './sections';
+import { INTRO_MAX, manualRedirectsSchema, parseSectionName, sectionKey, sectionsSchema, serializeSections, type Kind, type SectionEntry, type Sections } from './sections';
 import { pathOf, serializeSlugs, slugify, slugsSchema, takenPaths, type Slugs } from './slugs';
 
 export interface SyncOptions { config: SiteConfig; drive: DriveSource; contentDir: string; allowMassRemoval?: boolean; now?: Date }
@@ -85,12 +85,12 @@ async function strayEntries(contentDir: string, keys: Set<string>) {
 }
 /** The same strict reader sync uses on its previous output; the site builds from nothing else. */
 export async function readContent(contentDir: string) {
-  const { byKey } = await knownSections(contentDir);
+  const { byKey, file } = await knownSections(contentDir);
   const stray = await strayEntries(contentDir, new Set(byKey.keys()));
   if (stray.length) throw new Error(`content/${stray[0]!.name}: hører ikke til en sektion; kør sync, som rydder op`);
   const entries = new Map<string, Entry>();
   for (const [key, section] of byKey) await readSection(join(contentDir, key), key, section.kind, entries);
-  return { entries, slugs: slugsSchema.parse(await readJson(join(contentDir, '_slugs.json')) ?? {}), sections: [...byKey.values()] };
+  return { entries, slugs: slugsSchema.parse(await readJson(join(contentDir, '_slugs.json')) ?? {}), sections: [...byKey.values()], folderOf: new Map(Object.entries(file ?? {}).map(([id, e]) => [id, e.key])) };
 }
 async function countFiles(path: string): Promise<number> {
   let n = 0;
@@ -133,11 +133,16 @@ async function fetchNotice(drive: DriveSource, c: Candidate, firstDate: string):
   return { date, fingerprint: newsFingerprint(meta), build: updatedAt => new Map([[`${c.id}.json`, utf8(serializeNews({ ...meta, updatedAt }))]]) };
 }
 
-/** The _intro document of a section: its paragraphs as plain text. Headings, lists and tables are left out. */
+/** The _intro document of a section: its paragraphs as Markdown, so links and bold survive. Headings,
+ * lists and tables are left out. Links to other Google Docs and to section folders become site links at build time. */
 async function fetchIntro(drive: DriveSource, id: string) {
   const { bodyBlocks } = await googleDocsBlocks(await drive.readDocument(id), id, async () => { throw new Error('Introen kan ikke have billeder'); });
-  const text = flattenBlocks(bodyBlocks as SerializableBlock[]).flatMap(b => b.type === 'paragraph' ? [plainText(b.content).replace(/\s+/g, ' ').trim()] : []).filter(Boolean).join('\n\n');
-  if (text.length > 2000) throw new Error('Introen er for lang (højst 2000 tegn)');
+  const paragraphs = flattenBlocks(bodyBlocks as SerializableBlock[]).flatMap(b => b.type === 'paragraph' && plainText(b.content).trim()
+    ? [{ ...b, content: b.content.map(r => ({ ...r, text: r.text.replace(/\s+/g, ' ') })) }] : []);
+  if (paragraphs.map(b => plainText(b.content).trim()).join('\n\n').length > 2000) throw new Error('Introen er for lang (højst 2000 tegn)');
+  const text = blocksToMarkdown(paragraphs, () => { throw new Error('Introen kan ikke have billeder'); }).trim();
+  assertRoundTrip(paragraphs, validateMarkdown(text, () => false));
+  if (text.length > INTRO_MAX) throw new Error('Introen har for mange eller for lange links');
   return text;
 }
 const isIntro = (i: DriveItem) => i.name.normalize('NFC').trim().toLowerCase() === '_intro';

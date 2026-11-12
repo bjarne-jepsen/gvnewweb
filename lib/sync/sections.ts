@@ -5,10 +5,12 @@ import { driveIdSchema } from './drive';
 export const sectionKey = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(90);
 export const kindSchema = z.enum(['gdoc', 'notice']);
 export type Kind = z.infer<typeof kindSchema>;
+/** Room for the Markdown of an intro: at most 2000 characters of text plus the link addresses. */
+export const INTRO_MAX = 6000;
 /** One section as sync last saw it in Drive. The key (URL) is fixed the first time the folder is
  * seen; label, order, kind and intro follow the folder on every run. */
 export const sectionEntrySchema = z.strictObject({
-  key: sectionKey, label: z.string().min(1).max(200), order: z.number().int().min(0).max(999), kind: kindSchema, intro: z.string().max(2000),
+  key: sectionKey, label: z.string().min(1).max(200), order: z.number().int().min(0).max(999), kind: kindSchema, intro: z.string().max(INTRO_MAX),
 });
 /** content/_sections.json: section folder ID → section. Written by sync only; holds live sections only. */
 export const sectionsSchema = z.record(driveIdSchema, sectionEntrySchema).superRefine((s, ctx) => {

@@ -38,8 +38,37 @@ async function site(folders: Record<string, string> = { foreningen: '40 Forening
 test('loadSite giver sorterede sider, stier og interne ID\'er kun til kontrol', async () => {
   const s = await loadSite(await site());
   expect(s.items.map(i => [i.title, i.path])).toEqual([['Bestyrelsen', '/foreningen/bestyrelsen/'], ['Om foreningen', '/foreningen/om-foreningen/']]);
-  expect(s.sections).toEqual([{ key: 'foreningen', order: 0, label: 'Foreningen', intro: 'Bestyrelse og regler.\n\nKontakt os.', path: '/foreningen/', news: false }]);
+  expect(s.sections).toEqual([{ key: 'foreningen', order: 0, label: 'Foreningen', introHtml: '<p class="intro">Bestyrelse og regler.</p>\n<p class="intro">Kontakt os.</p>', path: '/foreningen/', news: false }]);
   expect(s.internalIds.sort()).toEqual(['doc-a', 'doc-b']);
+});
+test('introen kan linke til sider og sektioner via Google Docs- og mappelinks; ukendte links bliver tekst', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'gv-site-')); roots.push(root);
+  const config = { rootFolderId: 'root' };
+  await mkdir(join(root, 'config')); await writeFile(join(root, 'config/site.json'), JSON.stringify(config));
+  const drive = new FakeDrive();
+  drive.folder('f-om', '10 Om Grøndalsvænge', 'root'); drive.folder('f-bo', '20 Andelshaveren', 'root'); drive.folder('f-privat', 'Privat', 'root');
+  drive.gdoc('doc-hus', 'Sådan får du et hus', 'f-om', docJson('doc-hus', [{ text: 'Tekst.' }]));
+  drive.gdoc('doc-bo', 'Parkering', 'f-bo', docJson('doc-bo', [{ text: 'Tekst.' }]));
+  drive.gdoc('intro', '_intro', 'f-om', docJson('intro', [
+    { text: 'Læs om at få et hus', href: 'https://docs.google.com/document/d/doc-hus/edit' },
+    { text: 'Andelshaveren', bold: true, href: 'https://drive.google.com/drive/u/0/folders/f-bo' },
+    { text: 'Privat mappe', href: 'https://drive.google.com/drive/folders/f-privat' },
+    { text: 'Ukendt dokument', href: 'https://docs.google.com/document/d/findes-ikke/edit' },
+    { text: 'Rumly', href: 'https://rumly.dk/' },
+  ]));
+  await syncContent({ config: siteConfigSchema.parse(config), drive, contentDir: join(root, 'content') });
+  const s = await loadSite(root);
+  expect(s.sections.find(x => x.key === 'om-groendalsvaenge')!.introHtml).toBe([
+    '<p class="intro"><a href="/om-groendalsvaenge/saadan-faar-du-et-hus/">Læs om at få et hus</a></p>',
+    '<p class="intro"><a href="/andelshaveren/"><strong>Andelshaveren</strong></a></p>',
+    '<p class="intro">Privat mappe</p>',
+    '<p class="intro">Ukendt dokument</p>',
+    '<p class="intro"><a href="https://rumly.dk/" rel="noreferrer">Rumly</a></p>',
+  ].join('\n'));
+  expect(s.warnings.filter(w => w.startsWith('Om Grøndalsvænge (intro)'))).toEqual([
+    'Om Grøndalsvænge (intro): et link til en mappe, der ikke er en sektion på hjemmesiden, vises som almindelig tekst',
+    'Om Grøndalsvænge (intro): et link til et Google-dokument, der ikke er en side på hjemmesiden, vises som almindelig tekst',
+  ]);
 });
 test('loadSite afviser manglende slug og redirect over en side', async () => {
   const root = await site();
