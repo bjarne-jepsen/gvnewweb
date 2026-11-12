@@ -1,7 +1,7 @@
 ---
 id: "1xsAbkVu-_RVP2IcGA3ixg3r3IAkfFWrj5n8SIUl3EPw"
 title: "Udvalg og arbejdsgrupper"
-updatedAt: "2026-10-22T17:16:46.878Z"
+updatedAt: "2026-11-12T20:21:55.542Z"
 summary: "Bestyrelsen har fordelt sig i en række udvalg med hvert sit ansvarsområde. Derudover findes udvalg og arbejdsgrupper, hvor andre beboere er med."
 ---
 
@@ -54,5 +54,3 @@ Kontakt: [socialudvalggrondalsvaenge@gmail.com](mailto:socialudvalggrondalsvaeng
 ### Parkudvalget
 
 Vedligeholder og forbedrer foreningens to legepladser, Mirabellelegepladsen og Æblelegepladsen, og skaber sociale initiativer omkring dem.
-
-Kontakt: UDFYLDES: en adresse, som foreningen ejer.

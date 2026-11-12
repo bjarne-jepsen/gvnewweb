@@ -1,13 +1,13 @@
 ---
 id: "1_2sFlBsVicGgTelxfXBLERhnXvIvdyecC1xWqMLPEyk"
 title: "Bestyrelsen"
-updatedAt: "2026-11-11T16:20:03.681Z"
+updatedAt: "2026-11-12T20:22:33.300Z"
 summary: "Andelsboligforeningen Grøndalsvænge ledes af en bestyrelse på 9 medlemmer og 2 suppleanter i samarbejde med foreningens administrator. Alle bestyrelsesmedlemmer skal have bopæl i Grøndalsvænge."
 ---
 
 Andelsboligforeningen Grøndalsvænge ledes af en bestyrelse på 9 medlemmer og 2 suppleanter i samarbejde med foreningens administrator. Alle bestyrelsesmedlemmer skal have bopæl i Grøndalsvænge.
 
-### Valg og sammensætning
+## Valg og sammensætning
 
 Bestyrelsen vælges på den ordinære generalforsamling. Medlemmer vælges for to år ad gangen med forskudt udskiftning (halvdelen i lige år, halvdelen i ulige år) for at sikre kontinuitet. Suppleanter vælges for ét år ad gangen.
 
@@ -19,7 +19,7 @@ Valgt på generalforsamlingen 8. juni 2026:
 - Bestyrelsesmedlemmer på valg i 2028: Steen Baagøe Nielsen, Simon Juul Nielsen, Margit Preuss og Lotte Beyer Cramer
 - Suppleant på valg i 2027: Peter Jespersen \[TK: Mangler 2. suppleant — vedtægterne nævner 2 suppleanter, men kun 1 er oplistet\]
 
-### Arbejde og kontakt
+## Arbejde og kontakt
 
 Bestyrelsen holder møde hver tredje uge samt efter behov. Arbejdet følger en forretningsorden, som ligger på ProBo.
 
