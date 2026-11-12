@@ -1,18 +1,18 @@
 ---
 id: "1jpTiyBjWwzsQ3dUxwS6iGxGZV8llIURjXQwablH3O1Y"
 title: "Regler og dokumenter"
-updatedAt: "2026-10-22T17:16:55.985Z"
+updatedAt: "2026-11-12T20:14:38.990Z"
 summary: "Foreningens vedtægter, regulativer, referater, regnskaber og andre dokumenter findes i ProBo hos foreningens administrator Andelsbo. Hjemmesiden beskriver kort, hvilke regler der findes."
 ---
 
 Foreningens vedtægter, regulativer, referater, regnskaber og andre dokumenter findes i **ProBo** hos foreningens administrator Andelsbo. Hjemmesiden beskriver kort, hvilke regler der findes.
 
-## Vedtægter og husorden
+### Vedtægter og husorden
 
 - **Vedtægter** med bilag (bl.a. grundstørrelser). Ændringer kræver 2/3 af husstandene på en generalforsamling, hvor halvdelen er mødt frem.
 - **Husorden** for alle boliger i foreningen. De vigtigste punkter står på siden Husorden kort fortalt.
 
-## Regulativer
+### Regulativer
 
 - **Vurderingsregulativ:** hvordan husene vurderes ved salg.
 - **Regulativ for ekspektanter:** hvordan man bliver skrevet op på ekspektancelisten.
