@@ -285,7 +285,7 @@ test('nummererede mapper er sektioner: navn og tal følger mappen, adressen føl
   w.drive.gdoc('intro-bo', '_intro', 'f-bo', docJson('intro-bo', [{ text: 'Praktisk information.' }, { text: 'Overskrift', style: 'HEADING_2' }, { text: 'Andet  afsnit.' }]));
   const first = await w.run();
   expect(await w.json('_sections.json')).toEqual({
-    'f-bo': { key: 'bo-her', label: 'Bo her', order: 20, kind: 'gdoc', intro: 'Praktisk information.\n\nAndet afsnit.' },
+    'f-bo': { key: 'bo-her', label: 'Bo her', order: 20, kind: 'gdoc', intro: 'Praktisk information.\n\n## Overskrift\n\nAndet afsnit.' },
     'f-foreningen': { key: 'foreningen', label: 'foreningen', order: 10, kind: 'gdoc', intro: '' },
     'f-nyheder': { key: 'nyheder', label: 'nyheder', order: 20, kind: 'notice', intro: '' },
   });
@@ -329,6 +329,14 @@ test('_intro: et langt første afsnit giver en advarsel, men bruges', async () =
   const report = await w.run();
   expect(report.warnings).toContainEqual({ section: 'foreningen', title: '_intro', message: 'Første afsnit står ved siden af titlen og bør højst være 200 tegn (det er 201). Skriv den lange tekst i de næste afsnit' });
   expect((await w.json('_sections.json'))['f-foreningen'].intro).toBe(`${'x'.repeat(201)}\n\nResten.`);
+});
+
+test('_intro: overskrifter efter første afsnit bliver H2; overskrifter før det vises ikke', async () => {
+  const w = await world();
+  w.drive.gdoc('intro', '_intro', 'f-foreningen', docJson('intro', [{ text: 'Titel', style: 'TITLE' }, { text: 'Kort ingres.' }, { text: 'Valg', style: 'HEADING_2' }, { text: 'Brødtekst.' }, { text: 'Møder', style: 'HEADING_3' }, { text: 'Mere.' }]));
+  const report = await w.run();
+  expect((await w.json('_sections.json'))['f-foreningen'].intro).toBe('Kort ingres.\n\n## Valg\n\nBrødtekst.\n\n## Møder\n\nMere.');
+  expect(report.warnings).toContainEqual({ section: 'foreningen', title: '_intro', message: 'En overskrift før første afsnit vises ikke: første afsnit står ved siden af titlen. Flyt overskriften ned under første afsnit' });
 });
 
 test('_intro: kun ét Google-dokument; fejl beholder den sidste intro', async () => {
