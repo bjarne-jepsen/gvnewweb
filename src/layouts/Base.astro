@@ -3,7 +3,6 @@ import { getCollection } from 'astro:content';
 import '../styles/tokens.css';
 import '../styles/site.css';
 import Search from '../components/Search.astro';
-import Roofline from '../components/Roofline.astro';
 interface Props { title: string; }
 const { title } = Astro.props;
 const path = Astro.url.pathname;
@@ -48,7 +47,6 @@ const favicon = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www
       </div>
     </header>
     <main id="indhold" class="wrap"><slot /></main>
-    {path !== '/' && <Roofline />}
     <footer class="site-footer">
       <div class="wrap">
         <p class="footer-name">Grøndalsvænge</p>

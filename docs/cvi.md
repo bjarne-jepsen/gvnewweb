@@ -19,7 +19,7 @@ Status: **version 2, november 2026.** Bygger på Bjarnes mockup "Sådan får du 
 | Token | Navn | Hex | Brug |
 |---|---|---|---|
 | `--color-ink` | Blæk | `#141414` | Brødtekst, overskrifter, links, streg over H2 |
-| `--color-green` | Grøn | `#1E4636` | Links ved hover, knap, fokusring, pile, panelerne "Det vigtigste" og "På denne side", husrækken over footeren |
+| `--color-green` | Grøn | `#1E4636` | Links ved hover, knap, fokusring, pile, panelerne "Det vigtigste" og "På denne side" |
 | `--color-muted` | Grå | `#5C5C5C` | Datoer, brødkrumme og metadata |
 | `--color-paper` | Hvid | `#FFFFFF` | Sidebaggrund, tekst på knap |
 | `--color-surface` | Lys grå | `#F2F2EE` | Flader: genveje |
@@ -33,6 +33,7 @@ Status: **version 2, november 2026.** Bygger på Bjarnes mockup "Sådan får du 
 Teglrød er udgået. `tests/cvi.test.ts` måler, at al tekst har mindst 4,5:1 og fokusringe mindst 3:1 (WCAG 2.2 AA) for de tilladte kombinationer: blæk, grøn og grå på hvid og lys grå; blæk på grå flade; hvid på grøn og blæk; lys og lys grå på mørk.
 
 - Links i brødtekst er altid understregede. Farve alene må ikke bære betydning.
+- Links med en pil (← tilbage, → videre) har ingen understregning. Pilen er tegnet på, at det er et link. Ved hover bliver linket grønt, og pilen rykker lidt.
 - Linjefarven er kun til pynt.
 - Sitet har kun lyst tema (`color-scheme: light`).
 
@@ -62,11 +63,11 @@ Der bruges kun systemfonte: `--font-sans: "Helvetica Neue", Helvetica, Arial, sa
 
 **Header.** Navnet til venstre, hovednavigationen til højre. Ingen hamburgermenu og intet JavaScript. Den aktive side og hover vises med en understregning på 2 px.
 
+**Søgefelt.** Ingen ramme. Feltet står på den lysegrå flade (`--color-surface`) med et lille gråt forstørrelsesglas, så det stadig ses som et felt. Ved hover bliver fladen en tone mørkere. Ved fokus bliver feltet hvidt og får den grønne fokusring på 3 px.
+
 **Indholdsside.** Øverst en brødkrumme: sektion / sidens titel. Så H1 og ingressen (dokumentets første afsnit) i stor skrift. Hver H2 har en streg i blæk over sig. Eksterne links får en ↗ efter sig, og links til PDF får "(PDF)". Siden slutter med en linje, "Opdateret …" og en grøn knap "Kontakt foreningen" til siden med adressen `…/kontakt/`. Knappen vises ikke på selve kontaktsiden, eller hvis siden ikke findes.
 
 **På denne side.** En side med mindst tre H2 får et grønt panel med sidens H2 som links, i samme stil som "Det vigtigste" på forsiden: hvid tekst, linjer imellem og en pil ned. På smalle skærme står panelet under ingressen. Fra 64rem står det i en spalte til højre for teksten og bliver stående, når man scroller. Hver H2 får et id ud fra sin tekst (`lib/site/render.ts`), og layoutets egne id'er er reserveret. Nyheder får intet panel. Ved print skjules det. Højst én grøn flade pr. side: forsiden har "Det vigtigste", indholdssiderne "På denne side".
-
-**Husrække.** Over footeren på alle sider undtagen forsiden står en række huse og træer tegnet med én tynd grøn streg (`src/components/Roofline.astro`). Stregen tegner sig selv på knap to sekunder, bliver stående, toner ud og begynder forfra: én runde varer 12 sekunder. Med `prefers-reduced-motion` står den stille. Den er pynt, har `aria-hidden` og skjules ved print.
 
 **Tabeller.** Ingen ramme og ingen flade. Tabelhovedet er fedt med en streg i blæk under, rækkerne adskilles af tynde linjer.
 
