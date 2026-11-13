@@ -2,12 +2,15 @@
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import { date } from '../../lib/site/sections';
+import { teaser } from '../../lib/site/teaser';
 // The menu panels and the search cover the way around the site, so the front page holds only the
 // intro, the latest news and the most important pages. Intro and shortcuts come from the _forside document.
 // News come first, the three latest as a list of equal rows. "Det vigtigste" sits beside
 // them in a green panel on wide screens and under them on narrow ones.
 const intro = (await getCollection('frontpage'))[0]!.data.intro.split('\n\n').filter(Boolean);
 const shortcuts = (await getCollection('links')).map(l => l.data).filter(l => l.group === 'shortcut').sort((a, b) => a.order - b.order);
+// Each notice shows a short teaser, not its whole first paragraph, so the front page does not
+// repeat the notice (lib/site/teaser.ts).
 // Items are sorted newest news first, so the first three notices are the latest visible ones.
 const news = (await getCollection('items')).map(i => i.data).filter(i => i.kind === 'notice').slice(0, 3);
 const newsSection = (await getCollection('sections')).map(s => s.data).find(s => s.news);
@@ -24,7 +27,7 @@ const showNews = newsSection && news.length > 0;
       <ul class="news-list">{news.map(n => <li>
         <h3><a href={n.path}>{n.title}</a></h3>
         <p class="meta"><time datetime={n.date}>{date(n.date)}</time></p>
-        {n.summary && <p class="news-summary">{n.summary}</p>}
+        {n.summary && <p class="news-summary">{teaser(n.summary)}</p>}
       </li>)}</ul>
       <p class="more"><a href={newsSection.path}>Alle nyheder</a></p>
     </section>}
