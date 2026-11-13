@@ -5,7 +5,7 @@ Forsiden viser de tre seneste nyheder med titel, dato og en kort tekst. Den kort
 ## Reglerne
 
 1. **Højst 160 tegn.** Det er omkring tre linjer i nyhedskolonnen (52ch bred). Tekst, der allerede er kortere, vises hel. At skære i den sparer næsten ingen plads og skjuler information.
-2. **Hele sætninger først.** Så mange sætninger fra starten, som der er plads til. En hel sætning læses lettere end et brudstykke. Der sættes ikke prikker efter en hel sætning. Titlen er linket til resten.
+2. **Hele sætninger først.** Så mange sætninger fra starten, som der er plads til. En hel sætning læses lettere end et brudstykke. Afsluttende punktum erstattes af " …", så man kan se, at der er mere.
 3. **Ellers skæres ved et ord.** Er første sætning for lang, eller bliver de hele sætninger kortere end 60 tegn, skæres der ved et mellemrum, aldrig inde i et ord. Tegn som komma og kolon samt små bindeord ("og", "at", "i" …) fjernes i enden, og der sættes " …".
 4. **Prikkerne på dansk.** Når hele ord er udeladt, står der mellemrum før de tre prikker ("lang tekst …"). Der bruges ét tegn (…).
 5. **Punktum er ikke altid sætningsslut.** Punktum efter tal ("1. juni"), almindelige forkortelser ("fx.", "dvs.", "kl.") og forbogstaver ("H. C.") deler ikke teksten.

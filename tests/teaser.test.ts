@@ -6,16 +6,16 @@ test('kort tekst vises hel', () => {
   expect(teaser('  To   mellemrum\nog linjeskift. ')).toBe('To mellemrum og linjeskift.');
 });
 
-test('lang tekst beholder hele sætninger, så mange der er plads til, uden prikker', () => {
+test('lang tekst beholder hele sætninger, så mange der er plads til, med " …" til sidst', () => {
   const text = 'Legepladsen har fået to nye beboere. En ræv og en snegl, som de mindste allerede kan klatre på og lege med. Sneglen har fået et par overfladiske ridser under opsætningen, men de bliver udbedret snarest.';
-  expect(teaser(text)).toBe('Legepladsen har fået to nye beboere. En ræv og en snegl, som de mindste allerede kan klatre på og lege med.');
+  expect(teaser(text)).toBe('Legepladsen har fået to nye beboere. En ræv og en snegl, som de mindste allerede kan klatre på og lege med …');
 });
 
 test('punktum efter tal, forkortelser og initialer afslutter ikke en sætning', () => {
   expect(sentences('Ovne fra før 1. juni 2008 skal sløjfes. Det gælder fx. også H. C. Ørsteds vej, dvs. Nr. 3. Slut.'))
     .toEqual(['Ovne fra før 1. juni 2008 skal sløjfes.', 'Det gælder fx. også H. C. Ørsteds vej, dvs. Nr. 3.', 'Slut.']);
   const text = 'Vi minder om, at brændeovne skal sløjfes, hvis de er installeret før 1. juni 2008. Ifølge de nyere miljøkrav skal disse ældre ovne enten udskiftes til en ny og mere miljøvenlig model eller sløjfes. (dvs. fjernes eller gøres ubrugelige).';
-  expect(teaser(text)).toBe('Vi minder om, at brændeovne skal sløjfes, hvis de er installeret før 1. juni 2008.');
+  expect(teaser(text)).toBe('Vi minder om, at brændeovne skal sløjfes, hvis de er installeret før 1. juni 2008 …');
 });
 
 test('for lang første sætning skæres ved et ord med " …" og aldrig midt i et ord', () => {

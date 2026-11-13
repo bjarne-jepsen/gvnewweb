@@ -3,7 +3,7 @@
  * Rules (see docs/teaser.md for the reasons):
  * 1. Text that fits within `max` characters is shown whole. Cutting it would hide information and save little.
  * 2. Otherwise keep whole sentences from the start, as many as fit. A complete sentence reads better than a fragment.
- *    No ellipsis then: the sentence is finished, and the title link leads to the rest.
+ *    The closing full stop gives way to " …", so the reader sees there is more.
  * 3. If the first sentence alone is too long, or the kept sentences are shorter than `min`, cut at a word
  *    boundary, never inside a word. Trailing punctuation and short connecting words ("og", "at", "i" …) are
  *    dropped, and " …" marks the cut (Danish style: a space before the dots when whole words are left out).
@@ -50,5 +50,6 @@ export function teaser(input: string, max = TEASER_MAX, min = TEASER_MIN) {
     if (next.length > max) break;
     kept = next;
   }
-  return kept.length >= min ? kept : cutAtWord(text, max);
+  // Every shortened text ends with " …". A kept full stop gives way to it; "!" and "?" stay.
+  return kept.length >= min ? `${kept.replace(/\.$/, '')} …` : cutAtWord(text, max);
 }
