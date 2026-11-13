@@ -1,5 +1,6 @@
 ---
 import { SKY } from '../../lib/site/sky';
+import SceneAnimals from './SceneAnimals.astro';
 // The front page drawing: a row of houses as they look in Grøndalsvænge (1½ storeys, steep tile roofs,
 // rendered walls, hedges and trees) under a sky that follows the sun and the weather (lib/site/sky.ts,
 // docs/cvi.md "Forsidetegning"). It fills the top of the front page: the sky runs up behind the header,
@@ -45,7 +46,11 @@ const drawn = houses.map(h => ({ ...h, ...shape(h) }));
 // About two thirds of the windows are lit at night, the same ones on every visit.
 const windows = drawn.flatMap(h => h.windows).map((w, i) => ({ ...w, lit: i % 3 !== 1 }));
 const trees = [{ x: 205, r: 34, c: '#5E8A4E' }, { x: 478, r: 30, c: '#6F9455' }, { x: 932, r: 36, c: '#557F48' }];
-const hedge = Array.from({ length: 52 }, (_, i) => i * 26);
+// Two garden gates in the hedge, where the dog stands by day and the fox at night (SceneAnimals.astro).
+const gates = [{ from: 398, to: 446 }, { from: 764, to: 814 }];
+const inGate = (x: number, pad = 0) => gates.some(g => x > g.from - pad && x < g.to + pad);
+const hedge = Array.from({ length: 52 }, (_, i) => i * 26 + 13).filter(x => !inGate(x, 10));
+const hedgeParts = [0, ...gates.flatMap(g => [g.from, g.to]), 1320].reduce<[number, number][]>((a, x, i, all) => i % 2 ? [...a, [all[i - 1]!, x]] : a, []);
 // A fixed scatter for rain, snow and stars.
 const scatter = (n: number, seed: number) => Array.from({ length: n }, (_, i) => {
   const r = (k: number) => ((Math.sin((i + 1) * (k + seed) * 12.9898) * 43758.5453) % 1 + 1) % 1;
@@ -80,12 +85,14 @@ const sky = SKY.dag.klart;
         {h.dormer && <polygon points={h.dormer.roof} style={`--c:${h.roof}`} />}
       </g>)}
       <rect class="lawn" x="0" y={G} width="1320" height={340 - G} />
-      <g class="hedge"><rect x="0" y={G - 22} width="1320" height="24" />{hedge.map(x => <circle cx={x + 13} cy={G - 22} r="13" />)}</g>
+      {gates.map(g => <rect class="gate" x={g.from} y={G - 24} width={g.to - g.from} height="26" />)}
+      <g class="hedge">{hedgeParts.map(([a, b]) => <rect x={a} y={G - 22} width={b - a} height="24" />)}{hedge.map(x => <circle cx={x} cy={G - 22} r="13" />)}</g>
     </g>
     <g class="windows">{windows.map(w => <g>
       <rect class="frame" x={w.x - 2} y={w.y - 2} width={w.w + 4} height={w.h + 4} />
       <rect class:list={['pane', { lit: w.lit }]} x={w.x} y={w.y} width={w.w} height={w.h} />
     </g>)}</g>
+    <SceneAnimals />
     <g class="rain">{drops.map(p => <line x1={p.x} y1={p.y} x2={p.x - 6} y2={p.y + 20} />)}</g>
     <g class="snow">{flakes.map((p, i) => <circle cx={p.x} cy={p.y} r={1.5 + (i % 3)} />)}</g>
   </svg>

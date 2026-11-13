@@ -1,0 +1,85 @@
+---
+// The animals in the front page drawing (Scene.astro). By day two birds, a cat on the hedge and a dog in
+// a garden gate; at night two owls in a tree and a fox in the other gate. The switch is the same as the
+// sky's: night is when the sun is more than 6° below the horizon (lib/site/sky.ts). The fox and one bird
+// arrive when the page opens; after that every animal moves a little now and then, with long pauses.
+// With "reduce motion" they all stand still where they belong. Each animal is drawn around its own
+// origin (its feet), placed by the outer <g transform>, so the CSS animations on the inner <g> can move it.
+// Colours sit in --c and are mixed with the light like the houses (site.css, .animals).
+---
+<g class="animals">
+  <g class="day-animals">
+    <!-- A bird on top of the middle tree. -->
+    <g transform="translate(470 147) scale(1.4)"><g class="critter bird hop">
+      <polygon points="-7,-8 -15,-12 -13,-5" style="--c:#2E3A3F" />
+      <ellipse cx="0" cy="-7" rx="8" ry="6" style="--c:#2E3A3F" />
+      <ellipse class="wing" cx="-1" cy="-8" rx="5" ry="3.5" style="--c:#4A5A60" />
+      <circle cx="6" cy="-13" r="4" style="--c:#2E3A3F" />
+      <polygon points="9,-14.5 14,-13 9,-11.5" style="--c:#E0A526" />
+    </g></g>
+    <!-- A bird that flies in and lands on a chimney. -->
+    <g transform="translate(840 118) scale(1.4)"><g class="critter bird fly">
+      <polygon points="-7,-8 -15,-12 -13,-5" style="--c:#3B3330" />
+      <ellipse cx="0" cy="-7" rx="8" ry="6" style="--c:#3B3330" />
+      <ellipse class="wing flap" cx="-1" cy="-9" rx="6" ry="3.5" style="--c:#5A4D47" />
+      <circle cx="6" cy="-13" r="4" style="--c:#3B3330" />
+      <polygon points="9,-14.5 14,-13 9,-11.5" style="--c:#E0A526" />
+    </g></g>
+    <!-- A cat sitting on the hedge. -->
+    <g transform="translate(668 231) scale(1.4)"><g class="critter cat">
+      <path class="tail cat-tail" d="M-7 -2 C -19 -2 -22 -13 -16 -23" style="--c:#4A4440" />
+      <ellipse cx="0" cy="-10" rx="9" ry="11" style="--c:#4A4440" />
+      <circle cx="3" cy="-24" r="7" style="--c:#4A4440" />
+      <polygon points="-2,-28 -1,-37 4,-30" style="--c:#4A4440" />
+      <polygon points="4,-30 9,-37 9,-27" style="--c:#4A4440" />
+      <circle class="glow cat-eye" cx="6" cy="-25" r="1.2" />
+    </g></g>
+    <!-- A dog in the left garden gate. -->
+    <g transform="translate(422 262) scale(1.4)"><g class="critter dog">
+      <path class="tail dog-tail" d="M14 -19 q 8 -3 9 -13" style="--c:#A8774A" />
+      <rect x="-12" y="-11" width="4" height="11" style="--c:#8E6440" />
+      <rect x="-5" y="-11" width="4" height="11" style="--c:#A8774A" />
+      <rect x="5" y="-11" width="4" height="11" style="--c:#8E6440" />
+      <rect x="10" y="-11" width="4" height="11" style="--c:#A8774A" />
+      <ellipse cx="0" cy="-16" rx="16" ry="8" style="--c:#A8774A" />
+      <g class="dog-head">
+        <circle cx="-16" cy="-25" r="7" style="--c:#A8774A" />
+        <ellipse cx="-23" cy="-22" rx="5.5" ry="3.5" style="--c:#A8774A" />
+        <ellipse cx="-13" cy="-24" rx="3" ry="6" style="--c:#7A5232" />
+        <circle cx="-28.5" cy="-23" r="1.6" style="--c:#222222" />
+        <circle cx="-19" cy="-27" r="1.1" style="--c:#222222" />
+      </g>
+    </g></g>
+  </g>
+  <g class="night-animals">
+    <!-- Two owls in the right tree. -->
+    {[{ x: 914, y: 180, d: 0 }, { x: 952, y: 188, d: 1 }].map(o => <g transform={`translate(${o.x} ${o.y}) scale(1.4)`}><g class:list={['critter owl', `owl-${o.d}`]}>
+      <polygon points="-7,-19 -6,-27 -2,-21" style="--c:#6E5136" />
+      <polygon points="7,-19 6,-27 2,-21" style="--c:#6E5136" />
+      <ellipse cx="0" cy="-11" rx="8.5" ry="11.5" style="--c:#7A5A3C" />
+      <ellipse cx="0" cy="-6" rx="5" ry="6" style="--c:#A8835A" />
+      <circle cx="-3.6" cy="-15" r="4.2" style="--c:#D9BC8C" />
+      <circle cx="3.6" cy="-15" r="4.2" style="--c:#D9BC8C" />
+      <g class="eyes"><circle class="glow" cx="-3.6" cy="-15" r="2.4" /><circle class="glow" cx="3.6" cy="-15" r="2.4" /><circle class="pupil" cx="-3.6" cy="-15" r="1.1" /><circle class="pupil" cx="3.6" cy="-15" r="1.1" /></g>
+      <polygon points="-1.3,-12 1.3,-12 0,-9" style="--c:#E0A526" />
+    </g></g>)}
+    <!-- A fox that trots in and stops in the right garden gate. -->
+    <g transform="translate(790 262) scale(1.4)"><g class="critter fox">
+      <g class="fox-tail"><ellipse cx="21" cy="-15" rx="12" ry="5" transform="rotate(-18 21 -15)" style="--c:#C8642A" /><circle cx="31" cy="-19" r="3.6" style="--c:#F2EDE4" /></g>
+      <rect x="-11" y="-9" width="3" height="9" style="--c:#3A2A20" />
+      <rect x="-5" y="-9" width="3" height="9" style="--c:#3A2A20" />
+      <rect x="5" y="-9" width="3" height="9" style="--c:#3A2A20" />
+      <rect x="10" y="-9" width="3" height="9" style="--c:#3A2A20" />
+      <ellipse cx="0" cy="-14" rx="15" ry="7" style="--c:#C8642A" />
+      <g class="fox-head">
+        <circle cx="-14" cy="-17" r="6" style="--c:#C8642A" />
+        <polygon points="-15,-20 -28,-14 -15,-11" style="--c:#C8642A" />
+        <ellipse cx="-12" cy="-11" rx="4" ry="3.5" style="--c:#F2EDE4" />
+        <polygon points="-17,-21 -16,-29 -12,-22" style="--c:#C8642A" />
+        <polygon points="-12,-22 -9,-28 -8,-20" style="--c:#C8642A" />
+        <circle cx="-28" cy="-14" r="1.4" style="--c:#222222" />
+        <circle class="glow" cx="-17" cy="-18" r="1.1" />
+      </g>
+    </g></g>
+  </g>
+</g>
