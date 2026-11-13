@@ -5,7 +5,7 @@ Status: **version 2, november 2026.** Bygger på Bjarnes mockup "Sådan får du 
 ## Udgangspunkt
 
 - Foreningen har i dag intet logo og ingen faste farver. groendalsvaenge.dk bruger standardtemaet Kadence til WordPress med Inter, skifergrå tekst, blå links og et rødt nyhedsmærke. Det eneste særpræg er luftfotoet af de røde tegltage og de grønne haver.
-- Valgt retning (oktober 2026): et enkelt bomærke, paletten "Tegl og have", en rolig og lokalhistorisk stemning og en forside uden stort foto.
+- Valgt retning (oktober 2026): et enkelt bomærke, paletten "Tegl og have", en rolig og lokalhistorisk stemning og en forside uden stort foto. I november 2026 fik forsiden en tegning af husene i stedet (se "Forsidetegning").
 - Sitet er et oplysningssite for andelshavere og folk udefra. Det skal være let at læse for alle aldre, også på mobilen. Det må ikke ligne en kampagne.
 
 ## 1. Navn
@@ -73,7 +73,16 @@ Der bruges kun systemfonte: `--font-sans: "Helvetica Neue", Helvetica, Arial, sa
 
 **Billeder.** I fuld tekstbredde, uden radius, ramme eller skygge.
 
-**Forside.** Øverst "Velkommen" meget stort med ingressen til højre og en streg i blæk under. Derunder to spalter (fra 60rem): til venstre "Seneste nyt" med de tre nyeste nyheder som en liste. Alle nyheder har samme størrelse med dato, titel og resumé; til højre "Det vigtigste" som et grønt panel med hvide links på linjer og en pil. På smalle skærme står nyhederne først og panelet under. Spalteoverskrifterne er små versaler med spatiering. Hvid tekst på grøn er en af de godkendte kombinationer, og fokusringen er hvid i panelet.
+**Forside.** Øverst "Velkommen" meget stort med ingressen til højre, på himlen i forsidetegningen. Derunder to spalter (fra 60rem): til venstre "Seneste nyt" med de tre nyeste nyheder som en liste. Alle nyheder har samme størrelse med dato, titel og resumé; til højre "Det vigtigste" som et grønt panel med hvide links på linjer og en pil. Begge spalter ligger over plænen i tegningen; nyhederne står derfor på en hvid flade. På smalle skærme står nyhederne først og panelet under. Spalteoverskrifterne er små versaler med spatiering. Hvid tekst på grøn er en af de godkendte kombinationer, og fokusringen er hvid i panelet.
+
+**Forsidetegning.** En tegning af en række huse, som de ser ud i Grøndalsvænge: halvanden etage, stejle tegltage, pudsede facader, hække og træer. Den fylder toppen af forsiden. Himlen går op bag headeren og "Velkommen", husene står under ingressen, og "Seneste nyt" og "Det vigtigste" ligger over plænen. Tegningen er `src/components/Scene.astro`, farver og regler står i `lib/site/sky.ts`.
+- **Tid på døgnet** følger solen over Grøndalsvænge, ikke klokken: dag, når solen står mere end 6° over horisonten, nat, når den står mere end 6° under, og skumring imellem. Om natten er himlen natteblå med måne og stjerner, husene er mørkere, og omkring to tredjedele af vinduerne lyser. I skumringen er himlen varm forneden, og vinduerne lyser.
+- **Vejret** kommer fra Open-Meteo: klart, overskyet, regn, sne eller tåge. Kun himlen og lyset ændrer sig. Browseren spørger kun sitet selv (`/api/vejr`). En Cloudflare Pages-funktion (`functions/api/vejr.ts`) henter vejret for et fast punkt (55,69, 12,50) og gemmer svaret en halv time. Den besøgendes IP-adresse sendes altså ikke til Open-Meteo. Uden svar, lokalt og uden JavaScript er det klart vejr.
+- **Kilde:** Open-Meteo er gratis til ikke-kommerciel brug (CC BY 4.0). Når vejret vises, står "Vejrdata fra Open-Meteo.com" under nyhederne.
+- **Tekst på himlen** er blæk om dagen og i skumringen og lys (`--color-on-dark`) om natten, også fokusringen. `tests/sky.test.ts` tjekker, at alle himmelfarver giver mindst 4,5:1. Den lille mærkat "Grøndalsvænge" står i blæk på forsiden, fordi grå ikke har kontrast nok på himlen.
+- **Ingen bevægelse.** Regn og sne står stille, så der er intet at stoppe (WCAG 2.2.2).
+- Tegningen er pynt og skjult for skærmlæsere. Vejret står i ord i noten under nyhederne.
+- `?tid=nat` og `?vejr=regn` (også `dag`, `skumring`, `klart`, `skyet`, `sne`, `taage`) viser en anden himmel, så man kan se tegningen i alle tilstande.
 
 **Landingssider (sektioner).** Sektionens navn står meget stort (`--text-display`, op til 6rem, 400 / 0,95) med første afsnit af `_intro` til højre (fra 50rem, ellers under) og en streg i blæk under. Navnet orddeles ikke. Første afsnit er en kort ingres på højst cirka 200 tegn; synkroniseringen advarer, hvis det er længere. Resten af `_intro` står som løbende tekst under stregen, venstrestillet under titlen og højst 40rem bred. Teksten kan have mellemrubrikker, fed og links. Alle overskrifter i `_intro` bliver H2 på landingssiden, uanset niveau i Docs, i almindelig H2-størrelse; en overskrift før første afsnit vises ikke, fordi første afsnit står ved titlen. Et link til et Google-dokument bliver et link til dokumentets side, og et link til en sektionsmappe i Drive bliver et link til sektionens landingsside. Links til noget, der ikke er på hjemmesiden, bliver almindelig tekst. Hele teksten må højst være 2000 tegn. Der er ingen kort eller liste over undersider: menuen viser allerede alle sider, og teksten linker til de vigtigste. Nyhedssektionen beholder sine nyhedskort.
 

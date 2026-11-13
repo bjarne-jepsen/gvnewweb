@@ -3,8 +3,8 @@ import { getCollection } from 'astro:content';
 import '../styles/tokens.css';
 import '../styles/site.css';
 import Search from '../components/Search.astro';
-interface Props { title: string; }
-const { title } = Astro.props;
+interface Props { title: string; front?: boolean; }
+const { title, front = false } = Astro.props;
 const path = Astro.url.pathname;
 const sections = (await getCollection('sections')).map(s => s.data).sort((a, b) => a.order - b.order);
 // Each page section opens a panel with its pages; the landing page is the first link in the panel.
@@ -27,7 +27,7 @@ const favicon = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www
     <link rel="icon" type="image/svg+xml" href={favicon} />
     <title>{title} · Grøndalsvænge</title>
   </head>
-  <body>
+  <body class:list={{ front }}>
     <a class="skip" href="#indhold">Spring til indhold</a>
     <header class="site-header">
       <div class="wrap">

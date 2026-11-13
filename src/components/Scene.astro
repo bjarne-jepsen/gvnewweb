@@ -1,0 +1,126 @@
+---
+import { SKY } from '../../lib/site/sky';
+// The front page drawing: a row of houses as they look in Grøndalsvænge (1½ storeys, steep tile roofs,
+// rendered walls, hedges and trees) under a sky that follows the sun and the weather (lib/site/sky.ts,
+// docs/cvi.md "Forsidetegning"). It fills the top of the front page: the sky runs up behind the header,
+// and the news and "Det vigtigste" lie over the lawn. The drawing is decoration and hidden from screen
+// readers; the note under the news says the weather in words. Nothing moves. Without JavaScript it is a clear day.
+const G = 262; // the ground line; the lawn runs from here to the bottom (340)
+type House = { x: number; w: number; h: number; kind: 'gavl' | 'lang'; wall: string; roof: string };
+const houses: House[] = [
+  { x: 40, w: 120, h: 78, kind: 'gavl', wall: '#EDE3CC', roof: '#A6422B' },
+  { x: 250, w: 190, h: 70, kind: 'lang', wall: '#F3EFE6', roof: '#9B3B27' },
+  { x: 520, w: 124, h: 82, kind: 'gavl', wall: '#E6D3A0', roof: '#B0502F' },
+  { x: 690, w: 200, h: 72, kind: 'lang', wall: '#EFE6D2', roof: '#A6422B' },
+  { x: 975, w: 118, h: 80, kind: 'gavl', wall: '#F3EFE6', roof: '#9B3B27' },
+  { x: 1140, w: 186, h: 70, kind: 'lang', wall: '#E6D3A0', roof: '#B0502F' },
+];
+type Pane = { x: number; y: number; w: number; h: number };
+const shape = (h: House) => {
+  const eave = G - h.h, mid = h.x + h.w / 2;
+  if (h.kind === 'gavl') {
+    const rise = Math.round(h.w * 0.6), top = eave - rise;
+    const windows: Pane[] = [
+      { x: h.x + h.w * 0.16, y: eave + 14, w: h.w * 0.22, h: 28 },
+      { x: h.x + h.w * 0.62, y: eave + 14, w: h.w * 0.22, h: 28 },
+      { x: mid - 10, y: eave - 36, w: 20, h: 22 },
+    ];
+    return { roofPts: `${h.x - 6},${eave} ${mid},${top} ${h.x + h.w + 6},${eave}`, chimney: { x: h.x + h.w * 0.66, y: top + rise * 0.34 - 16 }, windows, dormer: null };
+  }
+  const rise = 58, top = eave - rise, a = h.x + h.w * 0.18, b = h.x + h.w * 0.82;
+  const windows: Pane[] = [
+    { x: h.x + h.w * 0.1, y: eave + 14, w: h.w * 0.15, h: 28 },
+    { x: h.x + h.w * 0.425, y: eave + 14, w: h.w * 0.15, h: 28 },
+    { x: h.x + h.w * 0.75, y: eave + 14, w: h.w * 0.15, h: 28 },
+    { x: mid - 10, y: top + 24, w: 20, h: 18 },
+  ];
+  return {
+    roofPts: `${h.x - 8},${eave} ${a},${top} ${b},${top} ${h.x + h.w + 8},${eave}`,
+    chimney: { x: h.x + h.w * 0.72, y: top - 14 },
+    windows,
+    dormer: { wall: `${mid - 20},${top + 48} ${mid - 20},${top + 18} ${mid + 20},${top + 18} ${mid + 20},${top + 48}`, roof: `${mid - 27},${top + 20} ${mid},${top + 2} ${mid + 27},${top + 20}` },
+  };
+};
+const drawn = houses.map(h => ({ ...h, ...shape(h) }));
+// About two thirds of the windows are lit at night, the same ones on every visit.
+const windows = drawn.flatMap(h => h.windows).map((w, i) => ({ ...w, lit: i % 3 !== 1 }));
+const trees = [{ x: 205, r: 34, c: '#5E8A4E' }, { x: 478, r: 30, c: '#6F9455' }, { x: 932, r: 36, c: '#557F48' }];
+const hedge = Array.from({ length: 52 }, (_, i) => i * 26);
+// A fixed scatter for rain, snow and stars.
+const scatter = (n: number, seed: number) => Array.from({ length: n }, (_, i) => {
+  const r = (k: number) => ((Math.sin((i + 1) * (k + seed) * 12.9898) * 43758.5453) % 1 + 1) % 1;
+  return { x: Math.round(r(1) * 1320), y: Math.round(r(2) * 300) };
+});
+const drops = scatter(90, 1), flakes = scatter(80, 7), stars = scatter(40, 3).filter(s => s.y < 110);
+const sky = SKY.dag.klart;
+---
+<div class="scene" data-scene data-tid="dag" data-vejr="klart" style={`--sky-top:${sky.top};--sky-bottom:${sky.bottom}`} aria-hidden="true">
+  <svg viewBox="0 0 1320 340" preserveAspectRatio="xMidYMax slice" focusable="false">
+    <g class="stars">{stars.map(s => <circle cx={s.x} cy={s.y} r="1.6" />)}</g>
+    <circle class="sun" cx="1185" cy="58" r="28" />
+    <mask id="scene-crescent"><circle cx="1185" cy="58" r="24" fill="#fff" /><circle cx="1197" cy="50" r="21" fill="#000" /></mask>
+    <circle class="moon" cx="1185" cy="58" r="24" mask="url(#scene-crescent)" />
+    <g class="clouds">
+      <g><ellipse cx="330" cy="70" rx="70" ry="16" /><circle cx="310" cy="60" r="22" /><circle cx="344" cy="54" r="26" /></g>
+      <g><ellipse cx="840" cy="44" rx="56" ry="13" /><circle cx="826" cy="36" r="17" /><circle cx="852" cy="32" r="21" /></g>
+    </g>
+    <g class="heavy">
+      <g><ellipse cx="1150" cy="96" rx="160" ry="34" /><circle cx="1100" cy="74" r="44" /><circle cx="1185" cy="62" r="56" /><circle cx="1255" cy="82" r="38" /></g>
+      <g><ellipse cx="600" cy="76" rx="150" ry="28" /><circle cx="560" cy="58" r="36" /><circle cx="630" cy="50" r="44" /></g>
+      <g><ellipse cx="140" cy="66" rx="130" ry="24" /><circle cx="120" cy="50" r="32" /></g>
+    </g>
+    <g class="town">
+      {trees.map(t => <g style={`--c:${t.c}`}><rect x={t.x - 5} y={G - 70} width="10" height="70" style="--c:#6B4E36" /><circle cx={t.x} cy={G - 88} r={t.r} /><circle cx={t.x - t.r * .62} cy={G - 70} r={t.r * .6} /><circle cx={t.x + t.r * .62} cy={G - 72} r={t.r * .66} /></g>)}
+      {drawn.map(h => <g>
+        <rect x={h.chimney.x} y={h.chimney.y} width="13" height="28" style="--c:#7E3020" />
+        <rect x={h.x} y={G - h.h} width={h.w} height={h.h} style={`--c:${h.wall}`} />
+        <polygon points={h.roofPts} style={`--c:${h.roof}`} />
+        <polyline class="snowcap" points={h.roofPts} />
+        {h.dormer && <polygon points={h.dormer.wall} style={`--c:${h.wall}`} />}
+        {h.dormer && <polygon points={h.dormer.roof} style={`--c:${h.roof}`} />}
+      </g>)}
+      <rect class="lawn" x="0" y={G} width="1320" height={340 - G} />
+      <g class="hedge"><rect x="0" y={G - 22} width="1320" height="24" />{hedge.map(x => <circle cx={x + 13} cy={G - 22} r="13" />)}</g>
+    </g>
+    <g class="windows">{windows.map(w => <g>
+      <rect class="frame" x={w.x - 2} y={w.y - 2} width={w.w + 4} height={w.h + 4} />
+      <rect class:list={['pane', { lit: w.lit }]} x={w.x} y={w.y} width={w.w} height={w.h} />
+    </g>)}</g>
+    <g class="rain">{drops.map(p => <line x1={p.x} y1={p.y} x2={p.x - 6} y2={p.y + 20} />)}</g>
+    <g class="snow">{flakes.map((p, i) => <circle cx={p.x} cy={p.y} r={1.5 + (i % 3)} />)}</g>
+  </svg>
+</div>
+<script>
+  import { daylightAt, darkSky, SKY, DAYLIGHTS, WEATHERS, weatherWords, type Daylight, type Weather } from '../../lib/site/sky';
+  // Time of day from the sun over Grøndalsvænge, weather from /api/vejr (a Cloudflare function; see
+  // functions/api/vejr.ts). ?tid=nat and ?vejr=regn show another sky, for checking the drawing.
+  const scene = document.querySelector<HTMLElement>('[data-scene]');
+  const note = document.querySelector<HTMLElement>('[data-scene-note]');
+  if (scene) {
+    const query = new URLSearchParams(location.search);
+    const fixedTime = DAYLIGHTS.find(d => d === query.get('tid'));
+    const fixedWeather = WEATHERS.find(w => w === query.get('vejr'));
+    let weather: Weather = fixedWeather ?? 'klart';
+    const paint = () => {
+      const time: Daylight = fixedTime ?? daylightAt(new Date());
+      const colours = SKY[time][weather];
+      scene.dataset.tid = time;
+      scene.dataset.vejr = weather;
+      scene.style.setProperty('--sky-top', colours.top);
+      scene.style.setProperty('--sky-bottom', colours.bottom);
+      document.body.dataset.sky = darkSky(time) ? 'mork' : 'lys';
+    };
+    paint();
+    setInterval(paint, 5 * 60_000);
+    if (!fixedWeather) fetch('/api/vejr', { headers: { Accept: 'application/json' } })
+      .then(r => r.ok ? r.json() : null)
+      .then((v: { vejr?: unknown } | null) => {
+        const found = WEATHERS.find(w => w === v?.vejr);
+        if (!found) return;
+        weather = found;
+        paint();
+        if (note) { note.querySelector('[data-weather]')!.textContent = weatherWords[found]; note.hidden = false; }
+      })
+      .catch(() => {});
+  }
+</script>

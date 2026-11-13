@@ -20,6 +20,7 @@ Admin vælger "Hjemmeside → Publicér nu" i et låst ark i Drive
 - **Ingen tidsplan.** Sitet ændrer sig kun, når nogen trykker. En nyhed med en fremtidig dato vises først ved den første kørsel på eller efter datoen.
 - **Fejl i enkelte filer:** Sitet opdateres, kørslen markeres som fejlet, og rapporten står i kørslens oversigt på GitHub. **Afbrudt sync:** intet ændres, hverken i Git eller på Cloudflare.
 - **Tilbagerulning:** Cloudflare skifter til den nye version på én gang og gemmer de tidligere. I Cloudflare under *Workers & Pages → gvnewweb → Deployments* vælger du en ældre version og trykker *Rollback*. Næste kørsel henter dog igen fra Drive.
+- **Vejret på forsiden:** `wrangler pages deploy` tager mappen `functions/` med. Den har én funktion, `/api/vejr`, der henter vejret fra Open-Meteo til forsidetegningen (docs/cvi.md, "Forsidetegning"). Den kræver ingen nøgle eller opsætning. Fejler den, viser forsiden bare klart vejr.
 - **`_redirects` og `_headers`** dannes af buildet. De giver rigtige 301-redirects for alle gamle adresser (WordPress og omdøbte sider), med og uden skråstreg til sidst, og `X-Robots-Tag: noindex` for hele sitet. Redirect-siderne med meta-refresh bliver liggende som reserve.
 
 ## Opsætning
