@@ -22,7 +22,7 @@ const showNews = newsSection && news.length > 0;
     <Scene />
     <div class="front-head">
       <h1>Velkommen</h1>
-      <div>{intro.map(p => <p class="intro">{p}</p>)}</div>
+      {intro.length > 0 && <div>{intro.map(p => <p class="intro">{p}</p>)}</div>}
     </div>
   </div>
   <div class="front-grid">

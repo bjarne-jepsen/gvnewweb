@@ -2,7 +2,7 @@
  * in the root folder (lib/sync/frontpage.ts). A path that does not exist (yet) is left out with a
  * build warning, so the list can name pages before the editors have written them. */
 export const frontpage = {
-  intro: 'Grøndalsvænge er en andelsboligforening med 389 fritliggende huse, bygget 1914–1928 på grænsen mellem Vanløse og København NV.',
+  intro: '',
   shortcuts: [
     { label: 'Hjertestarter', path: '/faellesskab/hjertestarter/' },
     { label: 'Kontakt', path: '/foreningen/kontakt/' },
