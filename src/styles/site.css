@@ -263,7 +263,9 @@ body.front { --scene-h: clamp(13.5rem, 26vw, 23rem); overflow-x: clip; }
 .front .front-head { border-bottom: 0; margin-bottom: 0; padding-bottom: var(--space-m); }
 .front .brand-sub { color: var(--color-ink); }
 .scene { position: absolute; z-index: 0; top: -40rem; bottom: calc(var(--scene-h) * -.2); left: 50%; width: 100vw; transform: translateX(-50%); background: linear-gradient(to bottom, var(--sky-top) 0, var(--sky-top) 30rem, var(--sky-bottom) 100%); pointer-events: none; }
-.scene svg { position: absolute; left: 0; bottom: 0; width: 100%; height: var(--scene-h); display: block; }
+.scene svg { position: absolute; left: 0; width: 100%; display: block; }
+.scene .town-art { bottom: 0; height: var(--scene-h); }
+.scene .sky-art { bottom: var(--scene-h); height: 36rem; }
 .front-grid { position: relative; z-index: 1; }
 .front .front-news { background: var(--color-paper); padding: var(--space-l) var(--space-l) var(--space-xs); }
 @media (min-width: 60rem) { .front .front-news { padding: var(--space-xl) var(--space-xl) var(--space-s); } }
@@ -272,7 +274,7 @@ body.front { --scene-h: clamp(13.5rem, 26vw, 23rem); overflow-x: clip; }
 /* The drawing: sun or moon, stars, clouds, rain or snow, lit windows. */
 .scene .sun { fill: #F2C14E; }
 .scene .moon { fill: #F1EAD0; }
-.scene .stars circle { fill: #F2F2EE; }
+.scene .stars circle { fill: #F2F2EE; opacity: .75; }
 .scene .clouds { fill: #FFFFFF; opacity: .75; }
 .scene .heavy { fill: #E9EDEE; opacity: .95; }
 /* Everything on the ground takes its own colour (--c) mixed with the light of the moment (--tint). */
