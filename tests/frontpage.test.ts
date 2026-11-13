@@ -67,7 +67,7 @@ test('_forside i roden styrer intro og Det vigtigste; fejl bevarer sidste versio
   // Without _forside: the built-in intro and shortcuts (only those that exist).
   await w.run();
   let site = await loadSite(w.root);
-  expect(site.frontpage.intro).toContain('389 fritliggende huse');
+  expect(site.frontpage.intro).toBe('');
   expect(site.links.filter(l => l.group === 'shortcut').map(l => l.href)).toEqual(['/foreningen/kontakt/']);
 
   w.drive.gdoc('forside', '_forside', 'root', forside([{ text: 'Velkommen.' }, { text: 'Bestyrelsen', bullet: true, href: link('doc-b') },
@@ -104,5 +104,5 @@ test('_forside i roden styrer intro og Det vigtigste; fejl bevarer sidste versio
   report = await w.run();
   expect(await w.file()).toBeUndefined();
   expect(report.sections).toContainEqual({ section: '(forside)', title: '_forside', message: 'Forsiden bruger igen standardteksterne' });
-  expect((await loadSite(w.root)).frontpage.intro).toContain('389 fritliggende huse');
+  expect((await loadSite(w.root)).frontpage.intro).toBe('');
 });
