@@ -250,3 +250,60 @@ main { min-height: 60vh; padding-block: clamp(2.5rem, 6vw, 5.5rem) 7.5rem; overf
   .search-panel { left: var(--gutter); right: var(--gutter); width: auto; top: auto; }
 }
 @media print { .search { display: none; } }
+
+/* Front page drawing (src/components/Scene.astro, docs/cvi.md "Forsidetegning"). The sky runs from above the
+   page down behind the header and the welcome; the houses stand under the welcome, and the news and
+   "Det vigtigste" lie over the lawn. --scene-h is the height of the drawing with the houses; the lowest
+   fifth of it is lawn and sits under the panels. Text on the sky is ink, and light at night (body[data-sky]). */
+body.front { --scene-h: clamp(13.5rem, 26vw, 23rem); overflow-x: clip; }
+.front .site-header { position: relative; z-index: 2; border-bottom: 0; }
+.front main { padding-top: clamp(1.5rem, 4vw, 3.5rem); }
+.front-hero { position: relative; padding-bottom: calc(var(--scene-h) * .8); }
+.front-hero > :not(.scene) { position: relative; z-index: 1; }
+.front .front-head { border-bottom: 0; margin-bottom: 0; padding-bottom: var(--space-m); }
+.front .brand-sub { color: var(--color-ink); }
+.scene { position: absolute; z-index: 0; top: -40rem; bottom: calc(var(--scene-h) * -.2); left: 50%; width: 100vw; transform: translateX(-50%); background: linear-gradient(to bottom, var(--sky-top) 0, var(--sky-top) 30rem, var(--sky-bottom) 100%); pointer-events: none; }
+.scene svg { position: absolute; left: 0; bottom: 0; width: 100%; height: var(--scene-h); display: block; }
+.front-grid { position: relative; z-index: 1; }
+.front .front-news { background: var(--color-paper); padding: var(--space-l) var(--space-l) var(--space-xs); }
+@media (min-width: 60rem) { .front .front-news { padding: var(--space-xl) var(--space-xl) var(--space-s); } }
+.scene-note { margin: var(--space-xl) 0 0; }
+
+/* The drawing: sun or moon, stars, clouds, rain or snow, lit windows. */
+.scene .sun { fill: #F2C14E; }
+.scene .moon { fill: #F1EAD0; }
+.scene .stars circle { fill: #F2F2EE; }
+.scene .clouds { fill: #FFFFFF; opacity: .75; }
+.scene .heavy { fill: #E9EDEE; opacity: .95; }
+/* Everything on the ground takes its own colour (--c) mixed with the light of the moment (--tint). */
+.scene { --tint: #0E1828; --amount: 0%; }
+.scene .town :is(rect, circle, polygon) { fill: color-mix(in srgb, var(--c), var(--tint) var(--amount)); }
+.scene .lawn { --c: #8DAF73; }
+.scene .hedge { --c: #3F6B44; }
+.scene .frame { fill: color-mix(in srgb, #F7F4EC, var(--tint) var(--amount)); }
+.scene .pane { fill: color-mix(in srgb, #3C4A52, var(--tint) var(--amount)); }
+.scene .snowcap { fill: none; stroke: none; stroke-width: 6; stroke-linejoin: round; }
+.scene .rain { stroke: #F4F8FA; stroke-width: 2; stroke-linecap: round; opacity: .7; }
+.scene .snow { fill: #FFFFFF; }
+.scene :is(.moon, .stars, .heavy, .rain, .snow) { display: none; }
+.scene[data-tid="nat"] .moon, .scene[data-tid="nat"][data-vejr="klart"] .stars { display: inline; }
+.scene[data-tid="nat"] .sun { display: none; }
+.scene:is([data-vejr="skyet"], [data-vejr="regn"], [data-vejr="sne"]) :is(.sun, .moon, .stars) { display: none; }
+.scene:is([data-vejr="skyet"], [data-vejr="regn"], [data-vejr="sne"]) .heavy { display: inline; }
+.scene[data-vejr="regn"] .heavy { fill: #D6DDE0; }
+.scene[data-vejr="regn"] .rain, .scene[data-vejr="sne"] .snow { display: inline; }
+.scene[data-vejr="sne"] .snowcap { stroke: #FFFFFF; }
+.scene[data-vejr="sne"] .lawn { --c: #E8ECEC; }
+.scene[data-vejr="taage"] .sun { opacity: .4; }
+.scene[data-vejr="taage"] { --tint: #E9EDEB; --amount: 45%; }
+.scene[data-tid="skumring"] { --tint: #3A3550; --amount: 20%; }
+.scene[data-tid="nat"] { --tint: #0E1828; --amount: 58%; }
+.scene[data-tid="nat"] :is(.clouds, .heavy) { fill: #8D9AB3; opacity: .25; }
+.scene[data-tid="nat"] .rain { stroke: #9FB2CC; opacity: .5; }
+.scene[data-tid="nat"] .pane.lit, .scene[data-tid="skumring"] .pane.lit { fill: #F6C453; }
+
+/* Night: light text on the sky, a light focus ring. The search field keeps its light surface. */
+body.front[data-sky="mork"] :is(.site-header .brand, .site-header nav a, .site-header nav summary, .brand-sub, .front-head h1, .front-head .intro) { color: var(--color-on-dark); }
+body.front[data-sky="mork"] .site-header .nav-panel a { color: var(--color-ink); }
+body.front[data-sky="mork"] :is(.site-header, .front-head) :focus-visible { outline-color: var(--color-on-dark); }
+@media print { .scene, .scene-note { display: none; } .front-hero { padding-bottom: 0; } }

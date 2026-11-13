@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
+import Scene from '../components/Scene.astro';
 import { date } from '../../lib/site/sections';
 import { teaser } from '../../lib/site/teaser';
 // The menu panels and the search cover the way around the site, so the front page holds only the
@@ -16,10 +17,13 @@ const news = (await getCollection('items')).map(i => i.data).filter(i => i.kind 
 const newsSection = (await getCollection('sections')).map(s => s.data).find(s => s.news);
 const showNews = newsSection && news.length > 0;
 ---
-<Base title="Forside">
-  <div class="front-head">
-    <h1>Velkommen</h1>
-    <div>{intro.map(p => <p class="intro">{p}</p>)}</div>
+<Base title="Forside" front>
+  <div class="front-hero">
+    <Scene />
+    <div class="front-head">
+      <h1>Velkommen</h1>
+      <div>{intro.map(p => <p class="intro">{p}</p>)}</div>
+    </div>
   </div>
   <div class="front-grid">
     {showNews && <section class="front-news" aria-labelledby="seneste-nyt">
@@ -36,4 +40,5 @@ const showNews = newsSection && news.length > 0;
       <ul class="shortcuts">{shortcuts.map(l => <li><a href={l.href}>{l.label}</a></li>)}</ul>
     </section>}
   </div>
+  <p class="scene-note meta" data-scene-note hidden>Tegningen øverst viser vejret i Grøndalsvænge lige nu: <span data-weather></span>. Vejrdata fra <a href="https://open-meteo.com/" rel="noreferrer">Open-Meteo.com</a>.</p>
 </Base>
