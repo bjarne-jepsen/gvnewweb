@@ -56,18 +56,25 @@ const scatter = (n: number, seed: number) => Array.from({ length: n }, (_, i) =>
   const r = (k: number) => ((Math.sin((i + 1) * (k + seed) * 12.9898) * 43758.5453) % 1 + 1) % 1;
   return { x: Math.round(r(1) * 1320), y: Math.round(r(2) * 300) };
 });
-const drops = scatter(90, 1), flakes = scatter(80, 7), stars = scatter(40, 3).filter(s => s.y < 110);
+const drops = scatter(90, 1), flakes = scatter(80, 7), stars = scatter(80, 3).map((s, i) => ({ x: s.x, y: Math.round(s.y * 1.85), r: i % 6 === 0 ? 1.8 : 1.2 })),
+  lowStars = scatter(14, 11).filter(s => s.y < 120 && Math.abs(s.x - 900) > 40).map(s => ({ ...s, r: 1.2 }));
 const sky = SKY.dag.klart;
 ---
 <div class="scene" data-scene data-tid="dag" data-vejr="klart" style={`--sky-top:${sky.top};--sky-bottom:${sky.bottom}`} aria-hidden="true">
-  <svg viewBox="0 0 1320 340" preserveAspectRatio="xMidYMax slice" focusable="false">
-    <g class="stars">{stars.map(s => <circle cx={s.x} cy={s.y} r="1.6" />)}</g>
-    <circle class="sun" cx="1185" cy="58" r="28" />
-    <mask id="scene-crescent"><circle cx="1185" cy="58" r="24" fill="#fff" /><circle cx="1197" cy="50" r="21" fill="#000" /></mask>
-    <circle class="moon" cx="1185" cy="58" r="24" mask="url(#scene-crescent)" />
+  <!-- Stars over the whole sky, also behind the header and the welcome. This layer ends where the drawing of
+       the houses begins, and the part above the top of the page is cut off. -->
+  <svg class="sky-art" viewBox="0 0 1320 560" preserveAspectRatio="xMidYMax slice" focusable="false">
+    <g class="stars">{stars.map(s => <circle cx={s.x} cy={s.y} r={s.r} />)}</g>
+  </svg>
+  <svg class="town-art" viewBox="0 0 1320 340" preserveAspectRatio="xMidYMax slice" focusable="false">
+    <g class="stars">{lowStars.map(s => <circle cx={s.x} cy={s.y} r={s.r} />)}</g>
+    <!-- Sun or moon right under the welcome, inside what a phone shows of the drawing. -->
+    <circle class="sun" cx="900" cy="50" r="28" />
+    <mask id="scene-crescent"><circle cx="900" cy="50" r="25" fill="#fff" /><circle cx="913" cy="41" r="22" fill="#000" /></mask>
+    <circle class="moon" cx="900" cy="50" r="25" mask="url(#scene-crescent)" />
     <g class="clouds">
       <g><ellipse cx="330" cy="70" rx="70" ry="16" /><circle cx="310" cy="60" r="22" /><circle cx="344" cy="54" r="26" /></g>
-      <g><ellipse cx="840" cy="44" rx="56" ry="13" /><circle cx="826" cy="36" r="17" /><circle cx="852" cy="32" r="21" /></g>
+      <g><ellipse cx="1120" cy="66" rx="56" ry="13" /><circle cx="1106" cy="58" r="17" /><circle cx="1132" cy="54" r="21" /></g>
     </g>
     <g class="heavy">
       <g><ellipse cx="1150" cy="96" rx="160" ry="34" /><circle cx="1100" cy="74" r="44" /><circle cx="1185" cy="62" r="56" /><circle cx="1255" cy="82" r="38" /></g>
