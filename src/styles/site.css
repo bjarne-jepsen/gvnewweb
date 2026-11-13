@@ -276,7 +276,7 @@ body.front { --scene-h: clamp(13.5rem, 26vw, 23rem); overflow-x: clip; }
 .scene .clouds { fill: #FFFFFF; opacity: .75; }
 .scene .heavy { fill: #E9EDEE; opacity: .95; }
 /* Everything on the ground takes its own colour (--c) mixed with the light of the moment (--tint). */
-.scene { --tint: #0E1828; --amount: 0%; }
+.scene { --tint: #0E1828; --amount: 0%; --soft: 0%; }
 .scene .town :is(rect, circle, polygon) { fill: color-mix(in srgb, var(--c), var(--tint) var(--amount)); }
 .scene .lawn { --c: #8DAF73; }
 .scene .hedge { --c: #3F6B44; }
@@ -295,12 +295,51 @@ body.front { --scene-h: clamp(13.5rem, 26vw, 23rem); overflow-x: clip; }
 .scene[data-vejr="sne"] .snowcap { stroke: #FFFFFF; }
 .scene[data-vejr="sne"] .lawn { --c: #E8ECEC; }
 .scene[data-vejr="taage"] .sun { opacity: .4; }
-.scene[data-vejr="taage"] { --tint: #E9EDEB; --amount: 45%; }
-.scene[data-tid="skumring"] { --tint: #3A3550; --amount: 20%; }
-.scene[data-tid="nat"] { --tint: #0E1828; --amount: 58%; }
+.scene[data-vejr="taage"] { --tint: #E9EDEB; --amount: 45%; --soft: 30%; }
+.scene[data-tid="skumring"] { --tint: #3A3550; --amount: 20%; --soft: 10%; }
+.scene[data-tid="nat"] { --tint: #0E1828; --amount: 58%; --soft: 28%; }
 .scene[data-tid="nat"] :is(.clouds, .heavy) { fill: #8D9AB3; opacity: .25; }
 .scene[data-tid="nat"] .rain { stroke: #9FB2CC; opacity: .5; }
 .scene[data-tid="nat"] .pane.lit, .scene[data-tid="skumring"] .pane.lit { fill: #F6C453; }
+
+/* Animals (SceneAnimals.astro): birds, a cat and a dog by day; owls and a fox at night. They take the light
+   more softly than the houses, so they stay visible. Eyes that catch the light are not dimmed. */
+.scene .gate { --c: #CFC6B0; }
+.scene .animals :is(rect, circle, ellipse, polygon) { fill: color-mix(in srgb, var(--c), var(--tint) var(--soft)); }
+.scene .animals .tail { fill: none; stroke: color-mix(in srgb, var(--c), var(--tint) var(--soft)); stroke-width: 4; stroke-linecap: round; }
+.scene .animals .glow { fill: #F2C14E; }
+.scene .animals .cat-eye { fill: #8FB04A; }
+.scene .animals .pupil { fill: #1A1A1A; }
+.scene .night-animals, .scene[data-tid="nat"] .day-animals { display: none; }
+.scene[data-tid="nat"] .night-animals { display: inline; }
+.scene .critter, .scene .critter * { transform-box: fill-box; }
+/* Motion: the fox and one bird arrive, then each animal moves a little now and then. */
+@media (prefers-reduced-motion: no-preference) {
+  .scene .fly { animation: scene-fly 3.2s .4s cubic-bezier(.25, .7, .3, 1) both; }
+  .scene .flap { transform-origin: 50% 100%; animation: scene-flap .22s .4s 14 alternate ease-in-out, scene-flap .22s 9s 6 alternate ease-in-out; }
+  .scene .hop { animation: scene-hop 9s 1.2s infinite; }
+  .scene .cat-tail { transform-origin: 100% 100%; animation: scene-swish 7s .8s infinite ease-in-out; }
+  .scene .dog-tail { transform-origin: 0 100%; animation: scene-wag 6s .6s infinite; }
+  .scene .dog-head { transform-origin: 70% 70%; animation: scene-tilt 11s 3s infinite ease-in-out; }
+  .scene .fox { animation: scene-trot-in 3.6s .3s cubic-bezier(.3, .6, .35, 1) both; }
+  .scene .fox-head { transform-origin: 80% 80%; animation: scene-sniff 10s 4.5s infinite ease-in-out; }
+  .scene .fox-tail { transform-origin: 0 50%; animation: scene-sway 8s 4s infinite ease-in-out; }
+  .scene .owl .eyes { transform-origin: 50% 50%; animation: scene-blink 6s 1s infinite; }
+  .scene .owl-1 .eyes { animation-delay: 3.4s; }
+  .scene .owl { transform-origin: 50% 100%; animation: scene-turn 12s 2s infinite ease-in-out; }
+  .scene .owl-1 { animation-delay: 7s; }
+}
+@keyframes scene-fly { 0% { transform: translate(-560px, -90px); } 60% { transform: translate(-90px, -40px); } 100% { transform: none; } }
+@keyframes scene-flap { to { transform: scaleY(-.6); } }
+@keyframes scene-hop { 0%, 6%, 100% { transform: none; } 2% { transform: translateY(-5px); } 4% { transform: translateY(-3px); } }
+@keyframes scene-swish { 0%, 20%, 100% { transform: none; } 7% { transform: rotate(14deg); } 14% { transform: rotate(-6deg); } }
+@keyframes scene-wag { 0%, 30%, 100% { transform: none; } 3%, 9%, 15%, 21% { transform: rotate(-22deg); } 6%, 12%, 18%, 24% { transform: rotate(10deg); } }
+@keyframes scene-tilt { 0%, 18%, 100% { transform: none; } 6%, 12% { transform: rotate(-10deg); } }
+@keyframes scene-trot-in { 0% { transform: translateX(320px); } 100% { transform: none; } }
+@keyframes scene-sniff { 0%, 20%, 100% { transform: none; } 6%, 14% { transform: rotate(-14deg) translateY(2px); } }
+@keyframes scene-sway { 0%, 100% { transform: none; } 50% { transform: rotate(-6deg); } }
+@keyframes scene-blink { 0%, 4%, 100% { transform: none; } 2% { transform: scaleY(.1); } }
+@keyframes scene-turn { 0%, 22%, 100% { transform: none; } 6%, 16% { transform: rotate(-9deg); } }
 
 /* Night: light text on the sky, a light focus ring. The search field keeps its light surface. */
 body.front[data-sky="mork"] :is(.site-header .brand, .site-header nav a, .site-header nav summary, .brand-sub, .front-head h1, .front-head .intro) { color: var(--color-on-dark); }
