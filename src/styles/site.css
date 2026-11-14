@@ -254,15 +254,15 @@ main { min-height: 60vh; padding-block: clamp(2.5rem, 6vw, 5.5rem) 7.5rem; overf
 /* Front page drawing (src/components/Scene.astro, docs/cvi.md "Forsidetegning"). The sky runs from above the
    page down behind the header and the welcome; the houses stand under the welcome, and the news and
    "Det vigtigste" lie over the lawn. --scene-h is the height of the drawing with the houses; the lowest
-   fifth of it is lawn and sits under the panels. Text on the sky is ink, and light at night (body[data-sky]). */
+   fifth of it is lawn, and the panels cover the lower half of it. Text on the sky is ink, and light at night (body[data-sky]). */
 body.front { --scene-h: clamp(13.5rem, 26vw, 23rem); overflow-x: clip; }
 .front .site-header { position: relative; z-index: 2; border-bottom: 0; }
-.front main { padding-top: clamp(1.5rem, 4vw, 3.5rem); }
-.front-hero { position: relative; padding-bottom: calc(var(--scene-h) * .8); }
+.front main { padding-top: 1.5rem; }
+.front-hero { position: relative; padding-bottom: calc(var(--scene-h) * .9); }
 .front-hero > :not(.scene) { position: relative; z-index: 1; }
 .front .front-head { border-bottom: 0; margin-bottom: 0; padding-bottom: var(--space-m); }
 .front .brand-sub { color: var(--color-ink); }
-.scene { position: absolute; z-index: 0; top: -40rem; bottom: calc(var(--scene-h) * -.2); left: 50%; width: 100vw; transform: translateX(-50%); background: linear-gradient(to bottom, var(--sky-top) 0, var(--sky-top) 30rem, var(--sky-bottom) 100%); pointer-events: none; }
+.scene { position: absolute; z-index: 0; top: -40rem; bottom: calc(var(--scene-h) * -.1); left: 50%; width: 100vw; transform: translateX(-50%); background: linear-gradient(to bottom, var(--sky-top) 0, var(--sky-top) 30rem, var(--sky-bottom) 100%); pointer-events: none; }
 .scene svg { position: absolute; left: 0; width: 100%; display: block; }
 .scene .town-art { bottom: 0; height: var(--scene-h); }
 .scene .sky-art { bottom: var(--scene-h); height: 36rem; }
