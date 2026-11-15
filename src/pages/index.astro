@@ -4,6 +4,7 @@ import Base from '../layouts/Base.astro';
 import Scene from '../components/Scene.astro';
 import { date } from '../../lib/site/sections';
 import { teaser } from '../../lib/site/teaser';
+import { NEW_TAB_HINT } from '../../lib/site/render';
 // The menu panels and the search cover the way around the site, so the front page holds only the
 // intro, the latest news and the most important pages. Intro and shortcuts come from the _forside document.
 // News come first, the three latest as a list of equal rows. "Det vigtigste" sits beside
@@ -40,5 +41,5 @@ const showNews = newsSection && news.length > 0;
       <ul class="shortcuts">{shortcuts.map(l => <li><a href={l.href}>{l.label}</a></li>)}</ul>
     </section>}
   </div>
-  <p class="scene-note meta" data-scene-note hidden>Tegningen øverst viser vejret i Grøndalsvænge lige nu: <span data-weather></span>. Vejrdata fra <a href="https://open-meteo.com/" rel="noreferrer">Open-Meteo.com</a>.</p>
+  <p class="scene-note meta" data-scene-note hidden>Tegningen øverst viser vejret i Grøndalsvænge lige nu: <span data-weather></span>. Vejrdata fra <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo.com<span class="visually-hidden"> ({NEW_TAB_HINT})</span></a>.</p>
 </Base>

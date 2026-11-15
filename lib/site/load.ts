@@ -52,7 +52,10 @@ export async function loadSite(root = '.', buildAt = new Date(process.env.BUILD_
     const slug = slugs[entry.id];
     if (slug && (entry.kind !== 'notice' || shown(newsMeta(entry)))) pathOfDoc.set(entry.id, pathOf(slug));
   }
+  // A full address on the site itself is an ordinary internal link, so it stays in the same tab.
+  const origin = new URL(config.siteUrl).origin;
   const linkTarget = (title: string) => (url: string): LinkTarget => {
+    if (/^https?:/.test(url)) { const u = new URL(url); if (u.origin === origin) return { path: u.pathname + u.search + u.hash }; }
     const id = docIdOf(url);
     if (!id) return undefined;
     const path = pathOfDoc.get(id);
@@ -138,7 +141,7 @@ export async function loadSite(root = '.', buildAt = new Date(process.env.BUILD_
   redirects.sort((a, b) => a.from < b.from ? -1 : 1);
   // Drive IDs must never reach the output. News items are Google documents too.
   const internalIds = [...entries.values()].map(e => e.id);
-  return { frontpage: { intro }, sections, items, redirects, links, assets, warnings, internalIds, buildDay, origin: new URL(config.siteUrl).origin };
+  return { frontpage: { intro }, sections, items, redirects, links, assets, warnings, internalIds, buildDay, origin };
 }
 
 /** Headings and running text of a Markdown body, for the search index. Image alt text is left out. */

@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import '../styles/tokens.css';
 import '../styles/site.css';
 import Search from '../components/Search.astro';
+import { NEW_TAB_HINT } from '../../lib/site/render';
 interface Props { title: string; front?: boolean; }
 const { title, front = false } = Astro.props;
 const path = Astro.url.pathname;
@@ -51,7 +52,7 @@ const favicon = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www
       <div class="wrap">
         <p class="footer-name">Grøndalsvænge</p>
         <div class="footer-grid">
-          {footerLinks.length > 0 && <nav aria-labelledby="sidefod-genveje"><p class="footer-label" id="sidefod-genveje">Genveje</p><ul class="footer-links">{footerLinks.map(l => <li><a href={l.href} rel={l.external ? 'noreferrer' : undefined}>{l.label}</a></li>)}</ul></nav>}
+          {footerLinks.length > 0 && <nav aria-labelledby="sidefod-genveje"><p class="footer-label" id="sidefod-genveje">Genveje</p><ul class="footer-links">{footerLinks.map(l => <li>{l.external ? <a href={l.href} target="_blank" rel="noopener noreferrer">{l.label}<span class="visually-hidden"> ({NEW_TAB_HINT})</span></a> : <a href={l.href}>{l.label}</a>}</li>)}</ul></nav>}
           <div class="wide"><p class="footer-label">For andelshavere</p><p>Dokumenter for andelshavere ligger i ProBo hos administrator.</p><p class="colophon">Lokal prototype: indholdet hentes fra hjemmesidens mapper i foreningens Google Drive.</p></div>
         </div>
       </div>

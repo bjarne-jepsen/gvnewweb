@@ -14,7 +14,7 @@ const local = (url: string) => url.startsWith('./d/');
 test('renderer escaper tekst og attributter og kender kun dialekten', () => {
   const html = renderBody('## A \\&amp; \\<b\\>\n\n[l](https://example.test/?a=1&b="x") **f** *k*\\\nny\n\n- et\n- to\n\n---\n\n| h1 | h2 |\n| --- | --- |\n| c1 | c2 |\n\n![Alt "x"](./d/abcdef0123456789.png)\n', local, u => `/s/p/${u.slice(4)}`);
   expect(html).toContain('<h2 id="a-amp-b">A &amp;amp; &lt;b&gt;</h2>');
-  expect(html).toContain('<a href="https://example.test/?a=1&amp;b=%22x%22" rel="noreferrer">l</a> <strong>f</strong> <em>k</em><br>');
+  expect(html).toContain('<a href="https://example.test/?a=1&amp;b=%22x%22" target="_blank" rel="noopener noreferrer">l<span class="visually-hidden"> (åbner i et nyt vindue)</span></a> <strong>f</strong> <em>k</em><br>');
   expect(html).toContain('<ul><li>et</li><li>to</li></ul>');
   expect(html).toContain('<thead><tr><th>h1</th><th>h2</th></tr></thead><tbody><tr><td>c1</td><td>c2</td></tr></tbody>');
   expect(html).toContain('<figure><img src="/s/p/abcdef0123456789.png" alt="Alt &quot;x&quot;"');
@@ -64,7 +64,7 @@ test('introen kan linke til sider og sektioner via Google Docs- og mappelinks; u
     '<p><a href="/andelshaveren/"><strong>Andelshaveren</strong></a></p>',
     '<p>Privat mappe</p>',
     '<p>Ukendt dokument</p>',
-    '<p><a href="https://rumly.dk/" rel="noreferrer">Rumly</a></p>',
+    '<p><a href="https://rumly.dk/" target="_blank" rel="noopener noreferrer">Rumly<span class="visually-hidden"> (åbner i et nyt vindue)</span></a></p>',
   ].join('\n'));
   expect(s.warnings.filter(w => w.startsWith('Om Grøndalsvænge (intro)'))).toEqual([
     'Om Grøndalsvænge (intro): et link til en mappe, der ikke er en sektion på hjemmesiden, vises som almindelig tekst',
@@ -137,13 +137,15 @@ test('links til andre Google-dokumenter peger på deres sider, og intet Drive-ID
     { text: 'Kontakt', href: 'https://docs.google.com/document/u/1/d/doc-kontakt/edit' },
     { text: 'Kladde', href: 'https://docs.google.com/document/d/doc-privat/edit?tab=t.0' },
     { text: 'Andelsbo', href: 'https://andelsbo.dk/' },
+    { text: 'Egen side', href: 'https://example.invalid/foreningen/kontakt/#svar' },
   ]));
   await syncContent({ config: siteConfigSchema.parse(config), drive, contentDir: join(root, 'content') });
   const s = await loadSite(root);
   const { html } = s.items.find(i => i.id === 'doc-b')!;
   expect(html).toContain('<a href="/foreningen/kontakt/">Kontakt</a>');
   expect(html).toContain('<p>Kladde</p>');
-  expect(html).toContain('<a href="https://andelsbo.dk/" rel="noreferrer">Andelsbo</a>');
+  expect(html).toContain('<a href="https://andelsbo.dk/" target="_blank" rel="noopener noreferrer">Andelsbo<span class="visually-hidden"> (åbner i et nyt vindue)</span></a>');
+  expect(html).toContain('<a href="/foreningen/kontakt/#svar">Egen side</a>');
   expect(html).not.toContain('doc-');
   expect(s.warnings.filter(w => w.startsWith('Bestyrelsen'))).toEqual(['Bestyrelsen: et link til et Google-dokument, der ikke er en side på hjemmesiden, vises som almindelig tekst']);
 });
