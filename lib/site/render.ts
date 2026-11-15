@@ -9,6 +9,12 @@ const unsupported = (node: Nodes): never => { throw new Error(`Kan ikke vise Mar
 /** Ids the layout uses itself; a heading never takes one of them. */
 const RESERVED_IDS = ['indhold', 'sidefod-genveje', 'paa-denne-side', 'genveje', 'seneste-nyt', 'soeg', 'soeg-resultater', 'soeg-status'];
 
+/** Links to other sites open in a new tab, so the reader keeps the page they came from.
+ * Screen readers hear the hint; it is hidden on screen. */
+export const NEW_TAB_HINT = 'åbner i et nyt vindue';
+export const NEW_TAB_ATTRS = 'target="_blank" rel="noopener noreferrer"';
+export const newTabHintHtml = `<span class="visually-hidden"> (${NEW_TAB_HINT})</span>`;
+
 /** What a link becomes: an address on the site, plain text (drop) or the link as written (undefined). */
 export type LinkTarget = { path: string } | 'drop' | undefined;
 
@@ -41,7 +47,9 @@ export function renderBody(body: string, isLocalImage: (url: string) => boolean,
       const target = linkTarget(href);
       if (target === 'drop') return inline(n.children);
       if (target) return `<a href="${escape(target.path)}">${inline(n.children)}</a>`;
-      return `<a href="${escape(href)}" rel="noreferrer">${inline(n.children)}</a>`;
+      // mailto opens the mail program, not a page, so only web links get a new tab.
+      if (href.startsWith('mailto:')) return `<a href="${escape(href)}" rel="noreferrer">${inline(n.children)}</a>`;
+      return `<a href="${escape(href)}" ${NEW_TAB_ATTRS}>${inline(n.children)}${newTabHintHtml}</a>`;
     }
     return unsupported(n);
   }).join('');

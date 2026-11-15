@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { inlineSchema, safeHref } from '../lib/contracts/blocks';
 import { googleDocsBlocks } from '../lib/google/docs';
 import { renderBody } from '../lib/site/render';
+import { tableOfContents } from '../lib/site/toc';
 import { assertRoundTrip, blocksToMarkdown, validateMarkdown, type SerializableBlock } from '../lib/sync/markdown';
 
 // Phase 5e: e-mail links. One rule (safeHref) for parser, Markdown validation, rendering and news.
@@ -35,4 +36,16 @@ test('mailto overlever rundturen gennem Markdown og renderes som link', () => {
   assertRoundTrip(blocks, validateMarkdown(md, () => false));
   expect(renderBody(md, () => false, u => u)).toBe('<p>Skriv til <a href="mailto:kom@groendalsvaenge.dk" rel="noreferrer"><strong>Kommunikationsudvalget</strong></a>.</p>');
   for (const bad of ['[x](mailto:a@b.dk?bcc=c@d.dk)\n', '[x](mailto:a@b.dk,c@d.dk)\n', '[x](javascript:alert(1))\n']) expect(() => validateMarkdown(bad, () => false)).toThrow('ikke-tilladte');
+});
+
+test('eksterne links åbner i ny fane med skjult hint; mailto og interne links gør ikke', () => {
+  const hint = '<span class="visually-hidden"> (åbner i et nyt vindue)</span>';
+  expect(renderBody('[Rumly](https://rumly.dk/)\n', () => false, u => u)).toBe(`<p><a href="https://rumly.dk/" target="_blank" rel="noopener noreferrer">Rumly${hint}</a></p>`);
+  expect(renderBody('[Skriv](mailto:a@b.dk)\n', () => false, u => u)).toBe('<p><a href="mailto:a@b.dk" rel="noreferrer">Skriv</a></p>');
+  expect(renderBody('[Side](https://docs.google.com/document/d/x/edit)\n', () => false, u => u, () => ({ path: '/a/b/' }))).toBe('<p><a href="/a/b/">Side</a></p>');
+});
+
+test('"På denne side" viser ikke hintet fra et eksternt link i en overskrift', () => {
+  const html = renderBody('## [Rumly](https://rumly.dk/)\n\n## B\n\n## C\n', () => false, u => u);
+  expect(tableOfContents(html).headings[0]).toEqual({ id: 'rumly', label: 'Rumly' });
 });

@@ -4,7 +4,7 @@
 export const TOC_MIN_HEADINGS = 3;
 
 export function tableOfContents(html: string) {
-  const headings = [...html.matchAll(/<h2 id="([^"]+)">([\s\S]*?)<\/h2>/g)].map(m => ({ id: m[1]!, label: m[2]!.replace(/<[^>]*>/g, '') }));
+  const headings = [...html.matchAll(/<h2 id="([^"]+)">([\s\S]*?)<\/h2>/g)].map(m => ({ id: m[1]!, label: m[2]!.replace(/<span class="visually-hidden">[\s\S]*?<\/span>/g, '').replace(/<[^>]*>/g, '') }));
   const lead = html.startsWith('<p>') ? html.slice(0, html.indexOf('</p>') + 4) : '';
   return { headings: headings.length >= TOC_MIN_HEADINGS ? headings : [], lead, rest: html.slice(lead.length) };
 }
