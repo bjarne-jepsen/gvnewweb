@@ -75,7 +75,7 @@ test('ugyldigt JSON og for store svar afvises', async () => {
 test('billeder hentes uden API-token og kun fra Googles billedværter', async () => {
   const client = new GoogleReadClient('secret', async (_url, init) => {
     expect(new Headers(init.headers).has('Authorization')).toBe(false);
-    expect(init.redirect).toBe('error'); return new Response('image-bytes');
+    expect(init.redirect).toBe('manual'); return new Response('image-bytes');
   });
   await client.downloadImage('https://docs.google.com/docs-images-rt/test');
   await client.downloadImage('https://lh3.googleusercontent.com/abc');
@@ -86,4 +86,24 @@ test('getFile returnerer papirkurvsstatus og afviser forkert fil', async () => {
   const client = new GoogleReadClient('t', async url => Response.json(item(new URL(url).pathname.split('/').at(-1)!, { trashed: true })));
   expect((await client.getFile('abc')).trashed).toBe(true);
   await rejects(new GoogleReadClient('t', async () => Response.json(item('other'))).getFile('abc'), /forkert fil/);
+});
+
+test('billeder følger omdirigeringer, men kun til Googles billedværter', async () => {
+  const seen: string[] = [];
+  const client = new GoogleReadClient('secret', async (url, init) => {
+    seen.push(url); expect(new Headers(init.headers).has('Authorization')).toBe(false);
+    if (url.includes('docs-images-rt')) return new Response(null, { status: 302, headers: { location: 'https://lh7-rt.googleusercontent.com/docsz/abc' } });
+    return new Response('image-bytes');
+  });
+  expect(Buffer.from(await client.downloadImage('https://docs.google.com/docs-images-rt/test')).toString()).toBe('image-bytes');
+  expect(seen).toEqual(['https://docs.google.com/docs-images-rt/test', 'https://lh7-rt.googleusercontent.com/docsz/abc']);
+  const evil = new GoogleReadClient('t', async () => new Response(null, { status: 302, headers: { location: 'https://example.test/x' } }));
+  await rejects(evil.downloadImage('https://lh3.googleusercontent.com/x'), /tilladt Google-billedkilde/);
+  const loop = new GoogleReadClient('t', async () => new Response(null, { status: 302, headers: { location: 'https://lh3.googleusercontent.com/x' } }));
+  await rejects(loop.downloadImage('https://lh3.googleusercontent.com/x'), /omdirigeringer/);
+});
+
+test('timeout får sin egen besked', async () => {
+  const client = new GoogleReadClient('t', async () => { throw new DOMException('slow', 'TimeoutError'); });
+  await rejects(client.downloadImage('https://lh3.googleusercontent.com/x'), /Google svarede ikke i tide/);
 });

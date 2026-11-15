@@ -6,16 +6,30 @@ const itemFields = 'id,name,mimeType,modifiedTime,trashed,size,sha256Checksum,sh
 const listSchema = z.object({ files: z.array(driveItemSchema), nextPageToken: z.string().min(1).optional(), incompleteSearch: z.boolean().optional() });
 export type HttpFetch = (url: string, init: RequestInit) => Promise<Response>;
 
+const isRedirect = (status: number) => [301, 302, 303, 307, 308].includes(status);
+function assertGoogleImage(uri: string) {
+  const url = new URL(uri);
+  const googleImage = url.hostname.endsWith('.googleusercontent.com') || (url.hostname === 'docs.google.com' && url.pathname.startsWith('/docs-images-rt/'));
+  if (url.protocol !== 'https:' || url.username || url.password || url.port || !googleImage) throw new Error('Google: billed-URL er ikke en tilladt Google-billedkilde');
+}
+
 /** Fixed Google endpoints and GET only: read-only listing, metadata, Docs and images. */
 export class GoogleReadClient implements DriveSource {
   constructor(private token: string, private transport: HttpFetch = (url, init) => fetch(url, init)) {
     if (!token || /\s/.test(token)) throw new Error('Google: ugyldigt eller manglende adgangstoken');
   }
   private async get(url: string, limit: number, authenticated = true): Promise<Uint8Array> {
-    let response: Response;
-    try {
-      response = await this.transport(url, { method: 'GET', headers: authenticated ? { Authorization: `Bearer ${this.token}` } : {}, redirect: 'error', cache: 'no-store', signal: AbortSignal.timeout(15000) });
-    } catch { throw new Error('Google: netværksfejl eller timeout'); }
+    let response = await this.send(url, authenticated);
+    // Docs image URLs answer with a redirect to the actual image. Each hop is followed by hand and
+    // must stay on a Google image host; API calls (with the token) never follow redirects.
+    for (let hop = 0; !authenticated && isRedirect(response.status); hop++) {
+      await response.body?.cancel();
+      const location = response.headers.get('location');
+      if (hop >= 3 || !location) throw new Error('Google: billedet kunne ikke hentes (for mange eller ugyldige omdirigeringer)');
+      const next = new URL(location, url).href;
+      assertGoogleImage(next);
+      response = await this.send(url = next, false);
+    }
     if (!response.ok) {
       // Neither the response body nor the token is ever part of an error.
       await response.body?.cancel();
@@ -35,6 +49,14 @@ export class GoogleReadClient implements DriveSource {
       }
     } catch { throw new Error('Google: afbrudt eller for stort svar'); }
     return Buffer.concat(chunks);
+  }
+  private async send(url: string, authenticated: boolean): Promise<Response> {
+    try {
+      return await this.transport(url, { method: 'GET', headers: authenticated ? { Authorization: `Bearer ${this.token}` } : {}, redirect: authenticated ? 'error' : 'manual', cache: 'no-store', signal: AbortSignal.timeout(authenticated ? 15000 : 30000) });
+    } catch (error) {
+      const timeout = error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError');
+      throw new Error(timeout ? 'Google: timeout; Google svarede ikke i tide' : 'Google: netværksfejl eller timeout');
+    }
   }
   private async json(url: string): Promise<unknown> {
     const bytes = await this.get(url, 2 * 1024 * 1024);
@@ -80,9 +102,7 @@ export class GoogleReadClient implements DriveSource {
     return this.access(() => this.json(`https://docs.googleapis.com/v1/documents/${fileId}?${query}`));
   }
   async downloadImage(uri: string) {
-    const url = new URL(uri);
-    const googleImage = url.hostname.endsWith('.googleusercontent.com') || (url.hostname === 'docs.google.com' && url.pathname.startsWith('/docs-images-rt/'));
-    if (url.protocol !== 'https:' || url.username || url.password || url.port || !googleImage) throw new Error('Google: billed-URL er ikke en tilladt Google-billedkilde');
+    assertGoogleImage(uri);
     // Ephemeral image URLs from Docs are fetched without forwarding the API bearer token.
     return this.get(uri, 5 * 1024 * 1024, false);
   }
