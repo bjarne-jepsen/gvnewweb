@@ -95,7 +95,9 @@ main { min-height: 60vh; padding-block: clamp(2.5rem, 6vw, 5.5rem) 7.5rem; overf
 /* The defibrillator shortcut has a heart in place of the arrow. It beats slowly and softly, a small
    double beat every two seconds, and stands still for anyone who has asked for less motion. */
 .shortcuts .shortcut-heart::after { content: none; }
-.shortcuts .heart { flex: none; width: 1.15em; height: 1.15em; }
+/* Red with a 2px white edge. The stroke does not scale with the drawing, so it stays 2px at any size. */
+.shortcuts .heart { flex: none; width: 1.15em; height: 1.15em; overflow: visible; }
+.shortcuts .heart path { fill: var(--color-heart); stroke: var(--color-paper); stroke-width: 2px; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 @media (prefers-reduced-motion: no-preference) {
   .shortcuts .heart { animation: heartbeat 2s ease-in-out infinite; transform-origin: 50% 55%; }
 }
