@@ -1,13 +1,15 @@
 ---
 id: "1qK6zWw_RV4iw6l4Vli0-lF79CNIQiH_oLjyVcosJ2BY"
 title: "Fester og traditioner"
-updatedAt: "2026-10-22T17:15:07.998Z"
+updatedAt: "2026-11-15T11:38:58.467Z"
 summary: "I Grøndalsvænge er der tradition for at mødes og fejre årets højtider og mærkedage. Her er de faste arrangementer, der samler naboer på tværs af generationer."
 ---
 
 I Grøndalsvænge er der tradition for at mødes og fejre årets højtider og mærkedage. Her er de faste arrangementer, der samler naboer på tværs af generationer.
 
 ## Fastelavn
+
+![fastelavnsarrangement i Grøndalsvænge](./1qK6zWw_RV4iw6l4Vli0-lF79CNIQiH_oLjyVcosJ2BY/c21c7e99fc001328.jpg)
 
 Hvert år inviteres alle foreningens børn til tøndeslagning på Mirabellelegepladsen. Bagefter er der slikposer og saftevand til børnene og kaffe til de voksne.
 
