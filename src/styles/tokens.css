@@ -13,6 +13,8 @@
   --color-on-dark: #F2F2EE;
   --color-on-dark-muted: #A8A8A2;
   --color-dark-line: #4A4A4A;
+  /* Only for the heart by Hjertestarter on the front page. Never text. */
+  --color-heart: #D7263D;
 
   --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
 
