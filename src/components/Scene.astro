@@ -5,7 +5,9 @@ import SceneAnimals from './SceneAnimals.astro';
 // rendered walls, hedges and trees) under a sky that follows the sun and the weather (lib/site/sky.ts,
 // docs/cvi.md "Forsidetegning"). It fills the top of the front page: the sky runs up behind the header,
 // and the news and "Det vigtigste" lie over the lawn. The drawing is decoration and hidden from screen
-// readers; the note under the news says the weather in words. Nothing moves. Without JavaScript it is a clear day.
+// readers; the note under the news says the weather in words. Without JavaScript it is a clear day.
+// The drawing has no top edge: the clouds may reach above it, and rain and snow fall in their own layer
+// (.precip) from the top of the page, behind the header and the welcome, so nothing is cut off in a line.
 const G = 262; // the ground line; the lawn runs from here to the bottom (340)
 type House = { x: number; w: number; h: number; kind: 'gavl' | 'lang'; wall: string; roof: string };
 const houses: House[] = [
@@ -51,14 +53,36 @@ const gates = [{ from: 398, to: 446 }, { from: 764, to: 814 }];
 const inGate = (x: number, pad = 0) => gates.some(g => x > g.from - pad && x < g.to + pad);
 const hedge = Array.from({ length: 52 }, (_, i) => i * 26 + 13).filter(x => !inGate(x, 10));
 const hedgeParts = [0, ...gates.flatMap(g => [g.from, g.to]), 1320].reduce<[number, number][]>((a, x, i, all) => i % 2 ? [...a, [all[i - 1]!, x]] : a, []);
-// A fixed scatter for rain, snow and stars.
+// A fixed scatter for stars.
 const scatter = (n: number, seed: number) => Array.from({ length: n }, (_, i) => {
   const r = (k: number) => ((Math.sin((i + 1) * (k + seed) * 12.9898) * 43758.5453) % 1 + 1) % 1;
   return { x: Math.round(r(1) * 1320), y: Math.round(r(2) * 300) };
 });
-const drops = scatter(90, 1), flakes = scatter(80, 7), stars = scatter(80, 3).map((s, i) => ({ x: s.x, y: Math.round(s.y * 1.85), r: i % 6 === 0 ? 1.8 : 1.2 })),
+const stars = scatter(80, 3).map((s, i) => ({ x: s.x, y: Math.round(s.y * 1.85), r: i % 6 === 0 ? 1.8 : 1.2 })),
   lowStars = scatter(14, 11).filter(s => s.y < 120 && Math.abs(s.x - 900) > 40).map(s => ({ ...s, r: 1.2 }));
 const sky = SKY.dag.klart;
+// Rain and snow are tiles that repeat across the whole sky. Each layer slides one tile down and to the left
+// and starts over, so the fall has no seam (site.css, scene-fall). The streaks lean the same way the layer moves.
+// Two layers with different tile sizes and speeds keep the pattern from showing and give a little depth.
+type Tile = { w: number; h: number; n: number; seed: number };
+const spots = ({ w, h, n, seed }: Tile, pad: number) => Array.from({ length: n }, (_, i) => {
+  const r = ((Math.sin((i + 1) * seed * 12.9898) * 43758.5453) % 1 + 1) % 1;
+  // One spot per row, at a random place across: an even fall without clumps.
+  return { x: Math.round(pad + r * (w - 2 * pad)), y: Math.round((i + .5) * h / n) };
+});
+const tile = (t: Tile, body: string) => `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${t.w}" height="${t.h}">${body}</svg>`)}")`;
+const rainTile = (t: Tile, len: number, width: number) => tile(t, spots(t, 12).map(p =>
+  `<line x1="${p.x + len * t.w / t.h / 2}" y1="${p.y - len / 2}" x2="${p.x - len * t.w / t.h / 2}" y2="${p.y + len / 2}" stroke="#000" stroke-width="${width}" stroke-linecap="round"/>`).join(''));
+const snowTile = (t: Tile, sizes: number[]) => tile(t, spots(t, 8).map((p, i) => `<circle cx="${p.x}" cy="${p.y}" r="${sizes[i % sizes.length]}"/>`).join(''));
+// Rain: 1 px across for every 4 px down. Snow drifts only a little.
+const rainNear = { w: 200, h: 800, n: 9, seed: 2 }, rainFar = { w: 150, h: 600, n: 8, seed: 5 };
+const snowNear = { w: 120, h: 600, n: 9, seed: 7 }, snowFar = { w: 90, h: 450, n: 10, seed: 9 };
+const precip = [
+  `--rain-near:${rainTile(rainNear, 24, 2)}`, `--rain-near-w:${rainNear.w}px`, `--rain-near-h:${rainNear.h}px`,
+  `--rain-far:${rainTile(rainFar, 14, 1.5)}`, `--rain-far-w:${rainFar.w}px`, `--rain-far-h:${rainFar.h}px`,
+  `--snow-near:${snowTile(snowNear, [2.5, 3.5, 3])}`, `--snow-near-w:${snowNear.w}px`, `--snow-near-h:${snowNear.h}px`,
+  `--snow-far:${snowTile(snowFar, [1.5, 2])}`, `--snow-far-w:${snowFar.w}px`, `--snow-far-h:${snowFar.h}px`,
+].join(';');
 ---
 <div class="scene" data-scene data-tid="dag" data-vejr="klart" style={`--sky-top:${sky.top};--sky-bottom:${sky.bottom}`} aria-hidden="true">
   <!-- Stars over the whole sky, also behind the header and the welcome. This layer ends where the drawing of
@@ -100,9 +124,9 @@ const sky = SKY.dag.klart;
       <rect class:list={['pane', { lit: w.lit }]} x={w.x} y={w.y} width={w.w} height={w.h} />
     </g>)}</g>
     <SceneAnimals />
-    <g class="rain">{drops.map(p => <line x1={p.x} y1={p.y} x2={p.x - 6} y2={p.y + 20} />)}</g>
-    <g class="snow">{flakes.map((p, i) => <circle cx={p.x} cy={p.y} r={1.5 + (i % 3)} />)}</g>
   </svg>
+  <!-- Rain or snow over the whole drawing and the sky above it, in front of the houses and behind all text. -->
+  <div class="precip" style={precip}><span class="far"><i></i></span><span class="near"><i></i></span></div>
 </div>
 <script>
   import { daylightAt, darkSky, SKY, DAYLIGHTS, WEATHERS, weatherWords, type Daylight, type Weather } from '../../lib/site/sky';

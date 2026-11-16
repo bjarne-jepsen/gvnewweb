@@ -274,7 +274,7 @@ body.front { --scene-h: clamp(13.5rem, 26vw, 23rem); overflow-x: clip; }
 .front .brand-sub { color: var(--color-ink); }
 .scene { position: absolute; z-index: 0; top: -40rem; bottom: calc(var(--scene-h) * -.1); left: 50%; width: 100vw; transform: translateX(-50%); background: linear-gradient(to bottom, var(--sky-top) 0, var(--sky-top) 30rem, var(--sky-bottom) 100%); pointer-events: none; }
 .scene svg { position: absolute; left: 0; width: 100%; display: block; }
-.scene .town-art { bottom: 0; height: var(--scene-h); }
+.scene .town-art { bottom: 0; height: var(--scene-h); overflow: visible; } /* no top edge: clouds may reach above it */
 .scene .sky-art { bottom: var(--scene-h); height: 36rem; }
 .front-grid { position: relative; z-index: 1; }
 .front .front-news { background: var(--color-paper); padding: var(--space-l) var(--space-l) var(--space-xs); }
@@ -295,15 +295,12 @@ body.front { --scene-h: clamp(13.5rem, 26vw, 23rem); overflow-x: clip; }
 .scene .frame { fill: color-mix(in srgb, #F7F4EC, var(--tint) var(--amount)); }
 .scene .pane { fill: color-mix(in srgb, #3C4A52, var(--tint) var(--amount)); }
 .scene .snowcap { fill: none; stroke: none; stroke-width: 6; stroke-linejoin: round; }
-.scene .rain { stroke: #F4F8FA; stroke-width: 2; stroke-linecap: round; opacity: .7; }
-.scene .snow { fill: #FFFFFF; }
-.scene :is(.moon, .stars, .heavy, .rain, .snow) { display: none; }
+.scene :is(.moon, .stars, .heavy) { display: none; }
 .scene[data-tid="nat"] .moon, .scene[data-tid="nat"][data-vejr="klart"] .stars { display: inline; }
 .scene[data-tid="nat"] .sun { display: none; }
 .scene:is([data-vejr="skyet"], [data-vejr="regn"], [data-vejr="sne"]) :is(.sun, .moon, .stars) { display: none; }
 .scene:is([data-vejr="skyet"], [data-vejr="regn"], [data-vejr="sne"]) .heavy { display: inline; }
 .scene[data-vejr="regn"] .heavy { fill: #D6DDE0; }
-.scene[data-vejr="regn"] .rain, .scene[data-vejr="sne"] .snow { display: inline; }
 .scene[data-vejr="sne"] .snowcap { stroke: #FFFFFF; }
 .scene[data-vejr="sne"] .lawn { --c: #E8ECEC; }
 .scene[data-vejr="taage"] .sun { opacity: .4; }
@@ -311,7 +308,6 @@ body.front { --scene-h: clamp(13.5rem, 26vw, 23rem); overflow-x: clip; }
 .scene[data-tid="skumring"] { --tint: #3A3550; --amount: 20%; --soft: 10%; }
 .scene[data-tid="nat"] { --tint: #0E1828; --amount: 58%; --soft: 28%; }
 .scene[data-tid="nat"] :is(.clouds, .heavy) { fill: #8D9AB3; opacity: .25; }
-.scene[data-tid="nat"] .rain { stroke: #9FB2CC; opacity: .5; }
 .scene[data-tid="nat"] .pane.lit, .scene[data-tid="skumring"] .pane.lit { fill: #F6C453; }
 
 /* Animals (SceneAnimals.astro): birds, a cat and a dog by day; owls and a fox at night. They take the light
@@ -352,6 +348,34 @@ body.front { --scene-h: clamp(13.5rem, 26vw, 23rem); overflow-x: clip; }
 @keyframes scene-sway { 0%, 100% { transform: none; } 50% { transform: rotate(-6deg); } }
 @keyframes scene-blink { 0%, 4%, 100% { transform: none; } 2% { transform: scaleY(.1); } }
 @keyframes scene-turn { 0%, 22%, 100% { transform: none; } 6%, 16% { transform: rotate(-9deg); } }
+
+/* Rain and snow (Scene.astro, .precip). The layer starts 18rem above the welcome, which is above the top of
+   the page on every screen, so the rain has no upper edge. It is fainter behind the header and stronger
+   from the welcome down, so the menu stays calm to read. Each tile is a mask over a flat colour, so night can
+   tint it. Each layer slides exactly one tile down and to the left and starts over (scene-fall), which only
+   moves a finished picture: the browser does not redraw it. Rain falls slowly on purpose. */
+.scene .precip { position: absolute; top: 22rem; bottom: 2px; left: 0; right: 0; overflow: hidden; display: none; --drop: #F4F8FA; -webkit-mask: linear-gradient(rgb(0 0 0 / .45) 12rem, #000 26rem); mask: linear-gradient(rgb(0 0 0 / .45) 12rem, #000 26rem); }
+.scene:is([data-vejr="regn"], [data-vejr="sne"]) .precip { display: block; }
+.scene .precip span { position: absolute; inset: 0; }
+.scene .precip i { position: absolute; top: calc(-1 * var(--th)); right: calc(-1 * var(--tw)); bottom: 0; left: 0; background: var(--drop); -webkit-mask: var(--tile) repeat 0 0 / var(--tw) var(--th); mask: var(--tile) repeat 0 0 / var(--tw) var(--th); }
+.scene[data-vejr="regn"] .near i { --tile: var(--rain-near); --tw: var(--rain-near-w); --th: var(--rain-near-h); --t: 3.4s; opacity: .7; }
+.scene[data-vejr="regn"] .far i { --tile: var(--rain-far); --tw: var(--rain-far-w); --th: var(--rain-far-h); --t: 3.6s; opacity: .45; }
+.scene[data-vejr="sne"] .near i { --tile: var(--snow-near); --tw: var(--snow-near-w); --th: var(--snow-near-h); --t: 20s; --drop: #FFFFFF; }
+.scene[data-vejr="sne"] .far i { --tile: var(--snow-far); --tw: var(--snow-far-w); --th: var(--snow-far-h); --t: 22s; --drop: #FFFFFF; opacity: .75; }
+.scene[data-tid="nat"] .precip { --drop: #9FB2CC; }
+.scene[data-tid="nat"][data-vejr="regn"] .precip { opacity: .75; }
+@media (prefers-reduced-motion: no-preference) {
+  .scene .precip i { animation: scene-fall var(--t) linear infinite; will-change: transform; }
+  .scene[data-vejr="sne"] .precip span { animation: scene-drift 7s ease-in-out infinite alternate; }
+  .scene[data-vejr="sne"] .precip .far { animation-duration: 9s; animation-delay: -3s; }
+  /* Clouds drift a little to and fro, each at its own pace. */
+  .scene :is(.clouds, .heavy) > g { animation: scene-cloud 70s ease-in-out infinite alternate; }
+  .scene :is(.clouds, .heavy) > g:nth-child(2) { animation-duration: 90s; animation-delay: -30s; }
+  .scene :is(.clouds, .heavy) > g:nth-child(3) { animation-duration: 80s; animation-delay: -55s; }
+}
+@keyframes scene-fall { to { transform: translate(calc(-1 * var(--tw)), var(--th)); } }
+@keyframes scene-drift { from { transform: translateX(-10px); } to { transform: translateX(10px); } }
+@keyframes scene-cloud { from { transform: translateX(-30px); } to { transform: translateX(30px); } }
 
 /* Night: light text on the sky, a light focus ring. The search field keeps its light surface. */
 body.front[data-sky="mork"] :is(.site-header .brand, .site-header nav a, .site-header nav summary, .brand-sub, .front-head h1, .front-head .intro) { color: var(--color-on-dark); }
