@@ -61,7 +61,7 @@ Der bruges kun systemfonte: `--font-sans: "Helvetica Neue", Helvetica, Arial, sa
 
 ## 5. Komponenter
 
-**Header.** Navnet til venstre, hovednavigationen til højre. Ingen hamburgermenu og intet JavaScript. Den aktive side og hover vises med en understregning på 2 px.
+**Header.** Navnet til venstre, hovednavigationen til højre. Den aktive side og hover vises med en understregning på 2 px. Under 60rem (mobil og lille tablet) står navnet og en knap "Menu" med tre streger på samme linje, og søgefeltet under dem. Knappen har en tynd ramme og skarpe hjørner; den er ikke den runde knap. Knappen folder menuen ud som en hvid liste med en linje pr. punkt, og hver sektion folder sine sider ud i listen. Escape lukker. Uden JavaScript er knappen skjult, og menuen står foldet ud (november 2026, efter ønske fra Bjarne).
 
 **Søgefelt.** Ingen ramme. Feltet står på den lysegrå flade (`--color-surface`) med et lille gråt forstørrelsesglas, så det stadig ses som et felt. Ved hover bliver fladen en tone mørkere. Ved fokus bliver feltet hvidt og får den grønne fokusring på 3 px.
 

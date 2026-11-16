@@ -33,7 +33,12 @@ const favicon = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www
     <header class="site-header">
       <div class="wrap">
         <a class="brand" href="/" aria-current={current('/') ? 'page' : undefined}><span class="brand-name">Andelsboligforeningen</span><span class="brand-sub">Grøndalsvænge</span></a>
-        <nav aria-label="Hovednavigation" class="site-nav">
+        <button type="button" class="menu-toggle" aria-expanded="false" aria-controls="hovedmenu" data-menu-toggle>
+          <svg class="menu-icon menu-icon-open" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M2 5h16M2 10h16M2 15h16" /></svg>
+          <svg class="menu-icon menu-icon-close" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="m4 4 12 12M16 4 4 16" /></svg>
+          Menu
+        </button>
+        <nav aria-label="Hovednavigation" class="site-nav" id="hovedmenu">
           {navigation.map(s => s.pages.length === 0
             ? <a href={s.path} aria-current={current(s.path) ? 'page' : undefined}>{s.label}</a>
             : <details class="nav-group" data-nav-group>
@@ -60,13 +65,35 @@ const favicon = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www
     <script>
       // Menu panels: one open at a time; Escape and a click outside close them. Without the script the
       // panels still open and close (they are <details>), they just stay open until clicked again.
+      // Keep the width in step with site.css.
+      const phone = matchMedia('(max-width: 59.99rem)');
       const groups = [...document.querySelectorAll<HTMLDetailsElement>('[data-nav-group]')];
       for (const g of groups) g.addEventListener('toggle', () => { if (g.open) for (const o of groups) if (o !== g) o.open = false; });
-      document.addEventListener('click', e => { for (const g of groups) if (g.open && !g.contains(e.target as Node)) g.open = false; });
+      document.addEventListener('click', e => { if (!phone.matches) for (const g of groups) if (g.open && !g.contains(e.target as Node)) g.open = false; });
+
+      // Phones and small tablets: the menu folds into a "Menu" button and opens as a list under the name,
+      // with the panels as sections that unfold in the list. Without JavaScript the button is hidden and
+      // the menu is shown as on a large screen (site.css).
+      const header = document.querySelector<HTMLElement>('.site-header')!;
+      const toggle = header.querySelector<HTMLButtonElement>('[data-menu-toggle]')!;
+      const nav = header.querySelector<HTMLElement>('.site-nav')!;
+      const isOpen = () => toggle.getAttribute('aria-expanded') === 'true';
+      const setMenu = (open: boolean) => {
+        toggle.setAttribute('aria-expanded', String(open));
+        header.classList.toggle('menu-open', open);
+        if (!open) for (const g of groups) g.open = false;
+      };
+      header.classList.add('has-menu');
+      toggle.addEventListener('click', () => setMenu(!isOpen()));
+      phone.addEventListener('change', () => setMenu(false));
+
       document.addEventListener('keydown', e => {
         if (e.key !== 'Escape') return;
         const open = groups.find(g => g.open);
-        if (open) { open.open = false; open.querySelector('summary')!.focus(); }
+        if (open) { open.open = false; open.querySelector('summary')!.focus(); return; }
+        // Escape in the open menu, or on the button, closes the menu and leaves the focus on the button.
+        const at = document.activeElement;
+        if (phone.matches && isOpen() && (at === toggle || nav.contains(at))) { setMenu(false); toggle.focus(); }
       });
     </script>
   </body>
