@@ -79,11 +79,13 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect(await html('nyheder/index.html')).toContain('OLDEST_NEWS');
   expect(home).toMatch(/<nav aria-labelledby="sidefod-genveje"><p class="footer-label" id="sidefod-genveje">Genveje<\/p><ul class="footer-links"><li><a href="\/foreningen\/kontakt\/">Kontakt<\/a><\/li><\/ul><\/nav>/);
   // The menu: each page section is a panel with its landing page first and its pages alphabetically; news is a plain link.
-  const nav = [...home.matchAll(/<nav aria-label="Hovednavigation" class="site-nav">([\s\S]*?)<\/nav>/g)][0]![1]!;
+  const nav = [...home.matchAll(/<nav aria-label="Hovednavigation" class="site-nav" id="hovedmenu">([\s\S]*?)<\/nav>/g)][0]![1]!;
   expect(nav.match(/href="([^"]+)"/g)).toEqual(['href="/foreningen/"', 'href="/foreningen/kontakt/"', 'href="/foreningen/om-foreningen/"', 'href="/bo-her/"', 'href="/bo-her/leje-af-lokaler/"', 'href="/nyheder/"']);
   expect(nav).toContain('<details class="nav-group" data-nav-group> <summary>Foreningen</summary>');
   expect(nav).toContain('<a class="nav-landing" href="/foreningen/">Gå til Foreningen</a>');
   expect(nav).not.toContain('2026-10-20-vandet-lukkes');
+  // On phones the menu opens from a button that points at it (docs/cvi.md, Header).
+  expect(home).toMatch(/<button type="button" class="menu-toggle" aria-expanded="false" aria-controls="hovedmenu" data-menu-toggle>/);
   // Scripts only as external modules from /_astro/; the search box is hidden until its script runs.
   expect([...home.matchAll(/<script\b[^>]*>/g)].map(m => m[0])).toEqual(expect.arrayContaining([expect.stringMatching(/^<script type="module" src="\/_astro\/[^"]+\.js">$/)]));
   expect(home).toContain('<div class="search" data-search hidden>');
@@ -178,7 +180,7 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   // 7. A renamed and renumbered folder changes the menu, not the address.
   drive.update('f-foreningen', { name: '95 Om foreningen' });
   await sync(); await expectGreen();
-  const menu = [...(await html('index.html')).matchAll(/<nav aria-label="Hovednavigation" class="site-nav">([\s\S]*?)<\/nav>/g)][0]![1]!.replace(/<div class="nav-panel">[\s\S]*?<\/div>/g, '');
+  const menu = [...(await html('index.html')).matchAll(/<nav aria-label="Hovednavigation" class="site-nav" id="hovedmenu">([\s\S]*?)<\/nav>/g)][0]![1]!.replace(/<div class="nav-panel">[\s\S]*?<\/div>/g, '');
   expect([...menu.matchAll(/<a href="([^"]+)"[^>]*>([^<]+)|<summary[^>]*>([^<]+)/g)].map(m => m[3] ? `panel ${m[3]}` : `${m[1]} ${m[2]}`))
     .toEqual(['/nyheder/ Nyheder', 'panel Om foreningen']);
   expect(await html('index.html')).toContain('<a class="nav-landing" href="/foreningen/">Gå til Om foreningen</a>');

@@ -192,8 +192,6 @@ main { min-height: 60vh; padding-block: clamp(2.5rem, 6vw, 5.5rem) 7.5rem; overf
 .footer-links { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; }
 
 @media (max-width: 700px) {
-  .site-header .wrap { padding-block: var(--space-m) 0; gap: var(--space-2xs) var(--space-xl); }
-  .site-header nav { width: 100%; gap: 0 var(--space-l); }
   .footer-grid .wide { grid-column: auto; }
 }
 
@@ -228,10 +226,6 @@ main { min-height: 60vh; padding-block: clamp(2.5rem, 6vw, 5.5rem) 7.5rem; overf
 .nav-panel ul { list-style: none; margin: 0; padding: 0; }
 .site-header .nav-panel a { padding-block: .5rem; min-height: 44px; display: flex; align-items: center; line-height: 1.3; }
 .site-header .nav-panel .nav-landing { font-weight: 700; border-bottom: 1px solid var(--color-line); margin-bottom: var(--space-2xs); }
-@media (max-width: 700px) {
-  .nav-group { position: static; }
-  .nav-panel, .nav-group:last-of-type .nav-panel { left: 0; right: 0; max-width: none; box-shadow: none; }
-}
 
 /* Search in the header. Results open in a panel under the box while typing. */
 .search { position: relative; flex: 0 1 20rem; margin-left: auto; }
@@ -254,12 +248,40 @@ main { min-height: 60vh; padding-block: clamp(2.5rem, 6vw, 5.5rem) 7.5rem; overf
 .search-section { order: -1; font-size: var(--text-xs); letter-spacing: .08em; text-transform: uppercase; color: var(--color-muted); }
 .search-excerpt { font-size: var(--text-sm); line-height: 1.45; color: var(--color-muted); }
 .search-excerpt mark { background: var(--color-surface-hover); color: var(--color-ink); font-weight: 700; }
-@media (max-width: 700px) {
-  .search { flex-basis: 100%; order: 3; margin-block: var(--space-xs) var(--space-m); position: static; }
+@media print { .search { display: none; } }
+
+/* Menu on phones and small tablets (under 60rem, the width in Base.astro's script): the name and a
+   "Menu" button on one line, the search under them. The button opens the menu as a list between the two,
+   and each section unfolds in the list. Without JavaScript the button is hidden and the menu stays as on
+   a large screen. "scripting: enabled" hides the menu before the script has run, so it does not flash. */
+.menu-toggle { display: none; }
+@media (max-width: 59.99rem) {
+  .site-header .wrap { align-items: center; padding-block: var(--space-m); gap: var(--space-s) var(--space-m); }
+  .site-header .brand { flex: 1 1 0; min-width: 0; }
+  .has-menu .menu-toggle { display: inline-flex; }
+  .has-menu:not(.menu-open) .site-nav { display: none; }
+  .menu-toggle { align-items: center; gap: var(--space-xs); min-height: 44px; margin-left: auto; padding: 0 var(--space-s); font: inherit; font-size: 1rem; color: inherit; background: transparent; border: 1px solid currentColor; border-radius: var(--radius); cursor: pointer; }
+  .menu-toggle:hover { background: var(--color-surface); }
+  .menu-icon { width: 1.125rem; height: 1.125rem; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: square; }
+  .menu-toggle[aria-expanded="true"] .menu-icon-open, .menu-toggle:not([aria-expanded="true"]) .menu-icon-close { display: none; }
+
+  /* The open menu: a white list across the full width, one line per item. */
+  .site-header .site-nav { order: 2; flex-basis: calc(100% + 2 * var(--gutter)); flex-direction: column; align-items: stretch; gap: 0; margin-inline: calc(-1 * var(--gutter)); padding-inline: var(--gutter); background: var(--color-paper); border-top: 1px solid var(--color-line); font-size: var(--text-base); }
+  .site-header .site-nav > a, .nav-group summary { display: flex; align-items: center; justify-content: space-between; min-height: 3.25rem; padding-block: var(--space-xs); border-bottom: 1px solid var(--color-line); }
+  .site-header .site-nav > a:last-child, .nav-group:last-child:not([open]) summary { border-bottom: 0; }
+  .nav-group summary::after { width: .5em; height: .5em; margin-right: .25rem; }
+  .nav-group { position: static; }
+  .nav-panel, .nav-group:last-of-type .nav-panel { position: static; min-width: 0; max-width: none; padding: var(--space-2xs) 0 var(--space-s) var(--space-m); border: 0; border-bottom: 1px solid var(--color-line); box-shadow: none; background: transparent; }
+  .site-header .nav-panel .nav-landing { border-bottom: 0; margin-bottom: 0; }
+
+  .search { flex-basis: 100%; order: 3; position: static; margin: 0; }
   .site-header .wrap { position: relative; }
   .search-panel { left: var(--gutter); right: var(--gutter); width: auto; top: auto; }
 }
-@media print { .search { display: none; } }
+@media (max-width: 59.99rem) and (scripting: enabled) {
+  .menu-toggle { display: inline-flex; }
+  .site-header:not(.menu-open) .site-nav { display: none; }
+}
 
 /* Front page drawing (src/components/Scene.astro, docs/cvi.md "Forsidetegning"). The sky runs from above the
    page down behind the header and the welcome; the houses stand under the welcome, and the news and
@@ -356,5 +378,12 @@ body.front { --scene-h: clamp(13.5rem, 26vw, 23rem); overflow-x: clip; }
 /* Night: light text on the sky, a light focus ring. The search field keeps its light surface. */
 body.front[data-sky="mork"] :is(.site-header .brand, .site-header nav a, .site-header nav summary, .brand-sub, .front-head h1, .front-head .intro) { color: var(--color-on-dark); }
 body.front[data-sky="mork"] .site-header .nav-panel a { color: var(--color-ink); }
+body.front[data-sky="mork"] .menu-toggle { color: var(--color-on-dark); }
+body.front[data-sky="mork"] .menu-toggle:hover { background: rgb(255 255 255 / .12); }
+body.front[data-sky="mork"] .site-header .nav-panel :focus-visible { outline-color: var(--color-green); }
+@media (max-width: 59.99rem) {
+  body.front[data-sky="mork"] .site-header .site-nav :is(a, summary) { color: var(--color-ink); }
+  body.front[data-sky="mork"] .site-header .site-nav :focus-visible { outline-color: var(--color-green); }
+}
 body.front[data-sky="mork"] :is(.site-header, .front-head) :focus-visible { outline-color: var(--color-on-dark); }
 @media print { .scene, .scene-note { display: none; } .front-hero { padding-bottom: 0; } }
