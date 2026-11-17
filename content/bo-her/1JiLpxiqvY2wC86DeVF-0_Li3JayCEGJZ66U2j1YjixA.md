@@ -1,7 +1,7 @@
 ---
 id: "1JiLpxiqvY2wC86DeVF-0_Li3JayCEGJZ66U2j1YjixA"
 title: "Sælg dit hus"
-updatedAt: "2026-10-22T17:11:58.039Z"
+updatedAt: "2026-11-17T19:09:22.587Z"
 summary: "At sælge din andelsbolig i Grøndalsvænge er en proces med flere vigtige trin, hvor du som sælger spiller en central rolle."
 ---
 
@@ -17,4 +17,4 @@ Foreningen anbefaler, at du aftaler et indledende møde med udvalget. Her får d
 
 Administrator Andelsbos salgsvejledning findes i ProBo.
 
-Hvem huset tilbydes til, og i hvilken rækkefølge, står på siden Sådan får du et hus.
+Hvem huset tilbydes til, og i hvilken rækkefølge, står på siden [Sådan får du et hus](https://docs.google.com/document/u/1/d/1VTafkNmGfhuv1VqJzhCUGg_TD20Ip7RSgMGa_J-3wuU/edit).

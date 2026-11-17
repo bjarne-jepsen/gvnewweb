@@ -1,17 +1,17 @@
 ---
 id: "1CqDlzBt6ku9KKVhCe9U537ENVCk9y3MAHRLpkUZ6qLw"
 title: "Generalforsamling"
-updatedAt: "2026-11-12T20:21:00.956Z"
-summary: "Generalforsamlingen er foreningens øverste myndighed. Her vælges bestyrelsen, og her træffes de store beslutninger, fx om vedtægter, husorden og budget."
+updatedAt: "2026-11-17T19:06:27.746Z"
+summary: "Generalforsamlingen er foreningens øverste myndighed. Her vælges bestyrelsen, og her træffes de store beslutninger, f.eks. om projekter, vedtægter, husorden og budget."
 ---
 
-Generalforsamlingen er foreningens øverste myndighed. Her vælges bestyrelsen, og her træffes de store beslutninger, fx om vedtægter, husorden og budget.
+Generalforsamlingen er foreningens øverste myndighed. Her vælges bestyrelsen, og her træffes de store beslutninger, f.eks. om projekter, vedtægter, husorden og budget.
 
 ## Den ordinære generalforsamling
 
-Der holdes ordinær generalforsamling hvert år. Indkaldelsen sendes digitalt til andelshaverne, medmindre man har bedt om papir.
+Der afholdes ordinær generalforsamling hvert år inden for 4 måneder efter regnskabsårets udløb. Det betyder, at generalforsamlingen normalt skal holdes senest 30. april.
 
-UDFYLDES: dato for næste ordinære generalforsamling og frist for forslag.
+Indkaldelsen sendes digitalt til andelshaverne, medmindre man har bedt om papir.
 
 ## Vedtægtsændringer
 

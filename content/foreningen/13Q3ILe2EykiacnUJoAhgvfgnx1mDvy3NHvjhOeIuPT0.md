@@ -1,7 +1,7 @@
 ---
 id: "13Q3ILe2EykiacnUJoAhgvfgnx1mDvy3NHvjhOeIuPT0"
 title: "Kontakt"
-updatedAt: "2026-10-22T17:17:00.378Z"
+updatedAt: "2026-11-17T18:58:59.235Z"
 summary: "Andelsboligforeningen Grøndalsvænge, Vindruevej 2A, 2400 København NV"
 ---
 
@@ -33,14 +33,6 @@ Al henvendelse til bestyrelsen sker så vidt muligt på e-mail, ikke via Faceboo
 
 - **Socialudvalget:** [socialudvalggrondalsvaenge@gmail.com](mailto:socialudvalggrondalsvaenge@gmail.com)
 - **Parkudvalget:** UDFYLDES: en adresse, som foreningen ejer.
-
-## Grøndalsvænge Nyt
-
-Grøndalsvænge Nyt er foreningens officielle nyhedsbrev og den vigtigste kilde til information fra bestyrelsen og administrationen. Det udgives af Kommunikationsudvalget den første weekend i hver måned undtagen januar og august. Hastende beskeder sendes som EkstraNyt.
-
-- Nyhedsbrevet sendes digitalt. Vil du have det på papir, så giv skriftlig besked til Kommunikationsudvalget.
-- Modtager du det ikke, så tjek dit spamfilter, og skriv ellers til Kommunikationsudvalget med navn, adresse og den ønskede e-mailadresse.
-- Vil du have et budskab med, så kontakt Kommunikationsudvalget. Afsenderen skal fremgå tydeligt.
 
 ## Flagmand
 

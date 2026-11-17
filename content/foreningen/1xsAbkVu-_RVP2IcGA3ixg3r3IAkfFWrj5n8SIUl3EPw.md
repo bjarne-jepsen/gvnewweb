@@ -1,7 +1,7 @@
 ---
 id: "1xsAbkVu-_RVP2IcGA3ixg3r3IAkfFWrj5n8SIUl3EPw"
 title: "Udvalg og arbejdsgrupper"
-updatedAt: "2026-11-12T20:21:55.542Z"
+updatedAt: "2026-11-17T19:07:42.975Z"
 summary: "Bestyrelsen har fordelt sig i en række udvalg med hvert sit ansvarsområde. Derudover findes udvalg og arbejdsgrupper, hvor andre beboere er med."
 ---
 
@@ -13,19 +13,22 @@ Bestyrelsen har fordelt sig i en række udvalg med hvert sit ansvarsområde. Der
 
 Varetager den daglige drift, herunder økonomiopfølgning og hastesager, og understøtter bestyrelsens arbejde. To medlemmer af FU tegner i fællesskab foreningen.
 
-Medlemmer: Mikael Koch-Hansen, Lasse Glenstrup og Bjarne Jepsen. Kontakt: [fu@groendalsvaenge.dk](mailto:fu@groendalsvaenge.dk)
+Medlemmer: Mikael Koch-Hansen, Lasse Glenstrup og Bjarne Jepsen.\
+Kontakt: [fu@groendalsvaenge.dk](mailto:fu@groendalsvaenge.dk)
 
 ### Vurderingsudvalget (VUR)
 
 Står for kommunikationen og den ikke-juridiske del af salgsprocessen, herunder spørgsmål fra køber og sælger.
 
-Medlemmer: Steen Baagøe Nielsen, Simon Juul Nielsen og Margit Preuss. Kontakt: [vur@groendalsvaenge.dk](mailto:vur@groendalsvaenge.dk)
+Medlemmer: Steen Baagøe Nielsen, Simon Juul Nielsen og Margit Preuss.\
+Kontakt: [vur@groendalsvaenge.dk](mailto:vur@groendalsvaenge.dk)
 
 ### Byggeudvalget (BYG)
 
 Rådgiver beboere om byggeprojekter i forhold til lokalplanen og udsteder tilladelser og fuldmagter til byggeansøgninger.
 
-Medlemmer: Lotte Beyer Cramer, Stig Kiefer og Mikkel Kiefer. Kontakt: [byg@groendalsvaenge.dk](mailto:byg@groendalsvaenge.dk)
+Medlemmer: Lotte Beyer Cramer, Stig Kiefer og Mikkel Kiefer.\
+Kontakt: [byg@groendalsvaenge.dk](mailto:byg@groendalsvaenge.dk)
 
 ## Andre udvalg i bestyrelsen
 
@@ -33,13 +36,15 @@ Medlemmer: Lotte Beyer Cramer, Stig Kiefer og Mikkel Kiefer. Kontakt: [byg@groen
 
 Står for praktiske opgaver som kontakt til havemand, opsyn med veje og fortove, internet- og tv-aftalen, vedligeholdelse af foreningsbygningen og kontakt til forsikringsselskabet. Udlåner også fællesudstyr og sælger stolper og stakitter.
 
-Medlemmer: Stig Kiefer, Mikkel Kiefer, Simon Juul Nielsen og Lotte Beyer Cramer. Kontakt: [tek@groendalsvaenge.dk](mailto:tek@groendalsvaenge.dk)
+Medlemmer: Stig Kiefer, Mikkel Kiefer, Simon Juul Nielsen og Lotte Beyer Cramer.\
+Kontakt: [tek@groendalsvaenge.dk](mailto:tek@groendalsvaenge.dk)
 
 ### Kommunikationsudvalget (KOM)
 
 Udsender Grøndalsvænge Nyt og vedligeholder hjemmesiden.
 
-Medlemmer: Bjarne Jepsen og Margit Preuss. Kontakt: [kom@groendalsvaenge.dk](mailto:kom@groendalsvaenge.dk)
+Medlemmer: Bjarne Jepsen og Margit Preuss.\
+Kontakt: [kom@groendalsvaenge.dk](mailto:kom@groendalsvaenge.dk)
 
 ## Udvalg med beboere
 
