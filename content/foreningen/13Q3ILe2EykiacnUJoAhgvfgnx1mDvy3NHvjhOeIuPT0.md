@@ -1,7 +1,7 @@
 ---
 id: "13Q3ILe2EykiacnUJoAhgvfgnx1mDvy3NHvjhOeIuPT0"
 title: "Kontakt"
-updatedAt: "2026-11-17T18:58:59.235Z"
+updatedAt: "2026-11-17T19:15:13.353Z"
 summary: "Andelsboligforeningen Grøndalsvænge, Vindruevej 2A, 2400 København NV"
 ---
 
@@ -27,7 +27,7 @@ Foreningens administrator er **Andelsbo**. Primær kontaktperson er Philip Stenk
 
 **Byggeudvalget** træffes på foreningens kontor (Vindruevej 2A, 1. sal) første mandag i måneden kl. 18–19, hvor du kan spørge om byggeprojekter og få tilladelser. Resten af måneden efter aftale. **Vurderingsudvalget** træffes efter aftale.
 
-Al henvendelse til bestyrelsen sker så vidt muligt på e-mail, ikke via Facebook eller Messenger. Kan noget ikke klares på mail, kan du bede om et møde, som normalt holdes på hverdage efter kl. 17. Bruger du ikke e-mail, kan administrator hjælpe med at koordinere.
+Al henvendelse til bestyrelsen sker så vidt muligt på e-mail. Kan noget ikke klares på mail, kan du bede om et møde, som normalt holdes på hverdage efter kl. 17. Bruger du ikke e-mail, kan administrator hjælpe med at koordinere.
 
 ## Udvalg med beboere
 
@@ -36,4 +36,4 @@ Al henvendelse til bestyrelsen sker så vidt muligt på e-mail, ikke via Faceboo
 
 ## Flagmand
 
-UDFYLDES: hvem man kontakter om flag ved dødsfald, begravelser og runde fødselsdage.
+Foreningens mangler i øjeblikket en flagmand, og derfor vil bestyrelsen i forbindelse med dødsfald/begravelser i foreningen, runde fødselsdage og tilsvarende, henvise midlertidigt til Tina Austad på tlf. nr.: 60 62 26 64.
