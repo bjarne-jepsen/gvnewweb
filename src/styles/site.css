@@ -20,10 +20,9 @@ p { max-width: var(--measure); margin: 0 0 var(--space-m); }
 .skip { position: absolute; left: var(--space-m); top: -5rem; padding: var(--space-xs) var(--space-m); background: var(--color-paper); z-index: 1; }
 .skip:focus { top: var(--space-m); }
 
-/* Brand: the name in bold with a small spaced label beside it. */
-.brand { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 .625rem; color: inherit; text-decoration: none; }
+/* Brand: the full name in bold. On a narrow screen it breaks between the two words. */
+.brand { color: inherit; text-decoration: none; }
 .brand-name { font-size: var(--text-lg); font-weight: 700; line-height: 1.2; letter-spacing: -.02em; }
-.brand-sub { font-size: var(--text-xs); letter-spacing: .08em; text-transform: uppercase; color: var(--color-muted); }
 
 /* Header */
 .site-header { border-bottom: 1px solid var(--color-line); }
@@ -293,7 +292,6 @@ body.front { --scene-h: clamp(13.5rem, 26vw, 23rem); overflow-x: clip; }
 .front-hero { position: relative; padding-bottom: calc(var(--scene-h) * .9); }
 .front-hero > :not(.scene) { position: relative; z-index: 1; }
 .front .front-head { border-bottom: 0; margin-bottom: 0; padding-bottom: var(--space-m); }
-.front .brand-sub { color: var(--color-ink); }
 .scene { position: absolute; z-index: 0; top: -40rem; bottom: calc(var(--scene-h) * -.1); left: 50%; width: 100vw; transform: translateX(-50%); background: linear-gradient(to bottom, var(--sky-top) 0, var(--sky-top) 30rem, var(--sky-bottom) 100%); pointer-events: none; }
 .scene svg { position: absolute; left: 0; width: 100%; display: block; }
 .scene .town-art { bottom: 0; height: var(--scene-h); overflow: visible; } /* no top edge: clouds may reach above it */
@@ -400,7 +398,7 @@ body.front { --scene-h: clamp(13.5rem, 26vw, 23rem); overflow-x: clip; }
 @keyframes scene-cloud { from { transform: translateX(-30px); } to { transform: translateX(30px); } }
 
 /* Night: light text on the sky, a light focus ring. The search field keeps its light surface. */
-body.front[data-sky="mork"] :is(.site-header .brand, .site-header nav a, .site-header nav summary, .brand-sub, .front-head h1, .front-head .intro) { color: var(--color-on-dark); }
+body.front[data-sky="mork"] :is(.site-header .brand, .site-header nav a, .site-header nav summary, .front-head h1, .front-head .intro) { color: var(--color-on-dark); }
 body.front[data-sky="mork"] .site-header .nav-panel a { color: var(--color-ink); }
 body.front[data-sky="mork"] .menu-toggle { color: var(--color-on-dark); }
 body.front[data-sky="mork"] .menu-toggle:hover { background: rgb(255 255 255 / .12); }
