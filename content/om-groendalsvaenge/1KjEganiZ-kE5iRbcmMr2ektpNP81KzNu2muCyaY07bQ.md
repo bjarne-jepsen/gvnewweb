@@ -1,7 +1,7 @@
 ---
 id: "1KjEganiZ-kE5iRbcmMr2ektpNP81KzNu2muCyaY07bQ"
 title: "Kort og nærområde"
-updatedAt: "2026-10-22T17:09:47.202Z"
+updatedAt: "2026-11-19T09:15:20.805Z"
 summary: "Grøndalsvænge ligger med grønne områder, gode indkøbsmuligheder og offentlig transport lige om hjørnet."
 ---
 
@@ -14,20 +14,19 @@ Grøndalsvænge ligger med grønne områder, gode indkøbsmuligheder og offentli
 
 ## Sport og fritid
 
-- **Grøndal Multicenter:** idræt, fitness, eSport, bowling og et lille legeland for de mindste.
-- **Genforeningspladsen:** fodbold- og tennisbaner og om vinteren en skøjtebane, når anlægget er i drift.
-- **Bellahøj Svømmestadion:** indendørs svømmehal med saunagus og et friluftsbad, der er åbent om sommeren.
-- **Degnemosen:** bakker til kælketure om vinteren, og i kolde vintre kan man skøjte på søen.
+- [**Grøndal Multicenter**](https://grondalmulticenter.kk.dk/)**:** Et af Nordeuropas største idrætscentre med over 40 aktiviteter, 70 idrætsforeninger, fitnesscenter, møde- og konferencelokaler, legeland, café og meget mere.
+- [**Genforeningspladsen**](https://grondalmulticenter.kk.dk/faciliteter/genforeningspladsen)**:** Idrætsplads som benyttes hele året til forskellige idrætsaktiviteter, herunder fodbold- og tennisbaner, og om vinteren en skøjtebane, når anlægget er i drift.
+- [**Bellahøj Svømmestadion**](https://svoemkbh.kk.dk/svoemmeanlaeg/svoemmehaller/bellahoej-svoemmestadion)**:** Indendørs svømmehal med saunagus og et friluftsbad, der er åbent om sommeren.
 
 ## Natur og grønne områder
 
-- **Degnemosen** ligger lige nord for Bellahøjvej. Her kan man gå en tur, fodre fugle eller opleve arrangementer på Bellahøj Friluftsscene.
-- **Legepladser** findes bl.a. ved børneinstitutionerne på Grøndalsvænge Allé, Edderkoppelegepladsen, Grøndal Torv, Genforeningspladsen og naturlegepladsen på hjørnet af Bellahøjvej og Hvidkildevej.
+- [**Degnemosen, Bellahøjparken og Rødkildeparken**](https://www.kk.dk/brug-byen/natur-og-groenne-omraader/parker/degnemosen-bellahoejparken-og-roedkildeparken)**.** Tre fredede parker i det nordvestlige hjørne af København.
 
 ## For børnefamilier
 
-- **Rødkilde Skole** er den lokale distriktsskole, hvor de fleste af foreningens børn går.
-- **Grøndalskirken** har FDF og Grøn Pigespejder, babysalmesang, spaghettigudstjenester og et gospelkor for voksne.
+- [**Rødkilde Skole**](https://roed.aula.dk/) er den lokale distriktsskole, hvor de fleste af foreningens børn går.
+- [**Grøndalskirken**](https://www.grondalskirken.dk/) har FDF og Grøn Pigespejder, babysalmesang, spaghettigudstjenester og et gospelkor for voksne.
+- **Legepladser** findes bl.a. ved børneinstitutionerne på Grøndalsvænge Allé, Edderkoppelegepladsen, Grøndal Torv, Genforeningspladsen og naturlegepladsen på hjørnet af Bellahøjvej og Hvidkildevej.
 
 ## Indkøb og mad
 
