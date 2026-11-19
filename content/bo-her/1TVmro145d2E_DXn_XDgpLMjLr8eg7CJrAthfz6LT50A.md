@@ -1,7 +1,7 @@
 ---
 id: "1TVmro145d2E_DXn_XDgpLMjLr8eg7CJrAthfz6LT50A"
 title: "Husorden kort fortalt"
-updatedAt: "2026-10-22T17:14:13.161Z"
+updatedAt: "2026-11-19T09:18:58.257Z"
 summary: "Husordenen gør hverdagen mellem naboer lettere. Her er de vigtigste punkter. Den gældende husorden, senest ændret på generalforsamlingen den 25. april 2024, findes i ProBo."
 ---
 
@@ -15,7 +15,7 @@ Husordenen gør hverdagen mellem naboer lettere. Her er de vigtigste punkter. De
 
 ## Parkering
 
-Biler holder på egen grund eller på de offentlige veje. Gæster parkerer, så de er til mindst mulig gene. Læs mere på siden Parkering.
+Biler holder på egen grund eller på de offentlige veje. Gæster parkerer, så de er til mindst mulig gene. Læs mere [på siden Parkering](https://docs.google.com/document/u/1/d/1ZtpgXOQFDtUhWEf4M3t-mmE88yHD9GEH14O2AOiysgA/edit).
 
 ## Fortov og vej
 
@@ -25,7 +25,7 @@ Biler holder på egen grund eller på de offentlige veje. Gæster parkerer, så 
 
 ## Støj
 
-Støjende havearbejde med el- eller benzindrevne redskaber, fx hækklipning og græsslåning, må ikke ske:
+Støjende havearbejde med el- eller benzindrevne redskaber, f.eks. hækklipning og græsslåning, må ikke ske:
 
 - hverdage efter kl. 19.30
 - lørdage efter kl. 17.00
