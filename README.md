@@ -108,10 +108,19 @@ Den gamle sti flyttes til `previousPaths` og bliver en redirect-side. Det samme 
 
 Serializeren skriver en lille dialekt: overskrift 2–6, afsnit, fed, kursiv, http(s)-links, punktlister, skillelinjer, tabeller og billeder med alt-tekst. Den samme liste over tilladte elementer valideres ved sync og ved build. Siden renderes af [lib/site/render.ts](lib/site/render.ts), som escaper alt og ikke kender rå HTML. En tabel med kun én række (layout) bliver til almindelige afsnit. Flere afsnit i en celle adskilles med ` · `. Overskriftsniveauer i Docs forskydes ét trin, fordi H1 er sidens titel.
 
+### Interaktive modeller
+
+En redaktør kan sætte en model ind på en side ved at skrive `[model: hus-1918]` som et afsnit for sig i Google-dokumentet. Afsnittet bliver til modellen, og markøren kan flyttes eller slettes som al anden tekst. Det virker kun på sider, ikke i intro eller nyheder.
+
+- Modellerne ligger i [modeller/](modeller/) som `<navn>.html`, `.css` og `.js` og er registreret i [lib/site/models.ts](lib/site/models.ts) med titel og billedtekst. De kommer aldrig fra Drive.
+- Siden viser modellen i en `<iframe sandbox="allow-scripts">` uden `allow-same-origin`. Modellens script kører derfor i sin egen oprindelse og kan ikke læse siden, cookies eller lager.
+- Buildet afviser en model, der henter noget udefra, har inline script eller event-attributter, mangler den faste Content-Security-Policy eller rækker ud af rammen (`parent`, `top`, `fetch` m.fl.).
+- Et ukendt navn giver en advarsel i buildet, og markøren står som almindelig tekst på siden. Markøren kommer ikke med i søgning og resumé.
+
 ## Output og sikkerhed
 
 - Sider ligger på `/<sektion>/<slug>/` og billeder ved siden af deres side.
-- Outputkontrollen ([scripts/verify-output.ts](scripts/verify-output.ts)) tillader kun de forventede filer. Bytes skal være identiske med `content/`. Der må ikke være Drive-ID'er og ingen `<script>`. Sitemap og søgeindeks skal være præcis de offentlige sider.
+- Outputkontrollen ([scripts/verify-output.ts](scripts/verify-output.ts)) tillader kun de forventede filer. Bytes skal være identiske med `content/`. Der må ikke være Drive-ID'er og ingen `<script>` i siderne. Modellerne i `modeller/` har deres eget script og kontrolleres af `modelProblems` i stedet. Sitemap og søgeindeks skal være præcis de offentlige sider.
 - Sitemap bruger `siteUrl` fra `config/site.json` (nu `https://newweb.groendalsvaenge.dk`). Prototypen har `noindex` i siderne og som header i `_headers`. Indeksering besluttes, når sitet skal på det rigtige domæne.
 - Redirects er meta-refresh-sider. Buildet skriver desuden `_redirects` med rigtige 301'ere og `_headers` til Cloudflare Pages. Outputkontrollen kræver, at de svarer præcis til redirects.
 

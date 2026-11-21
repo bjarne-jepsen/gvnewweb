@@ -83,8 +83,12 @@ export function blocksToMarkdown(input: SerializableBlock[], imagePath: (name: s
   }).filter(Boolean).join('\n\n') + '\n';
 }
 
+/** The marker paragraph's text, e.g. "[model: hus-1918]". Returns the name, or undefined for any other text. */
+export const modelMarker = (text: string) => text.trim().match(/^\[model:\s*([a-z0-9-]+)\s*\]$/i)?.[1]?.toLowerCase();
+
 export function summaryOf(blocks: SerializableBlock[], max = 300) {
-  const first = flattenBlocks(blocks).find(b => b.type === 'paragraph' && plain(b.content).trim());
+  // A model marker ("[model: hus-1918]") is not text, so it never becomes the summary.
+  const first = flattenBlocks(blocks).find(b => b.type === 'paragraph' && plain(b.content).trim() && !modelMarker(plain(b.content)));
   const text = first?.type === 'paragraph' ? plain(first.content).replace(/\s+/g, ' ').trim() : '';
   if (text.length <= max) return text;
   const cut = text.slice(0, max - 1), space = cut.lastIndexOf(' ');

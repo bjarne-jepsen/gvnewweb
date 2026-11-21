@@ -36,7 +36,7 @@ try {
     try { await rename('.build/staging', 'dist'); }
     catch (error) { if (previous) await rename('.build/previous', 'dist'); throw error; }
     await rm('.build/previous', { recursive: true, force: true });
-    console.log(`Outputkontrol bestået: ${site.items.length} sider, ${site.redirects.length} redirects, ${site.assets.size} billeder. Dato: ${site.buildDay}.`);
+    console.log(`Outputkontrol bestået: ${site.items.length} sider, ${site.redirects.length} redirects, ${site.assets.size} offentlige filer (billeder og modeller). Dato: ${site.buildDay}.`);
   }
 } finally {
   await lock.release();

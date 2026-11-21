@@ -7,7 +7,8 @@ import { parseMarkdown, splitFrontmatter } from '../sync/markdown';
 import { manualRedirectsSchema } from '../sync/sections';
 import { pathOf } from '../sync/slugs';
 import { readContent } from '../sync/sync';
-import { renderBody, type LinkTarget } from './render';
+import { renderBody, type LinkTarget, type ModelEmbed } from './render';
+import { loadModels, MODELS, modelMarker, modelPath } from './models';
 import { copenhagenDay, frontpage } from './sections';
 
 /** The folder's _intro document as HTML, with links to pages and sections. leadHtml is the first paragraph
@@ -73,6 +74,14 @@ export async function loadSite(root = '.', buildAt = new Date(process.env.BUILD_
     warnings.push(`${title}: et link til en mappe, der ikke er en sektion på hjemmesiden, vises som almindelig tekst`);
     return 'drop';
   };
+  // "[model: navn]" as a paragraph of its own shows an interactive model from modeller/. An unknown name
+  // stays on the page as the text the editor wrote, so the mistake is visible there too.
+  const modelEmbed = (title: string): ModelEmbed => name => {
+    const info = MODELS[name];
+    if (info) return { src: modelPath(name, 'html'), ...info };
+    warnings.push(`${title}: modellen "${name}" findes ikke; markøren vises som almindelig tekst. Kendte modeller: ${Object.keys(MODELS).join(', ')}`);
+    return undefined;
+  };
   const sectionByKey = new Map(known.map(s => [s.key, s]));
   for (const section of sections) {
     const intro = sectionByKey.get(section.key)!.intro;
@@ -98,7 +107,7 @@ export async function loadSite(root = '.', buildAt = new Date(process.env.BUILD_
       const base = { ...common, search: searchText(body, front.keywords ?? []) };
       for (const [name, bytes] of entry.files) if (name.startsWith(`${entry.id}/`)) assets.set(`${path}${name.slice(entry.id.length + 1)}`, bytes);
       const isLocal = localImage(entry.id), imageUrl = (url: string) => `${path}${url.slice(entry.id.length + 3)}`;
-      const html = renderBody(body, isLocal, imageUrl, linkTarget(entry.title));
+      const html = renderBody(body, isLocal, imageUrl, linkTarget(entry.title), modelEmbed(entry.title));
       const image = firstImage(body, isLocal);
       items.push({ ...base, kind: 'page', summary: front.summary, html, ...(image ? { image: { src: imageUrl(image.url), alt: image.alt } } : {}) });
     }
@@ -107,6 +116,7 @@ export async function loadSite(root = '.', buildAt = new Date(process.env.BUILD_
   const newsFirst = (a: SiteItem, b: SiteItem) => a.kind === 'notice' && b.kind === 'notice' ? (b.date < a.date ? -1 : b.date > a.date ? 1 : 0) : a.kind === 'notice' ? -1 : b.kind === 'notice' ? 1 : 0;
   items.sort((a, b) => newsFirst(a, b) || collator.compare(a.title, b.title) || (a.path < b.path ? -1 : 1));
 
+  for (const [url, bytes] of await loadModels()) assets.set(url, bytes);
   const live = new Set(['/', ...sections.map(s => s.path)]);
   for (const item of items) {
     if (live.has(item.path)) throw new Error(`${item.path} bruges af flere sider`);
@@ -150,7 +160,10 @@ function searchText(body: string, keywords: string[]): SearchText {
   const inline = new Set(['paragraph', 'heading', 'tableCell', 'strong', 'emphasis', 'link']);
   const text = (n: Node): string => n.type === 'text' ? n.value! : n.type === 'break' ? ' ' : (n.children ?? []).map(text).join(inline.has(n.type) ? '' : ' ');
   const root = parseMarkdown(body) as Node, headings: string[] = [], parts: string[] = [];
-  for (const block of root.children ?? []) (block.type === 'heading' ? headings : parts).push(text(block).replace(/\s+/g, ' ').trim());
+  for (const block of root.children ?? []) {
+    if (block.type === 'paragraph' && modelMarker(text(block))) continue; // a model marker is not text to search
+    (block.type === 'heading' ? headings : parts).push(text(block).replace(/\s+/g, ' ').trim());
+  }
   return { headings: headings.filter(Boolean), text: parts.filter(Boolean).join(' '), keywords };
 }
 
