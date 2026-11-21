@@ -140,6 +140,9 @@ main { min-height: 60vh; padding-block: clamp(2.5rem, 6vw, 5.5rem) 7.5rem; overf
 .prose a[href$=".pdf" i]::after { content: " (PDF)"; color: var(--color-muted); font-size: .875em; }
 .prose figure { margin: var(--space-xl) 0; }
 .prose img { display: block; max-width: 100%; height: auto; border-radius: var(--radius); }
+/* An interactive model from modeller/ (lib/site/models.ts). The frame has a fixed height; the model fits itself inside. */
+.prose .model iframe { display: block; width: 100%; height: clamp(22rem, 50vw, 32rem); border: 0; }
+.prose .model figcaption { margin-top: var(--space-xs); font-size: var(--text-sm); color: var(--color-muted); }
 .prose hr { border: 0; border-top: 1px solid var(--color-line); margin: var(--space-2xl) 0; }
 
 /* "På denne side": a green panel with the page's H2s, like "Det vigtigste" on the front page.

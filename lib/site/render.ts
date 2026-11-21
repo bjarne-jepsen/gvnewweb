@@ -2,6 +2,7 @@ import type { Nodes, PhrasingContent, RootContent } from 'mdast';
 import { safeHref } from '../contracts/blocks';
 import { slugify } from '../sync/slugs';
 import { validateMarkdown } from '../sync/markdown';
+import { modelMarker } from './models';
 
 const escape = (s: string) => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 const unsupported = (node: Nodes): never => { throw new Error(`Kan ikke vise Markdown-elementet ${node.type}`); };
@@ -18,10 +19,13 @@ export const newTabHintHtml = `<span class="visually-hidden"> (${NEW_TAB_HINT})<
 /** What a link becomes: an address on the site, plain text (drop) or the link as written (undefined). */
 export type LinkTarget = { path: string } | 'drop' | undefined;
 
+/** What a "[model: …]" paragraph becomes: a sandboxed frame, or the paragraph as written (undefined). */
+export type ModelEmbed = (name: string) => { src: string; title: string; caption: string } | undefined;
+
 /** Renders the validated Markdown dialect only. Every text and attribute is escaped and any
  * node outside the dialect throws, so raw HTML can never pass through to the page.
  * linkTarget lets the caller turn links to other Google Docs into links to their pages. */
-export function renderBody(body: string, isLocalImage: (url: string) => boolean, imageUrl: (url: string) => string, linkTarget: (url: string) => LinkTarget = () => undefined) {
+export function renderBody(body: string, isLocalImage: (url: string) => boolean, imageUrl: (url: string) => string, linkTarget: (url: string) => LinkTarget = () => undefined, model: ModelEmbed = () => undefined) {
   const tree = validateMarkdown(body, isLocalImage);
   let tables = 0;
   // Every H2 gets a stable id from its text, so the panel "På denne side" can link to it.
@@ -54,7 +58,14 @@ export function renderBody(body: string, isLocalImage: (url: string) => boolean,
     return unsupported(n);
   }).join('');
   const block = (n: RootContent): string => {
-    if (n.type === 'paragraph') return n.children.length === 1 && n.children[0]!.type === 'image' ? `<figure>${img(n.children[0]!)}</figure>` : `<p>${inline(n.children)}</p>`;
+    if (n.type === 'paragraph') {
+      const only = n.children.length === 1 ? n.children[0]! : undefined;
+      if (only?.type === 'image') return `<figure>${img(only)}</figure>`;
+      const name = only?.type === 'text' ? modelMarker(only.value) : undefined, embed = name ? model(name) : undefined;
+      // No allow-same-origin: the model runs in an opaque origin and cannot reach the page, cookies or storage.
+      if (embed) return `<figure class="model"><iframe src="${escape(embed.src)}" title="${escape(embed.title)}" sandbox="allow-scripts" loading="lazy" referrerpolicy="no-referrer"></iframe><figcaption>${escape(embed.caption)}</figcaption></figure>`;
+      return `<p>${inline(n.children)}</p>`;
+    }
     if (n.type === 'heading') return n.depth === 2 ? `<h2 id="${headingId(n.children)}">${inline(n.children)}</h2>` : `<h${n.depth}>${inline(n.children)}</h${n.depth}>`;
     if (n.type === 'thematicBreak') return '<hr>';
     if (n.type === 'list') return `<ul>${n.children.map(item => `<li>${item.children.map(c => c.type === 'paragraph' ? inline(c.children) : block(c)).join('<br>')}</li>`).join('')}</ul>`;

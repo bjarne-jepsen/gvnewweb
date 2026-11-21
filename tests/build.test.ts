@@ -30,7 +30,7 @@ async function release() {
 async function expectGreen() { const r = await build(); expect(r.log).toContain('Outputkontrol bestået'); expect(r.exit).toBe(0); return r; }
 
 test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og fjernelse virker; fejl bevarer dist', async () => {
-  for (const path of ['src', 'lib', 'scripts', 'astro.config.mjs', 'tsconfig.json', 'package.json']) await cp(path, join(root, path), { recursive: true });
+  for (const path of ['src', 'lib', 'modeller', 'scripts', 'astro.config.mjs', 'tsconfig.json', 'package.json']) await cp(path, join(root, path), { recursive: true });
   await symlink(resolve('node_modules'), join(root, 'node_modules'), 'dir');
   await mkdir(join(root, 'config')); await writeFile(join(root, 'config/site.json'), JSON.stringify(config));
   for (const [key, name] of [['foreningen', '10 Foreningen'], ['bo-her', '20 Bo her'], ['nyheder', '90 Nyheder'], ['redaktion', 'redaktion']]) drive.folder(`f-${key}`, name!, 'root');

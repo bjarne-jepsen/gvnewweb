@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+  <meta name="robots" content="noindex">
+  <title>Papmodel af et hus fra 1918</title>
+  <link rel="stylesheet" href="hus-1918.css">
+</head>
+<body>
+  <div class="bar">
+    <div class="group" role="group" aria-label="Visning">
+      <button type="button" data-mode="assembled" class="mode-btn">Model</button>
+      <button type="button" data-mode="lift" class="mode-btn">Løft taget</button>
+      <button type="button" data-mode="exploded" class="mode-btn">Adskilt</button>
+      <button type="button" data-mode="net" class="mode-btn">Udklipsark</button>
+    </div>
+    <div class="group">
+      <div id="view-presets" class="group presets" role="group" aria-label="Se huset fra">
+        <button type="button" data-view="hero" class="view-btn">Skråt</button>
+        <button type="button" data-view="front" class="view-btn">Indgang</button>
+        <button type="button" data-view="bay" class="view-btn">Karnap</button>
+        <button type="button" data-view="back" class="view-btn">Bagside</button>
+        <button type="button" data-view="garden" class="view-btn">Havegavl</button>
+      </div>
+      <button type="button" id="btn-lamp" title="Tænd og sluk lyset indenfor">Lys</button>
+      <button type="button" id="btn-spin" title="Lad modellen dreje rundt af sig selv">Drej</button>
+    </div>
+  </div>
+
+  <div class="stage">
+    <svg id="scene" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 368" role="img" aria-label="Papmodel af et Grøndalsvænge-hus fra 1918 med karnap, kvist og skorsten">
+      <defs id="svg-defs">
+        <!-- Subtle kraft paper grain -->
+        <filter id="kraft-grain" x="0%" y="0%" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" seed="11" result="noise" />
+          <feColorMatrix type="matrix" values="
+            0 0 0 0 0.35
+            0 0 0 0 0.22
+            0 0 0 0 0.10
+            0 0 0 0.08 0" in="noise" result="coloredNoise" />
+          <feComposite in="coloredNoise" in2="SourceGraphic" operator="atop" />
+        </filter>
+        <!-- Warm lamp window glow -->
+        <linearGradient id="lamp-glow" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#ffe7a3" />
+          <stop offset="100%" stop-color="#f2a93b" />
+        </linearGradient>
+      </defs>
+      <g id="layer-base"></g>
+      <g id="layer-model" filter="url(#kraft-grain)"></g>
+      <g id="layer-net"></g>
+      <g id="layer-hud"></g>
+    </svg>
+  </div>
+
+  <div class="bar foot">
+    <div class="group">
+      <label id="explode-wrap">Løft <input id="slider-lift" type="range" min="0" max="100" value="0"></label>
+      <label id="zoom-wrap">Zoom <input id="slider-zoom" type="range" min="65" max="155" value="100"></label>
+    </div>
+    <p id="status-note" aria-live="polite">Træk i modellen for at dreje den</p>
+  </div>
+
+  <script src="hus-1918.js"></script>
+</body>
+</html>
