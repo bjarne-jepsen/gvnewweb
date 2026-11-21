@@ -1,7 +1,7 @@
 ---
 id: "1-FJJF2xLdDjmLgCDvD0aKoZaiV9PSfcOvUh5Hd2UBrI"
 title: "Historie og arkitektur"
-updatedAt: "2026-10-22T17:09:43.474Z"
+updatedAt: "2026-11-21T17:00:19.952Z"
 summary: "Andelsboligforeningen Grøndalsvænge ligger på grænsen mellem Vanløse og København NV. Foreningen blev stiftet den 26. november 1911 som Haveboligforeningen Grøndalsvænge og består i dag af 389 fritliggende andelsboliger. Her er en næsten landlig atmosfære, få minutter fra Københavns centrum."
 ---
 
@@ -12,6 +12,8 @@ Andelsboligforeningen Grøndalsvænge ligger på grænsen mellem Vanløse og Kø
 Husene er opført mellem 1914 og 1928 af arkitekterne Poul Holsøe og Jesper Tvede og er et eksempel på klassisk **"Bedre Byggeskik"**. De kendetegnes ved røde vingeteglstenstage, karnapper og hvide stakitter. Hvert hus ligger på en grund på mellem 320 m² og 600 m², hvilket giver plads til både privatliv og grønne haver.
 
 Grøndalsvænge er underlagt en **bevarende lokalplan**, der sikrer, at kvarterets arkitektur og grønne miljø bevares.
+
+\[model: hus-1918\]
 
 ## Fællesskab og naboskab
 
