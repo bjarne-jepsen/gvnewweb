@@ -66,7 +66,7 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   const home = await html('index.html');
   expect(home).toContain('<ul class="shortcuts"><li><a href="/foreningen/kontakt/">Kontakt</a></li></ul>');
   expect(first.log).toContain('Forsiden: "Sælg dit hus" → /bo-her/saelg-dit-hus/ springes over, fordi siden ikke findes');
-  expect([...home.matchAll(/href="(\/nyheder\/[^"]+\/)"/g)].map(m => m[1])).toEqual(['/nyheder/2026-10-20-vandet-lukkes/', '/nyheder/2026-09-01-aeldre-nyhed-a/', '/nyheder/2026-08-01-aeldre-nyhed-b/']);
+  expect([...home.matchAll(/href="(\/nyheder\/\d{4}-[^"]+)"/g)].map(m => m[1])).toEqual(['/nyheder/2026-10-20-vandet-lukkes/', '/nyheder/2026-09-01-aeldre-nyhed-a/', '/nyheder/2026-08-01-aeldre-nyhed-b/']);
   expect(home).not.toContain('OLDEST_NEWS');
   // The three latest news as equal rows in one list. The menu covers the sections, so the front page has no section overview.
   expect(home).not.toContain('news-lead');
@@ -77,9 +77,9 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect(home).toContain('<h1>Velkommen</h1>'); expect(home).not.toContain('Lokal prototype med');
   expect(home).not.toContain('class="intro"'); // no intro until the editors write one in _forside
   expect(await html('nyheder/index.html')).toContain('OLDEST_NEWS');
-  expect(await html('nyheder/index.html')).toContain('<p class="rss-link"><a href="/nyheder/rss.xml">Abonnér på nyheder (RSS)</a></p>');
+  expect(await html('nyheder/index.html')).toContain('<p class="rss-link"><a href="/nyheder/rss/">Abonnér på nyheder (RSS)</a></p>');
   expect(home).toContain('<link rel="alternate" type="application/rss+xml" title="Nyheder · Grøndalsvænge" href="/nyheder/rss.xml">');
-  expect(home).toMatch(/<nav aria-labelledby="sidefod-genveje"><p class="footer-label" id="sidefod-genveje">Genveje<\/p><ul class="footer-links"><li><a href="\/foreningen\/kontakt\/">Kontakt<\/a><\/li><li><a href="\/nyheder\/rss\.xml">Abonnér på nyheder \(RSS\)<\/a><\/li><\/ul><\/nav>/);
+  expect(home).toMatch(/<nav aria-labelledby="sidefod-genveje"><p class="footer-label" id="sidefod-genveje">Genveje<\/p><ul class="footer-links"><li><a href="\/foreningen\/kontakt\/">Kontakt<\/a><\/li><li><a href="\/nyheder\/rss\/">Abonnér på nyheder \(RSS\)<\/a><\/li><\/ul><\/nav>/);
   // The menu: each page section is a panel with its landing page first and its pages alphabetically; news is a plain link.
   const nav = [...home.matchAll(/<nav aria-label="Hovednavigation" class="site-nav" id="hovedmenu">([\s\S]*?)<\/nav>/g)][0]![1]!;
   expect(nav.match(/href="([^"]+)"/g)).toEqual(['href="/foreningen/"', 'href="/foreningen/kontakt/"', 'href="/foreningen/om-foreningen/"', 'href="/bo-her/"', 'href="/bo-her/leje-af-lokaler/"', 'href="/nyheder/"']);
@@ -236,33 +236,41 @@ test('RSS-feed: aktuelle nyheder, tom nyhedssektion og site uden nyhedssektion',
     };
     const read = (p: string) => readFile(join(rssRoot, 'dist', p), 'utf8');
 
-    // 1. Active news item: feed, header, autodiscovery, news page and footer link.
+    // 1. Active news item: feed, header, autodiscovery, guide page, news page and footer link.
     await runSync(); await runBuild();
     const feed = await read('nyheder/rss.xml');
     expect(feed).toContain('<link>https://newweb.groendalsvaenge.dk/nyheder/2026-10-21-vandet-lukkes/</link>');
     expect(feed).toContain('<content:encoded>&lt;p&gt;Mandag kl. 9-12.&lt;/p&gt;</content:encoded>');
     expect(feed).not.toMatch(/EXPIRED_CANARY|FUTURE_CANARY|DRAFT_CANARY|nhlive/);
-    expect(await read('sitemap.xml')).not.toContain('rss.xml');
+    expect(await read('sitemap.xml')).not.toContain('rss');
+    expect(await read('search.json')).not.toContain('/nyheder/rss/');
     expect(await read('_headers')).toContain('/nyheder/rss.xml\n  Content-Type: application/rss+xml; charset=utf-8');
     const home = await read('index.html');
     expect(home).toContain('<link rel="alternate" type="application/rss+xml" title="Nyheder · Grøndalsvænge" href="/nyheder/rss.xml">');
-    expect(home).toContain('<li><a href="/nyheder/rss.xml">Abonnér på nyheder (RSS)</a></li>');
-    expect(await read('nyheder/index.html')).toContain('<p class="rss-link"><a href="/nyheder/rss.xml">Abonnér på nyheder (RSS)</a></p>');
+    expect(home).toContain('<li><a href="/nyheder/rss/">Abonnér på nyheder (RSS)</a></li>');
+    expect(await read('nyheder/index.html')).toContain('<p class="rss-link"><a href="/nyheder/rss/">Abonnér på nyheder (RSS)</a></p>');
+    const guide = await read('nyheder/rss/index.html');
+    expect(guide).toContain('<h1>Abonnér på nyheder (RSS)</h1>');
+    expect(guide).toContain('value="https://newweb.groendalsvaenge.dk/nyheder/rss.xml"');
+    expect(guide).toContain('data-rss-copy hidden>Kopiér adresse</button>');
+    expect(guide).toContain('<a href="/nyheder/rss.xml">Åbn selve RSS-filen (XML)</a>');
 
     // 2. Empty news section (0 active items): shows empty-state text, RSS link and valid empty feed.
     d.files.delete('nhlive'); d.files.delete('nhfut');
     await runSync(true); await runBuild();
     expect(await read('nyheder/index.html')).toContain('Der er ingen aktuelle nyheder lige nu.');
-    expect(await read('nyheder/index.html')).toContain('<p class="rss-link"><a href="/nyheder/rss.xml">Abonnér på nyheder (RSS)</a></p>');
+    expect(await read('nyheder/index.html')).toContain('<p class="rss-link"><a href="/nyheder/rss/">Abonnér på nyheder (RSS)</a></p>');
     expect(await read('nyheder/rss.xml')).not.toContain('<item>');
+    expect(await Bun.file(join(rssRoot, 'dist/nyheder/rss/index.html')).exists()).toBe(true);
 
-    // 3. No news section: no rss.xml, no autodiscovery link and no RSS footer link.
+    // 3. No news section: no rss.xml, no guide page, no autodiscovery link and no RSS footer link.
     d.files.delete('nhexp'); d.files.delete('f-nyheder');
     await runSync(true); await runBuild();
     expect(await Bun.file(join(rssRoot, 'dist/nyheder/rss.xml')).exists()).toBe(false);
+    expect(await Bun.file(join(rssRoot, 'dist/nyheder/rss/index.html')).exists()).toBe(false);
     const noNewsHome = await read('index.html');
     expect(noNewsHome).not.toContain('application/rss+xml');
-    expect(noNewsHome).not.toContain('rss.xml');
+    expect(noNewsHome).not.toContain('/nyheder/rss/');
     expect(await read('_headers')).not.toContain('rss.xml');
   } finally {
     await rm(rssRoot, { recursive: true, force: true });

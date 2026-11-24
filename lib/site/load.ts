@@ -9,6 +9,7 @@ import { pathOf } from '../sync/slugs';
 import { readContent } from '../sync/sync';
 import { renderBody, type LinkTarget, type ModelEmbed } from './render';
 import { loadModels, MODELS, modelMarker, modelPath } from './models';
+import { rssGuidePath } from './rss';
 import { copenhagenDay, frontpage } from './sections';
 
 /** The folder's _intro document as HTML, with links to pages and sections. leadHtml is the first paragraph
@@ -117,7 +118,7 @@ export async function loadSite(root = '.', buildAt = new Date(process.env.BUILD_
   items.sort((a, b) => newsFirst(a, b) || collator.compare(a.title, b.title) || (a.path < b.path ? -1 : 1));
 
   for (const [url, bytes] of await loadModels()) assets.set(url, bytes);
-  const live = new Set(['/', ...sections.map(s => s.path)]);
+  const live = new Set(['/', ...sections.map(s => s.path), ...sections.filter(s => s.news).map(rssGuidePath)]);
   for (const item of items) {
     if (live.has(item.path)) throw new Error(`${item.path} bruges af flere sider`);
     live.add(item.path);

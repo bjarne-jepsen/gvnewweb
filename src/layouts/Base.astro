@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
-import { rssPath } from '../../lib/site/rss';
+import { rssGuidePath, rssPath } from '../../lib/site/rss';
 import '../styles/tokens.css';
 import '../styles/site.css';
 import Search from '../components/Search.astro';
@@ -18,7 +18,7 @@ const current = (href: string) => href === '/' ? path === '/' : path.startsWith(
 const newsSections = sections.filter(s => s.news);
 const footerLinks = [
   ...(await getCollection('links')).map(l => l.data).filter(l => l.group === 'footer').sort((a, b) => a.order - b.order),
-  ...newsSections.map(s => ({ label: newsSections.length === 1 ? 'Abonnér på nyheder (RSS)' : `${s.label} (RSS)`, href: rssPath(s), external: false })),
+  ...newsSections.map(s => ({ label: newsSections.length === 1 ? 'Abonnér på nyheder (RSS)' : `${s.label} (RSS)`, href: rssGuidePath(s), external: false })),
 ];
 // The favicon is a house as a data URI, so it adds no file to the output. Colours are the ink, green and paper tokens.
 const favicon = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M2 15 16 3l14 12z" fill="#141414"/><path d="M6 15h20v14H6z" fill="#1E4636"/><path d="M14 20h4v9h-4z" fill="#FFFFFF"/></svg>')}`;
