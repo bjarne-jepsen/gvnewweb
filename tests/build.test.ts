@@ -66,7 +66,7 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   const home = await html('index.html');
   expect(home).toContain('<ul class="shortcuts"><li><a href="/foreningen/kontakt/">Kontakt</a></li></ul>');
   expect(first.log).toContain('Forsiden: "Sælg dit hus" → /bo-her/saelg-dit-hus/ springes over, fordi siden ikke findes');
-  expect([...home.matchAll(/href="(\/nyheder\/[^"]+)"/g)].map(m => m[1])).toEqual(['/nyheder/2026-10-20-vandet-lukkes/', '/nyheder/2026-09-01-aeldre-nyhed-a/', '/nyheder/2026-08-01-aeldre-nyhed-b/']);
+  expect([...home.matchAll(/href="(\/nyheder\/[^"]+\/)"/g)].map(m => m[1])).toEqual(['/nyheder/2026-10-20-vandet-lukkes/', '/nyheder/2026-09-01-aeldre-nyhed-a/', '/nyheder/2026-08-01-aeldre-nyhed-b/']);
   expect(home).not.toContain('OLDEST_NEWS');
   // The three latest news as equal rows in one list. The menu covers the sections, so the front page has no section overview.
   expect(home).not.toContain('news-lead');
@@ -77,7 +77,9 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect(home).toContain('<h1>Velkommen</h1>'); expect(home).not.toContain('Lokal prototype med');
   expect(home).not.toContain('class="intro"'); // no intro until the editors write one in _forside
   expect(await html('nyheder/index.html')).toContain('OLDEST_NEWS');
-  expect(home).toMatch(/<nav aria-labelledby="sidefod-genveje"><p class="footer-label" id="sidefod-genveje">Genveje<\/p><ul class="footer-links"><li><a href="\/foreningen\/kontakt\/">Kontakt<\/a><\/li><\/ul><\/nav>/);
+  expect(await html('nyheder/index.html')).toContain('<p class="rss-link"><a href="/nyheder/rss.xml">Abonnér på nyheder (RSS)</a></p>');
+  expect(home).toContain('<link rel="alternate" type="application/rss+xml" title="Nyheder · Grøndalsvænge" href="/nyheder/rss.xml">');
+  expect(home).toMatch(/<nav aria-labelledby="sidefod-genveje"><p class="footer-label" id="sidefod-genveje">Genveje<\/p><ul class="footer-links"><li><a href="\/foreningen\/kontakt\/">Kontakt<\/a><\/li><li><a href="\/nyheder\/rss\.xml">Abonnér på nyheder \(RSS\)<\/a><\/li><\/ul><\/nav>/);
   // The menu: each page section is a panel with its landing page first and its pages alphabetically; news is a plain link.
   const nav = [...home.matchAll(/<nav aria-label="Hovednavigation" class="site-nav" id="hovedmenu">([\s\S]*?)<\/nav>/g)][0]![1]!;
   expect(nav.match(/href="([^"]+)"/g)).toEqual(['href="/foreningen/"', 'href="/foreningen/kontakt/"', 'href="/foreningen/om-foreningen/"', 'href="/bo-her/"', 'href="/bo-her/leje-af-lokaler/"', 'href="/nyheder/"']);
@@ -128,6 +130,13 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   // News: expired and future rows are in content/ but not built; drafts never reach content/.
   expect(await html('nyheder/2026-10-20-vandet-lukkes/index.html')).toContain('<time datetime="2026-10-20">20. oktober 2026</time>');
   expect(await html('nyheder/index.html')).toContain('Mandag kl. 9-12.');
+  const rss = await html('nyheder/rss.xml');
+  expect([...rss.matchAll(/<item>[\s\S]*?<link>https:\/\/example\.invalid([^<]+)<\/link>/g)].map(m => m[1])).toEqual([
+    '/nyheder/2026-10-20-vandet-lukkes/', '/nyheder/2026-09-01-aeldre-nyhed-a/', '/nyheder/2026-08-01-aeldre-nyhed-b/', '/nyheder/2026-07-01-oldest-news/',
+  ]);
+  expect(rss).toContain('<content:encoded>&lt;p&gt;Mandag kl. 9-12.&lt;/p&gt;</content:encoded>');
+  expect(rss).not.toMatch(/EXPIRED_CANARY|FUTURE_CANARY|DRAFT_CANARY/);
+  expect(await html('sitemap.xml')).not.toContain('rss.xml');
   expect(await Bun.file(join(root, 'content/nyheder/nhexpired.json')).exists()).toBe(true);
   expect(await Bun.file(join(root, 'content/nyheder/nhdraft.json')).exists()).toBe(false);
 
@@ -156,7 +165,7 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect(rules).toContain('/andelshaveren/byggeprojekter /foreningen/om-os/ 301\n/andelshaveren/byggeprojekter/ /foreningen/om-os/ 301');
   expect(rules).toContain('/foreningen/om-foreningen/ /foreningen/om-os/ 301');
   expect(rules).not.toContain('/gammel');
-  expect(await html('_headers')).toContain('/*\n  X-Robots-Tag: noindex, nofollow');
+  expect(await html('_headers')).toContain('/*\n  X-Robots-Tag: noindex, nofollow\n/nyheder/rss.xml\n  Content-Type: application/rss+xml; charset=utf-8');
   expect(await html('sitemap.xml')).toContain('<loc>https://example.invalid/</loc>');
 
   // 5. Errors keep the last valid dist: a redirect over a live page, hand-written HTML in content/.
@@ -195,4 +204,67 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect(front).toContain('<ul class="shortcuts"><li><a href="/foreningen/kontakt/">Kontakt os</a></li><li><a href="/foreningen/om-os/">Om os</a></li></ul>');
   expect(withFront.log).toContain('Forsiden: "Hemmelig" springes over, fordi dokumentet ikke er en side på hjemmesiden');
   for (const path of await walk(join(root, 'dist'))) expect((await readFile(path)).toString()).not.toMatch(/CANARY|Hemmelig|docs\.google\.com|"private"/);
+}, 90000);
+
+test('RSS-feed: aktuelle nyheder, tom nyhedssektion og site uden nyhedssektion', async () => {
+  const rssRoot = await mkdtemp(join(tmpdir(), 'gv-rss-build-'));
+  try {
+    for (const path of ['src', 'lib', 'modeller', 'scripts', 'astro.config.mjs', 'tsconfig.json', 'package.json']) await cp(path, join(rssRoot, path), { recursive: true });
+    await symlink(resolve('node_modules'), join(rssRoot, 'node_modules'), 'dir');
+    await mkdir(join(rssRoot, 'config'));
+    await writeFile(join(rssRoot, 'config/site.json'), JSON.stringify({ rootFolderId: 'root', siteUrl: 'https://newweb.groendalsvaenge.dk' }));
+    const d = new FakeDrive();
+    d.folder('f-foreningen', '10 Foreningen', 'root');
+    d.folder('f-nyheder', '50 Nyheder', 'root');
+    d.folder('internt', 'Kladder', 'root');
+    d.gdoc('doc-1', 'Kontakt', 'f-foreningen', docJson('doc-1', [{ text: 'Skriv til os.' }]));
+    const newsDoc = (id: string, name: string, date: string, text: string, parent = 'f-nyheder', expires?: string) =>
+      d.gdoc(id, name, parent, docJson(id, [{ text: `Dato: ${date}` }, ...(expires ? [{ text: `Vises til: ${expires}` }] : []), { text }]));
+    newsDoc('nhlive', 'Vandet lukkes', '2026-10-21', 'Mandag kl. 9-12.');
+    newsDoc('nhexp', 'EXPIRED_CANARY', '2026-01-10', 'Tekst', 'f-nyheder', '2026-01-31');
+    newsDoc('nhfut', 'FUTURE_CANARY', '2099-01-01', 'Tekst');
+    newsDoc('nhdraft', 'DRAFT_CANARY', '2026-10-21', 'Tekst', 'internt');
+    const runSync = (allowMassRemoval = false) => syncContent({
+      config: siteConfigSchema.parse({ rootFolderId: 'root', siteUrl: 'https://newweb.groendalsvaenge.dk' }),
+      drive: d, contentDir: join(rssRoot, 'content'), allowMassRemoval,
+    });
+    const runBuild = async () => {
+      const proc = Bun.spawn([process.execPath, 'run', 'scripts/build.ts'], { cwd: rssRoot, stdout: 'pipe', stderr: 'pipe' });
+      const [stdout, stderr, exit] = await Promise.all([new Response(proc.stdout).text(), new Response(proc.stderr).text(), proc.exited]);
+      expect(stdout + stderr).toContain('Outputkontrol bestået');
+      expect(exit).toBe(0);
+    };
+    const read = (p: string) => readFile(join(rssRoot, 'dist', p), 'utf8');
+
+    // 1. Active news item: feed, header, autodiscovery, news page and footer link.
+    await runSync(); await runBuild();
+    const feed = await read('nyheder/rss.xml');
+    expect(feed).toContain('<link>https://newweb.groendalsvaenge.dk/nyheder/2026-10-21-vandet-lukkes/</link>');
+    expect(feed).toContain('<content:encoded>&lt;p&gt;Mandag kl. 9-12.&lt;/p&gt;</content:encoded>');
+    expect(feed).not.toMatch(/EXPIRED_CANARY|FUTURE_CANARY|DRAFT_CANARY|nhlive/);
+    expect(await read('sitemap.xml')).not.toContain('rss.xml');
+    expect(await read('_headers')).toContain('/nyheder/rss.xml\n  Content-Type: application/rss+xml; charset=utf-8');
+    const home = await read('index.html');
+    expect(home).toContain('<link rel="alternate" type="application/rss+xml" title="Nyheder · Grøndalsvænge" href="/nyheder/rss.xml">');
+    expect(home).toContain('<li><a href="/nyheder/rss.xml">Abonnér på nyheder (RSS)</a></li>');
+    expect(await read('nyheder/index.html')).toContain('<p class="rss-link"><a href="/nyheder/rss.xml">Abonnér på nyheder (RSS)</a></p>');
+
+    // 2. Empty news section (0 active items): shows empty-state text, RSS link and valid empty feed.
+    d.files.delete('nhlive'); d.files.delete('nhfut');
+    await runSync(true); await runBuild();
+    expect(await read('nyheder/index.html')).toContain('Der er ingen aktuelle nyheder lige nu.');
+    expect(await read('nyheder/index.html')).toContain('<p class="rss-link"><a href="/nyheder/rss.xml">Abonnér på nyheder (RSS)</a></p>');
+    expect(await read('nyheder/rss.xml')).not.toContain('<item>');
+
+    // 3. No news section: no rss.xml, no autodiscovery link and no RSS footer link.
+    d.files.delete('nhexp'); d.files.delete('f-nyheder');
+    await runSync(true); await runBuild();
+    expect(await Bun.file(join(rssRoot, 'dist/nyheder/rss.xml')).exists()).toBe(false);
+    const noNewsHome = await read('index.html');
+    expect(noNewsHome).not.toContain('application/rss+xml');
+    expect(noNewsHome).not.toContain('rss.xml');
+    expect(await read('_headers')).not.toContain('rss.xml');
+  } finally {
+    await rm(rssRoot, { recursive: true, force: true });
+  }
 }, 90000);

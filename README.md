@@ -103,6 +103,7 @@ Den gamle sti flyttes til `previousPaths` og bliver en redirect-side. Det samme 
 - **Billeder:** Understøttes ikke endnu. En nyhed med et billede publiceres ikke og giver en fejl i rapporten.
 - **Fejl:** En ugyldig dato, `Vises til` før datoen eller en nyhed uden tekst giver en fejl. Den sidste gyldige version beholdes.
 - **Adresse:** Adressen dannes af dato og titel første gang, fx `/nyheder/2026-10-21-generalforsamling/`, og bevares derefter.
+- **RSS-feed:** Hver nyhedssektion har et statisk RSS 2.0-feed på `/<sektion>/rss.xml` (fx `/nyheder/rss.xml`) med de aktuelle offentlige nyheder (fuld tekst i `content:encoded`). Der er autodiscovery i `<head>`, og et link på nyhedssiden og i sidefoden.
 
 ### Markdown
 
@@ -120,7 +121,7 @@ En redaktør kan sætte en model ind på en side ved at skrive `[model: hus-1918
 ## Output og sikkerhed
 
 - Sider ligger på `/<sektion>/<slug>/` og billeder ved siden af deres side.
-- Outputkontrollen ([scripts/verify-output.ts](scripts/verify-output.ts)) tillader kun de forventede filer. Bytes skal være identiske med `content/`. Der må ikke være Drive-ID'er og ingen `<script>` i siderne. Modellerne i `modeller/` har deres eget script og kontrolleres af `modelProblems` i stedet. Sitemap og søgeindeks skal være præcis de offentlige sider.
+- Outputkontrollen ([scripts/verify-output.ts](scripts/verify-output.ts)) tillader kun de forventede filer. Bytes skal være identiske med `content/`. Der må ikke være Drive-ID'er og ingen `<script>` i siderne. Modellerne i `modeller/` har deres eget script og kontrolleres af `modelProblems` i stedet. Sitemap, søgeindeks og RSS-feed skal være præcis de offentlige sider/nyheder.
 - Sitemap bruger `siteUrl` fra `config/site.json` (nu `https://newweb.groendalsvaenge.dk`). Prototypen har `noindex` i siderne og som header i `_headers`. Indeksering besluttes, når sitet skal på det rigtige domæne.
 - Redirects er meta-refresh-sider. Buildet skriver desuden `_redirects` med rigtige 301'ere og `_headers` til Cloudflare Pages. Outputkontrollen kræver, at de svarer præcis til redirects.
 

@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import { rssPath } from '../../../lib/site/rss';
 import Base from '../../layouts/Base.astro';
 import Entries from '../../components/Entries.astro';
 export async function getStaticPaths() {
@@ -10,7 +11,7 @@ const { section, entries } = Astro.props;
 // A news section shows its notices as cards. Other sections are landing pages: a large title with the first
 // paragraph of _intro beside it and the rest as running text under it. The menu lists the pages, so there are
 // no tiles (docs/cvi.md). leadHtml and bodyHtml are rendered from validated Markdown at build time (lib/site/load.ts), with every text escaped.
-const news = entries.length > 0 && entries.every(e => e.kind === 'notice');
+const news = section.news;
 ---
 <Base title={section.label}>
   {news ? <>
@@ -18,7 +19,8 @@ const news = entries.length > 0 && entries.every(e => e.kind === 'notice');
     <h1>{section.label}</h1>
     <Fragment set:html={section.leadHtml} />
     <Fragment set:html={section.bodyHtml} />
-    <Entries heading="h2" cards entries={entries} />
+    <p class="rss-link"><a href={rssPath(section)}>Abonnér på nyheder (RSS)</a></p>
+    {entries.length > 0 ? <Entries heading="h2" cards entries={entries} /> : <p class="meta">Der er ingen aktuelle nyheder lige nu.</p>}
   </> : <>
     <div class="landing-head">
       <h1>{section.label}</h1>

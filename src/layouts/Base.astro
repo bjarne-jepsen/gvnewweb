@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import { rssPath } from '../../lib/site/rss';
 import '../styles/tokens.css';
 import '../styles/site.css';
 import Search from '../components/Search.astro';
@@ -14,7 +15,11 @@ const collator = new Intl.Collator('da-DK');
 const pages = (await getCollection('items')).map(i => i.data).filter(i => i.kind === 'page').sort((a, b) => collator.compare(a.title, b.title));
 const navigation = sections.map(s => ({ ...s, pages: s.news ? [] : pages.filter(p => p.section === s.key) }));
 const current = (href: string) => href === '/' ? path === '/' : path.startsWith(href);
-const footerLinks = (await getCollection('links')).map(l => l.data).filter(l => l.group === 'footer').sort((a, b) => a.order - b.order);
+const newsSections = sections.filter(s => s.news);
+const footerLinks = [
+  ...(await getCollection('links')).map(l => l.data).filter(l => l.group === 'footer').sort((a, b) => a.order - b.order),
+  ...newsSections.map(s => ({ label: newsSections.length === 1 ? 'Abonnér på nyheder (RSS)' : `${s.label} (RSS)`, href: rssPath(s), external: false })),
+];
 // The favicon is a house as a data URI, so it adds no file to the output. Colours are the ink, green and paper tokens.
 const favicon = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M2 15 16 3l14 12z" fill="#141414"/><path d="M6 15h20v14H6z" fill="#1E4636"/><path d="M14 20h4v9h-4z" fill="#FFFFFF"/></svg>')}`;
 ---
@@ -26,6 +31,7 @@ const favicon = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www
     <meta name="description" content="En lokal prototype med Grøndalsvænges offentlige information fra foreningens Google Drive." />
     <meta name="robots" content="noindex, nofollow" />
     <link rel="icon" type="image/svg+xml" href={favicon} />
+    {newsSections.map(s => <link rel="alternate" type="application/rss+xml" title={`${s.label} · Grøndalsvænge`} href={rssPath(s)} />)}
     <title>{title} · Grøndalsvænge</title>
   </head>
   <body class:list={{ front }}>
