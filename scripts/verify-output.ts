@@ -3,6 +3,7 @@ import { join, relative } from 'node:path';
 import { digest } from '../lib/sync/content';
 import { hostFiles } from '../lib/site/hosting';
 import type { Site } from '../lib/site/load';
+import { rssFile } from '../lib/site/rss';
 export async function walk(root: string): Promise<string[]> {
   const results: string[] = [];
   for (const e of await readdir(root, { withFileTypes: true })) {
@@ -40,9 +41,10 @@ const scriptSources = (html: string) => [...html.matchAll(/<script type="module"
 /** Default deny: dist may contain exactly the pages, files and indexes derived from content/. */
 export async function verifyOutput(root: string, site: Site) {
   const pages = ['/', ...site.sections.map(s => s.path), ...site.items.map(i => i.path)].map(pageFile);
+  const feeds = site.sections.filter(s => s.news);
   const redirects = new Map(site.redirects.map(r => [pageFile(r.from), r.to]));
   const host = hostFiles(site);
-  const allowed = new Set([...pages, ...redirects.keys(), ...host.keys(), 'search.json', 'sitemap.xml', ...[...site.assets.keys()].map(u => u.slice(1))]);
+  const allowed = new Set([...pages, ...feeds.map(rssFile), ...redirects.keys(), ...host.keys(), 'search.json', 'sitemap.xml', ...[...site.assets.keys()].map(u => u.slice(1))]);
   const found = new Set<string>(), scripts: string[] = [];
   for (const path of await walk(root)) {
     const rel = relative(root, path); found.add(rel);
@@ -65,7 +67,19 @@ export async function verifyOutput(root: string, site: Site) {
   const urls = site.items.map(i => i.path).sort();
   if (JSON.stringify(search.map(x => x.url).sort()) !== JSON.stringify(urls)) throw new Error('Søgeindeks afviger fra de offentlige sider');
   const sitemap = await readFile(join(root, 'sitemap.xml'), 'utf8');
-  const loc = new RegExp(`<loc>${site.origin.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&')}([^<]*)</loc>`, 'g');
+  const originPattern = site.origin.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
+  const loc = new RegExp(`<loc>${originPattern}([^<]*)</loc>`, 'g');
   const listed = [...sitemap.matchAll(loc)].map(m => m[1]!).sort();
   if (listed.length !== [...sitemap.matchAll(/<loc>/g)].length || JSON.stringify(listed) !== JSON.stringify(['/', ...site.sections.map(s => s.path), ...urls].sort())) throw new Error('Sitemap afviger fra de offentlige sider');
+  for (const section of feeds) {
+    const file = rssFile(section);
+    const rss = await readFile(join(root, file), 'utf8');
+    const links = [...rss.matchAll(/<item>[\s\S]*?<\/item>/g)].map(m => {
+      const link = new RegExp(`<link>${originPattern}([^<]+)</link>`).exec(m[0]);
+      if (!link) throw new Error(`Ugyldigt link i ${file}`);
+      return link[1]!;
+    });
+    const expected = site.items.filter(i => i.kind === 'notice' && i.section === section.key).map(i => i.path);
+    if (JSON.stringify(links) !== JSON.stringify(expected)) throw new Error(`RSS-feed ${file} afviger fra de offentlige nyheder`);
+  }
 }

@@ -43,7 +43,8 @@ main { min-height: 60vh; padding-block: clamp(2.5rem, 6vw, 5.5rem) 7.5rem; overf
 .back:hover::before { transform: translateX(-.2em); }
 
 /* Stand-alone links are at least 44 px high (docs/cvi.md); the negative margin keeps the layout. */
-.back, .more a, .footer-links a, .crumbs a { display: inline-flex; align-items: center; gap: .3em; min-height: 44px; }
+.back, .more a, .footer-links a, .crumbs a, .rss-link a { display: inline-flex; align-items: center; gap: .3em; min-height: 44px; }
+.rss-link { font-size: var(--text-sm); margin: 0 0 var(--space-l); }
 .entries :is(h2, h3) a { display: inline-block; padding-block: .6rem; margin-block: -.6rem; }
 
 /* Lists of entries (section pages, news). */
@@ -211,7 +212,7 @@ main { min-height: 60vh; padding-block: clamp(2.5rem, 6vw, 5.5rem) 7.5rem; overf
 @media print {
   html { background: #fff; }
   body { font-size: 11pt; }
-  .skip, .site-header nav, .site-footer, .back, .more, .crumbs, .button, .toc { display: none; }
+  .skip, .site-header nav, .site-footer, .back, .more, .crumbs, .button, .toc, .rss-link { display: none; }
   .site-header { border-bottom: 0; margin-bottom: var(--space-l); }
   .wrap { max-width: none; padding-inline: 0; }
   .site-header .wrap, main { padding-block: 0; }
