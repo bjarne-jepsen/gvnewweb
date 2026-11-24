@@ -112,8 +112,18 @@ main { min-height: 60vh; padding-block: clamp(2.5rem, 6vw, 5.5rem) 7.5rem; overf
 .landing-head { display: grid; gap: 1.75rem; align-items: end; padding-bottom: var(--space-xl); border-bottom: 1px solid var(--color-ink); }
 .landing-head h1 { font-size: var(--text-display); line-height: .95; letter-spacing: -.045em; max-width: none; margin: 0; hyphens: manual; overflow-wrap: break-word; }
 .landing-intro .intro { font-size: 1.25rem; line-height: 1.5; max-width: 40ch; margin: 0; }
-.landing-text { margin-top: clamp(2.5rem, 5vw, 4.5rem); max-width: 40rem; }
-.landing-text p { font-size: var(--text-lg); line-height: 1.55; margin: 0 0 var(--space-m); }
+/* The running text and a line drawing (LandingArt.astro). On a phone the drawing comes after the text, small,
+   so it never pushes the text down. From 50rem it stands in the right column and stays in view while you read. */
+.landing-body { display: grid; margin-top: clamp(2.5rem, 5vw, 4.5rem); }
+.landing-text { max-width: 40rem; }
+.landing-text p { font-size: var(--text-base); line-height: 1.6; margin: 0 0 var(--space-m); }
+.landing-art { display: block; width: 100%; max-width: 17rem; height: auto; margin-top: var(--space-2xl); justify-self: start; }
+.landing-art * { fill: var(--color-paper); stroke: var(--color-green); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.landing-art .line { fill: none; }
+@media (min-width: 50rem) {
+  .landing-body { grid-template-columns: 7fr 5fr; gap: var(--space-xl); align-items: start; }
+  .landing-art { max-width: 30rem; margin-top: 0; position: sticky; top: var(--space-xl); }
+}
 .landing-text p:last-child { margin-bottom: 0; }
 .landing-text h2 { margin: var(--space-2xl) 0 var(--space-s); }
 .landing-text > h2:first-child { margin-top: 0; }

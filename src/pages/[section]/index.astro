@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Entries from '../../components/Entries.astro';
+import LandingArt from '../../components/LandingArt.astro';
 export async function getStaticPaths() {
   const items = (await getCollection('items')).map(i => i.data);
   return (await getCollection('sections')).map(({ data: section }) => ({ params: { section: section.key }, props: { section, entries: items.filter(i => i.section === section.key) } }));
@@ -24,6 +25,9 @@ const news = entries.length > 0 && entries.every(e => e.kind === 'notice');
       <h1>{section.label}</h1>
       {section.leadHtml && <div class="landing-intro"><Fragment set:html={section.leadHtml} /></div>}
     </div>
-    {section.bodyHtml && <div class="landing-text"><Fragment set:html={section.bodyHtml} /></div>}
+    <div class="landing-body">
+      {section.bodyHtml && <div class="landing-text"><Fragment set:html={section.bodyHtml} /></div>}
+      <LandingArt section={section.key} />
+    </div>
   </>}
 </Base>
