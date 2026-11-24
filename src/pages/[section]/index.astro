@@ -4,6 +4,7 @@ import { rssPath } from '../../../lib/site/rss';
 import Base from '../../layouts/Base.astro';
 import Entries from '../../components/Entries.astro';
 import LandingArt from '../../components/LandingArt.astro';
+import LandingArtRow from '../../components/LandingArtRow.astro';
 export async function getStaticPaths() {
   const items = (await getCollection('items')).map(i => i.data);
   return (await getCollection('sections')).map(({ data: section }) => ({ params: { section: section.key }, props: { section, entries: items.filter(i => i.section === section.key) } }));
@@ -13,6 +14,8 @@ const { section, entries } = Astro.props;
 // paragraph of _intro beside it and the rest as running text under it. The menu lists the pages, so there are
 // no tiles (docs/cvi.md). leadHtml and bodyHtml are rendered from validated Markdown at build time (lib/site/load.ts), with every text escaped.
 const news = section.news;
+// "Foreningen" shows a whole row of houses; the other landing pages show the single sektion 2 house.
+const Art = section.key === 'foreningen' ? LandingArtRow : LandingArt;
 ---
 <Base title={section.label}>
   {news ? <>
@@ -29,7 +32,7 @@ const news = section.news;
     </div>
     <div class="landing-body">
       {section.bodyHtml && <div class="landing-text"><Fragment set:html={section.bodyHtml} /></div>}
-      <LandingArt />
+      <Art />
     </div>
   </>}
 </Base>

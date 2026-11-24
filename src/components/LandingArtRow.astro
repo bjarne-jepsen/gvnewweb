@@ -1,0 +1,79 @@
+---
+// The line drawing on the landing page for "Foreningen": the front of a long row of houses with a bay in the
+// middle under a pointed tower roof, a dormer on each side and a lower wing at each end. Traced from the
+// original elevation in the same style as LandingArt.astro (thin green lines on paper, decoration only).
+// The drawing is wide and low, so it is simplified harder than the single house: no skylights, cellar windows,
+// railings or lettering, about one roof strip in three, and window bars cut down to a cross. Coordinates follow the
+// scanned sheet (2000 units across), so details can be measured straight off it. Shapes are filled with paper,
+// so a shape drawn later covers the lines behind it.
+const G = 690; // ground
+const eaveL = 460, eaveR = 466; // the main eave, left and right of the bay
+// The main roof seen from the front: hip ends over the wings, eave over the ground floor.
+const roof = `M 95 278 L 195 190 L 285 95 L 1690 95 L 1860 302 L 1700 302 L 1700 ${eaveR} L 1215 ${eaveR} L 1215 ${eaveL} L 360 ${eaveL} L 300 278 Z`;
+const strips = Array.from({ length: 36 }, (_, i) => 215 + i * 46);
+// A window: frame, a mullion and a transom. Tall windows get a second transom.
+const win = (x: number, y: number, w: number, h: number, tall = false) => {
+  const mid = x + w / 2, t1 = y + h * (tall ? .33 : .4), t2 = y + h * .66;
+  return { frame: { x, y, width: w, height: h }, bars: `M ${mid} ${y} V ${y + h} M ${x} ${t1} H ${x + w}${tall ? ` M ${x} ${t2} H ${x + w}` : ''}` };
+};
+const windows = [
+  // The left wing, both floors, and the right wing upstairs.
+  win(143, 300, 42, 88, true), win(233, 300, 42, 88, true), win(140, 482, 42, 115, true), win(230, 486, 42, 115, true),
+  win(1712, 330, 36, 85, true), win(1786, 330, 36, 85, true), win(1866, 505, 44, 135, true),
+  // The dormers.
+  win(575, 312, 60, 103), win(1342, 320, 58, 90),
+  // The bay: three lights upstairs, three downstairs.
+  win(850, 312, 55, 88), win(950, 314, 74, 86), win(1070, 314, 55, 86),
+  win(838, 498, 72, 140), win(932, 500, 102, 138), win(1057, 500, 72, 140),
+  // The bay windows on the ground floor, each with a narrow side light.
+  win(412, 490, 88, 140), win(596, 495, 84, 140), win(1287, 505, 88, 140), win(1462, 510, 92, 135),
+  win(385, 490, 16, 140, true), win(568, 495, 14, 140, true), win(1386, 505, 16, 140, true), win(1564, 510, 16, 135, true),
+];
+// The bay windows' frames and the little roofs on top of them.
+const bays = [{ l: 377, r: 515, top: 480 }, { l: 560, r: 692, top: 485 }, { l: 1280, r: 1410, top: 492 }, { l: 1455, r: 1585, top: 497 }];
+// An arched door with a step in front.
+const door = (x: number, w: number, top: number) =>
+  `M ${x} ${G - 18} V ${top + w / 2} A ${w / 2} ${w / 2} 0 0 1 ${x + w} ${top + w / 2} V ${G - 18}`;
+const doors = [door(700, 52, 487), door(1222, 52, 505), door(1702, 38, 520), door(1783, 38, 520)];
+const steps = [{ x: 694, w: 72 }, { x: 1196, w: 80 }];
+// The tower roof over the bay: an apex and a few lines fanning down from it.
+const apex = { x: 990, y: 110 }, foot = 290;
+const fan = [880, 935, 990, 1045, 1100];
+// Chimneys: shaft and cap.
+const chimneys = [{ x: 515, y: 42, w: 70, h: 80 }, { x: 968, y: 48, w: 48, h: 50 }, { x: 1398, y: 55, w: 66, h: 80 }, { x: 195, y: 85, w: 54, h: 195 }];
+---
+<svg class="landing-art landing-art-row" viewBox="30 30 1920 670" focusable="false" aria-hidden="true">
+  <defs><clipPath id="landing-row-roof"><path d={roof} /></clipPath></defs>
+  <!-- Wings: the left one is a gable with flared sides, the right one flares at its outer end -->
+  <path d={`M 100 278 Q 70 380 45 455 V ${G} H 360 V ${eaveL} Q 330 380 300 278 Z`} />
+  <path d={`M 1860 302 Q 1890 400 1925 480 V ${G} H 1700 V 302 Z`} />
+  <!-- Roof, with tiles in vertical strips -->
+  <path d={roof} />
+  <g clip-path="url(#landing-row-roof)">{strips.map(x => <path d={`M ${x} 90 V ${eaveR}`} />)}</g>
+  <rect x="1660" y="298" width="44" height="8" /><rect x="92" y="274" width="216" height="8" />
+  <!-- Chimneys -->
+  {chimneys.map(c => <><rect x={c.x} y={c.y + 10} width={c.w} height={c.h - 10} /><rect x={c.x - 5} y={c.y} width={c.w + 10} height="12" /></>)}
+  <!-- Ground floor between the wings, under the eave -->
+  <rect x="360" y={eaveL} width="855" height="8" /><rect x="1215" y={eaveR} width="485" height="8" />
+  <rect x="360" y={eaveL + 8} width="1340" height={G - eaveL - 8} />
+  <!-- The bay in the middle, its cornice and the tower roof -->
+  <rect x="830" y={foot + 8} width="315" height={G - foot - 8} />
+  <path d={`M 915 ${foot + 8} V ${G} M 1050 ${foot + 8} V ${G} M 830 650 H 1145`} />
+  <rect x="826" y="480" width="323" height="10" />
+  <polygon points={`${apex.x},${apex.y} 1150,${foot} 830,${foot}`} />
+  {fan.map(x => <path d={`M ${apex.x} ${apex.y} L ${x} ${foot}`} />)}
+  <rect x="818" y={foot} width="340" height="10" />
+  <!-- Dormers -->
+  <polygon points="525,308 552,294 622,294 650,308" /><rect x="560" y="308" width="90" height="115" />
+  <polygon points="1325,316 1350,304 1420,304 1447,316" /><rect x="1332" y="316" width="80" height="102" />
+  <!-- Bay windows on the ground floor -->
+  {bays.map(b => <><rect x={b.l} y={b.top} width={b.r - b.l} height={G - b.top} /><rect x={b.l - 4} y={b.top - 8} width={b.r - b.l + 8} height="10" /></>)}
+  <!-- Windows -->
+  {windows.map(w => <><rect {...w.frame} /><path d={w.bars} /></>)}
+  <!-- Doors and steps -->
+  {doors.map(d => <path d={d} />)}
+  {steps.map(s => <path class="line" d={`M ${s.x} ${G} V ${G - 9} H ${s.x + 10} V ${G - 18} H ${s.x + s.w - 10} V ${G - 9} H ${s.x + s.w} V ${G}`} />)}
+  <rect x="1688" y={G - 10} width="236" height="10" />
+  <!-- Ground -->
+  <path d={`M 30 ${G} H 1950`} />
+</svg>
