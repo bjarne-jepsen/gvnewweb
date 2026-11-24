@@ -121,6 +121,8 @@ main { min-height: 60vh; padding-block: clamp(2.5rem, 6vw, 5.5rem) 7.5rem; overf
 .landing-art { display: block; width: 100%; max-width: 17rem; height: auto; margin-top: var(--space-2xl); justify-self: start; }
 .landing-art * { fill: var(--color-paper); stroke: var(--color-green); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .landing-art .line { fill: none; }
+/* The row of houses (LandingArtRow.astro) is wide and low, so on a phone it may use the full width. */
+.landing-art-row { max-width: 24rem; }
 @media (min-width: 50rem) {
   .landing-body { grid-template-columns: 7fr 5fr; gap: var(--space-xl); align-items: start; }
   .landing-art { max-width: 30rem; margin-top: 0; position: sticky; top: var(--space-xl); }

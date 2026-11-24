@@ -115,9 +115,11 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   expect(await html('foreningen/index.html')).not.toContain('<img');
   expect(await html('foreningen/index.html')).not.toContain('class="entries"');
   // The intro comes from the folder's _intro document: every paragraph on the section page.
-  expect(await html('foreningen/index.html')).toContain('<div class="landing-intro"><p class="intro">Bestyrelse og regler.</p></div> </div> <div class="landing-body"> <div class="landing-text"><h2 id="kontakt">Kontakt</h2>\n<p>Skriv til os.</p></div> <svg class="landing-art"');
+  expect(await html('foreningen/index.html')).toContain('<div class="landing-intro"><p class="intro">Bestyrelse og regler.</p></div> </div> <div class="landing-body"> <div class="landing-text"><h2 id="kontakt">Kontakt</h2>\n<p>Skriv til os.</p></div> <svg class="landing-art landing-art-row"');
   // The line drawing beside the text is decoration only.
-  expect(await html('foreningen/index.html')).toMatch(/<svg class="landing-art"[^>]*aria-hidden="true"/);
+  // "Foreningen" shows the row of houses; the other landing pages show the single house.
+  expect(await html('foreningen/index.html')).toMatch(/<svg class="landing-art landing-art-row"[^>]*aria-hidden="true"/);
+  expect(await html('bo-her/index.html')).toMatch(/<svg class="landing-art"[^>]*aria-hidden="true"/);
   expect(await html('nyheder/index.html')).toContain('<ul class="entries cards"><li>');
   expect(await readFile(dist(`foreningen/om-foreningen/${image}`))).toEqual(png);
   for (const path of await walk(join(root, 'dist'))) expect((await readFile(path)).toString()).not.toMatch(/CANARY|target-doc|doc-1/);
