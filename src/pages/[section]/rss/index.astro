@@ -1,0 +1,70 @@
+---
+import { readFile } from 'node:fs/promises';
+import { getCollection } from 'astro:content';
+import { rssPath } from '../../../../lib/site/rss';
+import { siteConfigSchema } from '../../../../lib/sync/config';
+import Base from '../../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const { siteUrl } = siteConfigSchema.parse(JSON.parse(await readFile('config/site.json', 'utf8')));
+  const origin = new URL(siteUrl).origin;
+  return (await getCollection('sections'))
+    .map(s => s.data)
+    .filter(s => s.news)
+    .map(section => ({ params: { section: section.key }, props: { section, origin } }));
+}
+
+const { section, origin } = Astro.props;
+const feedPath = rssPath(section);
+const feedUrl = `${origin}${feedPath}`;
+---
+<Base title="Abonnér på nyheder (RSS)">
+  <nav class="crumbs" aria-label="Brødkrumme">
+    <ol><li><a href={section.path}>{section.label}</a></li><li aria-current="page">Abonnér på nyheder (RSS)</li></ol>
+  </nav>
+  <article class="page">
+    <h1>Abonnér på nyheder (RSS)</h1>
+    <p class="intro">Med et RSS-feed får du automatisk besked, når foreningen lægger en ny nyhed ud — direkte på din telefon, tablet eller i dit mailprogram, helt uden login.</p>
+
+    <div class="rss-box">
+      <label class="rss-label" for="rss-url">Adressen til nyhedsfeedet</label>
+      <div class="rss-row">
+        <input id="rss-url" class="rss-url" type="text" readonly value={feedUrl} aria-describedby="rss-status" />
+        <button type="button" class="button rss-copy" data-rss-copy hidden>Kopiér adresse</button>
+      </div>
+      <p id="rss-status" class="meta rss-status" role="status" aria-live="polite"></p>
+      <p class="meta rss-direct">Bruger du en app, der åbner feedet direkte? <a href={feedPath}>Åbn selve RSS-filen (XML)</a></p>
+    </div>
+
+    <div class="prose">
+      <h2>På telefon eller tablet</h2>
+      <p>Hent en gratis nyhedslæser (RSS-app), fx <strong>NetNewsWire</strong> (iPhone, iPad og Mac) eller <strong>Feedly</strong> / <strong>Feeder</strong> (iPhone og Android). Vælg at tilføje et nyt feed, og indsæt adressen ovenfor.</p>
+
+      <h2>I dit mailprogram</h2>
+      <p>Bruger du <strong>Outlook</strong> eller <strong>Thunderbird</strong> på computeren, kan du få nyhederne direkte i din indbakke. Find punktet <em>RSS-feeds</em> i mappelisten, vælg <em>Tilføj nyt RSS-feed</em>, og indsæt adressen ovenfor.</p>
+
+      <h2>Hvad kommer med?</h2>
+      <p>Feedet indeholder de aktuelle, offentlige nyheder fra hjemmesiden med hele teksten og klikbare links. Foreningen registrerer ingen oplysninger om, hvem der abonnerer.</p>
+    </div>
+  </article>
+</Base>
+
+<script>
+  const input = document.querySelector<HTMLInputElement>('#rss-url');
+  const button = document.querySelector<HTMLButtonElement>('[data-rss-copy]');
+  const status = document.querySelector<HTMLElement>('#rss-status');
+  if (input && button && status) {
+    button.hidden = false;
+    input.addEventListener('focus', () => input.select());
+    button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(input.value);
+        status.textContent = 'Adressen er kopieret — nu kan du indsætte den i din app eller dit mailprogram.';
+      } catch {
+        input.focus();
+        input.select();
+        status.textContent = 'Adressen er markeret — tryk Ctrl+C (eller ⌘C på Mac) for at kopiere.';
+      }
+    });
+  }
+</script>

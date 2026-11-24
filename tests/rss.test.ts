@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { hostFiles } from '../lib/site/hosting';
 import type { Site } from '../lib/site/load';
-import { renderRss, rssFile, rssPath } from '../lib/site/rss';
+import { renderRss, rssFile, rssGuideFile, rssGuidePath, rssPath } from '../lib/site/rss';
 import { verifyOutput } from '../scripts/verify-output';
 
 const section = { label: 'Nyheder', leadHtml: '<p class="intro">Nyt fra foreningen &amp; bestyrelsen.</p>', path: '/nyheder/' };
@@ -45,6 +45,8 @@ test('renderRss skriver gyldig RSS 2.0 med escaping, RFC 2822-datoer, absolutte 
   expect(xml).toContain('<pubDate>Sat, 05 Sep 2026 00:00:00 GMT</pubDate>');
   expect(rssPath(section)).toBe('/nyheder/rss.xml');
   expect(rssFile(section)).toBe('nyheder/rss.xml');
+  expect(rssGuidePath(section)).toBe('/nyheder/rss/');
+  expect(rssGuideFile(section)).toBe('nyheder/rss/index.html');
 });
 
 test('renderRss uden nyheder og uden intro er stadig gyldig og deterministisk', () => {
@@ -72,8 +74,10 @@ test('verifyOutput afviser manglende eller manipuleret rss.xml', async () => {
     buildDay: '2026-10-21', origin: 'https://example.invalid',
   };
   await mkdir(join(root, 'nyheder/2026-10-21-test'), { recursive: true });
+  await mkdir(join(root, 'nyheder/rss'), { recursive: true });
   await writeFile(join(root, 'index.html'), '<html></html>');
   await writeFile(join(root, 'nyheder/index.html'), '<html></html>');
+  await writeFile(join(root, 'nyheder/rss/index.html'), '<html></html>');
   await writeFile(join(root, 'nyheder/2026-10-21-test/index.html'), '<html></html>');
   await writeFile(join(root, 'search.json'), JSON.stringify([{ url: '/nyheder/2026-10-21-test/' }]));
   await writeFile(join(root, 'sitemap.xml'), '<?xml version="1.0" encoding="UTF-8"?><urlset><url><loc>https://example.invalid/</loc></url><url><loc>https://example.invalid/nyheder/</loc></url><url><loc>https://example.invalid/nyheder/2026-10-21-test/</loc></url></urlset>');

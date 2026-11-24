@@ -3,7 +3,7 @@ import { join, relative } from 'node:path';
 import { digest } from '../lib/sync/content';
 import { hostFiles } from '../lib/site/hosting';
 import type { Site } from '../lib/site/load';
-import { rssFile } from '../lib/site/rss';
+import { rssFile, rssGuideFile } from '../lib/site/rss';
 export async function walk(root: string): Promise<string[]> {
   const results: string[] = [];
   for (const e of await readdir(root, { withFileTypes: true })) {
@@ -44,7 +44,7 @@ export async function verifyOutput(root: string, site: Site) {
   const feeds = site.sections.filter(s => s.news);
   const redirects = new Map(site.redirects.map(r => [pageFile(r.from), r.to]));
   const host = hostFiles(site);
-  const allowed = new Set([...pages, ...feeds.map(rssFile), ...redirects.keys(), ...host.keys(), 'search.json', 'sitemap.xml', ...[...site.assets.keys()].map(u => u.slice(1))]);
+  const allowed = new Set([...pages, ...feeds.map(rssFile), ...feeds.map(rssGuideFile), ...redirects.keys(), ...host.keys(), 'search.json', 'sitemap.xml', ...[...site.assets.keys()].map(u => u.slice(1))]);
   const found = new Set<string>(), scripts: string[] = [];
   for (const path of await walk(root)) {
     const rel = relative(root, path); found.add(rel);

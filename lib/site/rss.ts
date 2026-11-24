@@ -15,6 +15,8 @@ const rfc2822 = (isoDay: string) => new Date(`${isoDay}T00:00:00Z`).toUTCString(
 
 export const rssPath = (section: Pick<SiteSection, 'path'>) => `${section.path}rss.xml`;
 export const rssFile = (section: Pick<SiteSection, 'path'>) => rssPath(section).slice(1);
+export const rssGuidePath = (section: Pick<SiteSection, 'path'>) => `${section.path}rss/`;
+export const rssGuideFile = (section: Pick<SiteSection, 'path'>) => `${rssGuidePath(section).slice(1)}index.html`;
 
 /** Deterministic RSS 2.0 feed for one news section. Every value is XML-escaped; no raw CDATA. */
 export function renderRss(

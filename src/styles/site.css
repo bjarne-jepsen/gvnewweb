@@ -45,6 +45,17 @@ main { min-height: 60vh; padding-block: clamp(2.5rem, 6vw, 5.5rem) 7.5rem; overf
 /* Stand-alone links are at least 44 px high (docs/cvi.md); the negative margin keeps the layout. */
 .back, .more a, .footer-links a, .crumbs a, .rss-link a { display: inline-flex; align-items: center; gap: .3em; min-height: 44px; }
 .rss-link { font-size: var(--text-sm); margin: 0 0 var(--space-l); }
+
+/* RSS guide page: selectable feed URL and optional copy button (shown when JS runs). */
+.rss-box { background: var(--color-surface); padding: var(--space-l); margin: var(--space-xl) 0 var(--space-2xl); }
+.rss-label { display: block; font-size: var(--text-xs); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--color-muted); margin-bottom: var(--space-xs); }
+.rss-row { display: flex; flex-wrap: wrap; gap: var(--space-s); align-items: stretch; }
+.rss-url { flex: 1 1 18rem; min-width: 0; min-height: 52px; padding: .75rem 1rem; font: inherit; font-size: 1rem; color: var(--color-ink); background: var(--color-paper); border: 1px solid var(--color-line); border-radius: var(--radius); }
+.rss-copy { border: 0; cursor: pointer; font-family: inherit; }
+.rss-copy[hidden] { display: none; }
+.rss-status { margin: var(--space-s) 0 0; min-height: 1.4em; color: var(--color-green); }
+.rss-status:empty { margin: 0; min-height: 0; }
+.rss-direct { margin: var(--space-m) 0 0; }
 .entries :is(h2, h3) a { display: inline-block; padding-block: .6rem; margin-block: -.6rem; }
 
 /* Lists of entries (section pages, news). */
@@ -212,7 +223,7 @@ main { min-height: 60vh; padding-block: clamp(2.5rem, 6vw, 5.5rem) 7.5rem; overf
 @media print {
   html { background: #fff; }
   body { font-size: 11pt; }
-  .skip, .site-header nav, .site-footer, .back, .more, .crumbs, .button, .toc, .rss-link { display: none; }
+  .skip, .site-header nav, .site-footer, .back, .more, .crumbs, .button, .toc, .rss-link, .rss-copy { display: none; }
   .site-header { border-bottom: 0; margin-bottom: var(--space-l); }
   .wrap { max-width: none; padding-inline: 0; }
   .site-header .wrap, main { padding-block: 0; }

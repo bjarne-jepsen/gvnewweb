@@ -103,7 +103,7 @@ Den gamle sti flyttes til `previousPaths` og bliver en redirect-side. Det samme 
 - **Billeder:** Understøttes ikke endnu. En nyhed med et billede publiceres ikke og giver en fejl i rapporten.
 - **Fejl:** En ugyldig dato, `Vises til` før datoen eller en nyhed uden tekst giver en fejl. Den sidste gyldige version beholdes.
 - **Adresse:** Adressen dannes af dato og titel første gang, fx `/nyheder/2026-10-21-generalforsamling/`, og bevares derefter.
-- **RSS-feed:** Hver nyhedssektion har et statisk RSS 2.0-feed på `/<sektion>/rss.xml` (fx `/nyheder/rss.xml`) med de aktuelle offentlige nyheder (fuld tekst i `content:encoded`). Der er autodiscovery i `<head>`, og et link på nyhedssiden og i sidefoden.
+- **RSS-feed:** Hver nyhedssektion har et statisk RSS 2.0-feed på `/<sektion>/rss.xml` (fx `/nyheder/rss.xml`) med de aktuelle offentlige nyheder (fuld tekst i `content:encoded`) og en brugervenlig vejledningsside med kopieringsknap på `/<sektion>/rss/`. Der er autodiscovery i `<head>`, og et link til vejledningen på nyhedssiden og i sidefoden.
 
 ### Markdown
 
