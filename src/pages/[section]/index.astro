@@ -27,7 +27,7 @@ const news = entries.length > 0 && entries.every(e => e.kind === 'notice');
     </div>
     <div class="landing-body">
       {section.bodyHtml && <div class="landing-text"><Fragment set:html={section.bodyHtml} /></div>}
-      <LandingArt section={section.key} />
+      <LandingArt />
     </div>
   </>}
 </Base>
