@@ -11,7 +11,7 @@ Status: **version 2, november 2026.** Bygger på Bjarnes mockup "Sådan får du 
 ## 1. Navn
 
 - **Navnet** står som "Andelsboligforeningen Grøndalsvænge": "Andelsboligforeningen" i fed sans-serif foran "Grøndalsvænge" som lille mærkat med versaler og spatiering. Navnet linker til forsiden, så menuen har intet punkt "Forside".
-- Footeren har navnet sat meget stort (op til 8rem) i normal vægt.
+- Footeren har navnet sat stort (op til 5,5rem) i normal vægt. Den blev gjort lavere og navnet mindre i november 2026 efter ønske fra Bjarne.
 - Version 2 har **intet bomærke** i header og footer, ligesom mockuppen. Favicon er stadig en lille hussilhuet som `data:`-URI, nu i blæk, grøn og hvid.
 
 ## 2. Farver
