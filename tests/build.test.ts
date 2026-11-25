@@ -105,9 +105,9 @@ test('sync → build: kun sektionernes indhold publiceres; URL\'er, redirects og
   const page = await html('foreningen/om-foreningen/index.html');
   expect(page).toContain('<h1>Om foreningen</h1>'); expect(page).toContain('<h2 id="velkommen">Velkommen</h2>');
   expect(page).toContain(`<img src="/foreningen/om-foreningen/${image}" alt="Kort over området"`);
-  // CVI 2: content pages have a breadcrumb and end with the update date and a button to the contact page.
+  // CVI 2: content pages have a breadcrumb and end with a button to the contact page. They show no update date: an old date makes readers doubt that the page is current.
   expect(page).toContain('<nav class="crumbs" aria-label="Brødkrumme"> <ol><li><a href="/foreningen/">Foreningen</a></li><li aria-current="page">Om foreningen</li></ol> </nav>');
-  expect(page).toMatch(/<p class="meta updated">Opdateret \d+\. \w+ \d{4}<\/p>/);
+  expect(page).not.toContain('Opdateret');
   expect(page).toContain('<a class="button" href="/foreningen/kontakt/">Kontakt foreningen');
   expect(await html('foreningen/kontakt/index.html')).not.toContain('class="button"');
   // Other sections are landing pages: the title with the intro beside it, and no tiles or list (the menu lists the pages).
